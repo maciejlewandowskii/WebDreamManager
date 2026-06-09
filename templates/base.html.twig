@@ -8,7 +8,7 @@
     {% block stylesheets %}{% endblock %}
     {{ importmap('app') }}
 </head>
-<body class="app-layout">
+<body class="{% block body_class %}app-layout{% endblock %}">
 
 {% block body %}{% endblock %}
 

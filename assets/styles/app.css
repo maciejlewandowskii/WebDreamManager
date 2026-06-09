@@ -116,6 +116,103 @@ body {
 }
 
 /* =====================================================
+   AUTH LAYOUT — split-screen login / 2FA
+   ===================================================== */
+.auth-layout {
+    margin: 0;
+    padding: 0;
+}
+
+.auth-split {
+    display: grid;
+    grid-template-columns: 1fr 480px;
+    min-height: 100dvh;
+}
+
+.auth-brand {
+    background-color: rgb(var(--card));
+    border-right: 1px solid rgb(var(--border));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 3rem;
+}
+
+.auth-brand__inner {
+    max-width: 480px;
+    display: flex;
+    flex-direction: column;
+    gap: 3rem;
+}
+
+.auth-brand__logo {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-family: var(--font-headline);
+    font-weight: 700;
+    font-size: 1.0625rem;
+    color: rgb(var(--foreground));
+    letter-spacing: -0.01em;
+}
+
+.auth-brand__name {
+    color: rgb(var(--foreground));
+}
+
+.auth-brand__content {
+    display: flex;
+    flex-direction: column;
+    gap: 0.875rem;
+}
+
+.auth-brand__headline {
+    font-family: var(--font-headline);
+    font-size: 2.25rem;
+    font-weight: 700;
+    line-height: 1.15;
+    letter-spacing: -0.03em;
+    color: rgb(var(--foreground));
+    margin: 0;
+}
+
+.auth-brand__sub {
+    font-size: 1rem;
+    line-height: 1.6;
+    color: rgb(var(--muted-foreground));
+    margin: 0;
+}
+
+.auth-brand__pills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.auth-pill {
+    font-size: 0.75rem;
+    font-weight: 500;
+    letter-spacing: 0.02em;
+    padding: 0.3125rem 0.75rem;
+    border: 1px solid rgb(var(--border));
+    color: rgb(var(--muted-foreground));
+    border-radius: 100px;
+}
+
+.auth-form-panel {
+    background-color: rgb(var(--background));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 3rem 2.5rem;
+}
+
+.auth-form-wrap {
+    width: 100%;
+    max-width: 360px;
+}
+
+/* =====================================================
    SIDEBAR NAV
    ===================================================== */
 .sidebar-logo {
