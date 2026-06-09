@@ -1,0 +1,104 @@
+{% extends 'layout.html.twig' %}
+
+{% block title %}{{ customer.name }} — WebDream Manager{% endblock %}
+
+{% block content %}
+    {% set breadcrumbs = [{label: 'Customers', url: path('app_customer_index')}, {label: customer.name}] %}
+    {% set actions %}
+        <twig:customer:CustomerForm :customerId="customer.id" />
+    {% endset %}
+    <twig:layout:PageHeader title="{{ customer.name }}" :breadcrumbs="breadcrumbs" />
+
+    <div class="page-content">
+        <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 1.5rem;">
+
+            {# Info panel #}
+            <div>
+                <div class="card">
+                    <div class="card-header">
+                        <div style="font-size: 0.875rem; font-weight: 500;">Contact Info</div>
+                    </div>
+                    <div class="card-body" style="display: flex; flex-direction: column; gap: 0.75rem;">
+                        {% if customer.company %}
+                            <div>
+                                <div class="form-label">Company</div>
+                                <div style="font-size: 0.875rem;">{{ customer.company }}</div>
+                            </div>
+                        {% endif %}
+                        {% if customer.email %}
+                            <div>
+                                <div class="form-label">Email</div>
+                                <div style="font-size: 0.875rem; font-family: var(--font-mono);">{{ customer.email }}</div>
+                            </div>
+                        {% endif %}
+                        {% if customer.phone %}
+                            <div>
+                                <div class="form-label">Phone</div>
+                                <div style="font-size: 0.875rem; font-family: var(--font-mono);">{{ customer.phone }}</div>
+                            </div>
+                        {% endif %}
+                        {% if customer.taxId %}
+                            <div>
+                                <div class="form-label">Tax ID (NIP)</div>
+                                <div style="font-size: 0.875rem; font-family: var(--font-mono);">{{ customer.taxId }}</div>
+                            </div>
+                        {% endif %}
+                        <div>
+                            <div class="form-label">Status</div>
+                            <span class="badge badge-{{ customer.status.value == 'active' ? 'success' : 'default' }}">{{ customer.status.value }}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card" style="margin-top: 1rem;">
+                    <div class="card-header">
+                        <div style="font-size: 0.875rem; font-weight: 500;">Edit</div>
+                    </div>
+                    <div class="card-body">
+                        <twig:customer:CustomerForm :customerId="customer.id" />
+                    </div>
+                </div>
+            </div>
+
+            {# Projects #}
+            <div>
+                <div class="card">
+                    <div class="card-header" style="display: flex; align-items: center; justify-content: space-between;">
+                        <div style="font-size: 0.875rem; font-weight: 500;">Projects</div>
+                        <a href="{{ path('app_project_new') }}?customerId={{ customer.id }}" class="btn btn-ghost btn-sm">
+                            {{ ux_icon('tabler:plus', {class: 'w-4 h-4'}) }}
+                            New
+                        </a>
+                    </div>
+                    <table class="data-table">
+                        <thead>
+                            <tr><th>Name</th><th>Status</th><th>Budget</th><th>Due</th><th></th></tr>
+                        </thead>
+                        <tbody>
+                            {% for project in customer.projects %}
+                                <tr>
+                                    <td>
+                                        <a href="{{ path('app_project_show', {id: project.id}) }}"
+                                           style="color: var(--color-on-surface); text-decoration: none; font-weight: 500;">
+                                            {{ project.name }}
+                                        </a>
+                                    </td>
+                                    <td><span class="badge badge-default">{{ project.status.value }}</span></td>
+                                    <td style="font-family: var(--font-mono); font-size: 0.8125rem; color: var(--color-on-surface-variant);">
+                                        {% if project.budget %}{{ project.budget|number_format(0, '.', ' ') }} {{ project.currency }}{% else %}—{% endif %}
+                                    </td>
+                                    <td style="font-family: var(--font-mono); font-size: 0.8125rem; color: var(--color-on-surface-variant);">
+                                        {% if project.dueDate %}{{ project.dueDate|date('d.m.Y') }}{% else %}—{% endif %}
+                                    </td>
+                                    <td><a href="{{ path('app_project_show', {id: project.id}) }}" class="btn btn-ghost btn-sm">{{ ux_icon('tabler:chevron-right', {class: 'w-4 h-4'}) }}</a></td>
+                                </tr>
+                            {% else %}
+                                <tr><td colspan="5" style="text-align: center; padding: 2rem; color: var(--color-on-surface-variant);">No projects.</td></tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

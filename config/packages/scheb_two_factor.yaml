@@ -1,0 +1,16 @@
+scheb_two_factor:
+    totp:
+        enabled: true
+        issuer: 'WebDream Manager'
+        leeway: 1
+
+    email:
+        enabled: true
+        sender_email: '%env(MAILER_FROM)%'
+        sender_name: 'WebDream Manager'
+        digits: 6
+        template: identity/two_factor/email.html.twig
+
+    security_tokens:
+        - Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken
+        - Symfony\Component\Security\Http\Authenticator\Token\PostAuthenticationToken

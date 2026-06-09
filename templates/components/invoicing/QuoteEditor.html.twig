@@ -1,0 +1,156 @@
+<div {{ attributes }} style="max-width: 900px;">
+
+    {# Intro text — shown at top of the quote document #}
+    <div style="margin-bottom: 1.5rem;">
+        <label class="form-label">Introduction / Cover text</label>
+        <textarea class="form-textarea editor-field"
+                  data-model="introText"
+                  rows="3"
+                  placeholder="Dear client, we are pleased to present the following quote…">{{ introText }}</textarea>
+    </div>
+
+    {# Header meta row #}
+    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem; margin-bottom: 1.5rem;">
+        <div>
+            <label class="form-label">Customer *</label>
+            <select class="form-select" data-model="customerId">
+                <option value="">— Select —</option>
+                {% for customer in this.availableCustomers %}
+                    <option value="{{ customer.id }}" {{ customerId == customer.id ? 'selected' }}>
+                        {{ customer.name }}
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+        <div>
+            <label class="form-label">Project</label>
+            <select class="form-select" data-model="projectId">
+                <option value="">— None —</option>
+                {% for project in this.availableProjects %}
+                    <option value="{{ project.id }}" {{ projectId == project.id ? 'selected' }}>
+                        {{ project.name }}
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+        <div>
+            <label class="form-label">Currency</label>
+            <select class="form-select" data-model="currency">
+                {% for c in ['PLN', 'EUR', 'USD', 'GBP'] %}
+                    <option value="{{ c }}" {{ currency == c ? 'selected' }}>{{ c }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div>
+            <label class="form-label">Issue Date</label>
+            <input type="date" class="form-input editor-field" value="{{ issuedAt }}" data-model="issuedAt">
+        </div>
+        <div>
+            <label class="form-label">Valid Until</label>
+            <input type="date" class="form-input editor-field" value="{{ validUntil }}" data-model="validUntil">
+        </div>
+        <div>
+            <label class="form-label">Default Tax Rate %</label>
+            <input type="number" class="form-input editor-field" value="{{ defaultTaxRate }}" data-model="defaultTaxRate" min="0" max="100" step="1">
+        </div>
+    </div>
+
+    {# Line items #}
+    <table class="editor-table" style="margin-bottom: 1rem;">
+        <thead>
+            <tr>
+                <th style="width: 50%;">Description</th>
+                <th style="width: 10%;">Qty</th>
+                <th style="width: 15%;">Unit price</th>
+                <th style="width: 10%;">Tax %</th>
+                <th style="width: 12%; text-align: right;">Total net</th>
+                <th style="width: 3%;"></th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for i, item in items %}
+                <tr>
+                    <td>
+                        <input type="text"
+                               class="editor-field"
+                               value="{{ item.description }}"
+                               data-model="items[{{ i }}][description]"
+                               placeholder="Service or product description">
+                    </td>
+                    <td>
+                        <input type="number"
+                               class="editor-field"
+                               value="{{ item.quantity }}"
+                               data-model="items[{{ i }}][quantity]"
+                               min="0" step="0.01">
+                    </td>
+                    <td>
+                        <input type="number"
+                               class="editor-field"
+                               value="{{ item.unitPrice }}"
+                               data-model="items[{{ i }}][unitPrice]"
+                               min="0" step="0.01">
+                    </td>
+                    <td>
+                        <input type="number"
+                               class="editor-field"
+                               value="{{ item.taxRate }}"
+                               data-model="items[{{ i }}][taxRate]"
+                               min="0" max="100" step="1">
+                    </td>
+                    <td style="text-align: right; padding: 0.5rem 0.75rem; font-family: var(--font-mono); font-size: 0.8125rem; color: var(--color-on-surface-variant);">
+                        {{ (item.quantity * item.unitPrice)|number_format(2, '.', ' ') }}
+                    </td>
+                    <td style="text-align: center;">
+                        <button type="button"
+                                data-action="live#action"
+                                data-live-action-param="removeItem"
+                                data-live-index-param="{{ i }}"
+                                class="btn btn-ghost btn-icon"
+                                style="color: var(--color-error);">
+                            {{ ux_icon('tabler:x', {class: 'w-3 h-3'}) }}
+                        </button>
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <button type="button"
+            data-action="live#action"
+            data-live-action-param="addItem"
+            class="btn btn-ghost btn-sm"
+            style="margin-bottom: 1.5rem;">
+        {{ ux_icon('tabler:plus', {class: 'w-4 h-4'}) }}
+        Add line
+    </button>
+
+    {# Totals #}
+    <div class="editor-totals" style="max-width: 320px; margin-left: auto;">
+        <div class="editor-totals-row">
+            <span>Net total</span>
+            <span style="font-family: var(--font-mono);">{{ netTotal|number_format(2, '.', ' ') }} {{ currency }}</span>
+        </div>
+        <div class="editor-totals-row">
+            <span>VAT</span>
+            <span style="font-family: var(--font-mono);">{{ taxTotal|number_format(2, '.', ' ') }} {{ currency }}</span>
+        </div>
+        <div class="editor-totals-row gross">
+            <span>Gross total</span>
+            <span style="font-family: var(--font-mono);">{{ grossTotal|number_format(2, '.', ' ') }} {{ currency }}</span>
+        </div>
+    </div>
+
+    {# Notes #}
+    <div style="margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid var(--color-outline-variant);">
+        <label class="form-label">Notes / Terms</label>
+        <textarea class="form-textarea editor-field" data-model="notes" rows="2" placeholder="Payment terms, conditions…">{{ notes }}</textarea>
+    </div>
+
+    <div style="margin-top: 1.5rem; display: flex; gap: 0.5rem; justify-content: flex-end;">
+        <button type="button" data-action="live#action" data-live-action-param="save" class="btn btn-primary">
+            {{ ux_icon('tabler:device-floppy', {class: 'w-4 h-4'}) }}
+            Save Quote
+        </button>
+    </div>
+</div>

@@ -1,0 +1,52 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Sign In — WebDream Manager{% endblock %}
+
+{% block body %}
+<div style="min-height: 100dvh; display: flex; align-items: center; justify-content: center; background-color: var(--color-surface);">
+    <div style="width: 100%; max-width: 400px; padding: 2rem;">
+        <div style="margin-bottom: 2rem; text-align: center;">
+            <div style="font-family: var(--font-headline); font-size: 1.25rem; font-weight: 700; color: var(--color-on-surface); margin-bottom: 0.25rem;">
+                WebDream Manager
+            </div>
+            <div style="font-size: 0.875rem; color: var(--color-on-surface-variant);">Sign in to your account</div>
+        </div>
+
+        {% if error %}
+            <div style="padding: 0.75rem 1rem; background-color: var(--color-error-container); color: var(--color-on-error-container); font-size: 0.875rem; margin-bottom: 1rem;">
+                {{ error.messageKey|trans(error.messageData, 'security') }}
+            </div>
+        {% endif %}
+
+        <form method="post" action="{{ path('app_login') }}">
+            <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
+
+            <div style="margin-bottom: 1rem;">
+                <label class="form-label" for="email">Email</label>
+                <input id="email"
+                       type="email"
+                       name="email"
+                       class="form-input"
+                       value="{{ last_username }}"
+                       autocomplete="email"
+                       autofocus
+                       required>
+            </div>
+
+            <div style="margin-bottom: 1.5rem;">
+                <label class="form-label" for="password">Password</label>
+                <input id="password"
+                       type="password"
+                       name="password"
+                       class="form-input"
+                       autocomplete="current-password"
+                       required>
+            </div>
+
+            <button type="submit" class="btn btn-primary" style="width: 100%; justify-content: center;">
+                Sign in
+            </button>
+        </form>
+    </div>
+</div>
+{% endblock %}

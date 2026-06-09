@@ -1,0 +1,22 @@
+<div class="page-header">
+    <div>
+        {% if breadcrumbs is defined %}
+            <div style="font-size: 0.75rem; color: var(--color-on-surface-variant); margin-bottom: 0.25rem; font-family: var(--font-mono);">
+                {% for crumb in breadcrumbs %}
+                    {% if not loop.last %}
+                        <a href="{{ crumb.url }}" style="color: var(--color-on-surface-variant); text-decoration: none;">{{ crumb.label }}</a>
+                        <span style="margin: 0 0.375rem; opacity: 0.5;">/</span>
+                    {% else %}
+                        <span>{{ crumb.label }}</span>
+                    {% endif %}
+                {% endfor %}
+            </div>
+        {% endif %}
+        <h1 class="page-header-title">{{ title }}</h1>
+    </div>
+    {% if actions is defined %}
+        <div style="display: flex; gap: 0.5rem; align-items: center;">
+            {{ actions|raw }}
+        </div>
+    {% endif %}
+</div>

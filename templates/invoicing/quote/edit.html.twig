@@ -1,0 +1,14 @@
+{% extends 'layout.html.twig' %}
+
+{% block title %}
+    {% if quote is defined %}Edit {{ quote.number }}{% else %}New Quote{% endif %} — WebDream Manager
+{% endblock %}
+
+{% block content %}
+    {% set breadcrumbs = [{label: 'Quotes', url: path('app_quote_index')}, {label: quote is defined ? quote.number : 'New'}] %}
+    <twig:layout:PageHeader title="{{ quote is defined ? quote.number : 'New Quote' }}" :breadcrumbs="breadcrumbs" />
+
+    <div class="page-content">
+        <twig:invoicing:QuoteEditor :quoteId="quote is defined ? quote.id : null" />
+    </div>
+{% endblock %}

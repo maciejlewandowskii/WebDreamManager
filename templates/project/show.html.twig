@@ -1,0 +1,71 @@
+{% extends 'layout.html.twig' %}
+
+{% block title %}{{ project.name }} — WebDream Manager{% endblock %}
+
+{% block content %}
+    {% set breadcrumbs = [
+        {label: 'Projects', url: path('app_project_index')},
+        {label: project.customer.name, url: path('app_customer_show', {id: project.customer.id})},
+        {label: project.name}
+    ] %}
+    <twig:layout:PageHeader title="{{ project.name }}" :breadcrumbs="breadcrumbs" />
+
+    <div class="page-content">
+        <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 1.5rem;">
+
+            <div>
+                <div class="card">
+                    <div class="card-header"><div style="font-size: 0.875rem; font-weight: 500;">Details</div></div>
+                    <div class="card-body" style="display: flex; flex-direction: column; gap: 0.75rem;">
+                        <div><div class="form-label">Customer</div>
+                            <a href="{{ path('app_customer_show', {id: project.customer.id}) }}"
+                               style="font-size: 0.875rem; color: var(--color-on-surface); text-decoration: none;">{{ project.customer.name }}</a>
+                        </div>
+                        <div><div class="form-label">Status</div>
+                            <span class="badge badge-default">{{ project.status.value }}</span>
+                        </div>
+                        {% if project.websiteUrl %}
+                            <div><div class="form-label">Website</div>
+                                <a href="{{ project.websiteUrl }}" target="_blank" rel="noopener" style="font-size: 0.8125rem; font-family: var(--font-mono); color: var(--color-primary); text-decoration: none; word-break: break-all;">{{ project.websiteUrl }}</a>
+                            </div>
+                        {% endif %}
+                        {% if project.githubRepository %}
+                            <div><div class="form-label">GitHub</div>
+                                <span style="font-size: 0.8125rem; font-family: var(--font-mono);">{{ project.githubRepository }}</span>
+                            </div>
+                        {% endif %}
+                        {% if project.budget %}
+                            <div><div class="form-label">Budget</div>
+                                <span style="font-size: 0.875rem; font-family: var(--font-mono);">{{ project.budget|number_format(0, '.', ' ') }} {{ project.currency }}</span>
+                            </div>
+                        {% endif %}
+                        {% if project.dueDate %}
+                            <div><div class="form-label">Due Date</div>
+                                <span style="font-size: 0.875rem; font-family: var(--font-mono);">{{ project.dueDate|date('d.m.Y') }}</span>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="card" style="margin-top: 1rem;">
+                    <div class="card-header"><div style="font-size: 0.875rem; font-weight: 500;">Edit</div></div>
+                    <div class="card-body">
+                        <twig:project:ProjectForm :projectId="project.id" />
+                    </div>
+                </div>
+            </div>
+
+            <div style="display: flex; flex-direction: column; gap: 1rem;">
+                <div class="card">
+                    <div class="card-header" style="display: flex; align-items: center; justify-content: space-between;">
+                        <div style="font-size: 0.875rem; font-weight: 500;">Time Records</div>
+                        <a href="{{ path('app_time_record_new') }}?projectId={{ project.id }}" class="btn btn-ghost btn-sm">
+                            {{ ux_icon('tabler:plus', {class: 'w-4 h-4'}) }} Log Time
+                        </a>
+                    </div>
+                    <twig:time_tracking:TimeRecordList :projectId="project.id" />
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

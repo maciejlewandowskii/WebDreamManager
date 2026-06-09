@@ -1,0 +1,69 @@
+<div {{ attributes }}>
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+        <div style="grid-column: 1 / -1;">
+            <label class="form-label" for="customer-name">Full Name *</label>
+            <input id="customer-name"
+                   type="text"
+                   class="form-input"
+                   value="{{ name }}"
+                   data-model="name"
+                   placeholder="e.g. Jan Kowalski">
+        </div>
+
+        <div>
+            <label class="form-label" for="customer-email">Email</label>
+            <input id="customer-email"
+                   type="email"
+                   class="form-input"
+                   value="{{ email }}"
+                   data-model="email"
+                   placeholder="contact@example.com">
+        </div>
+
+        <div>
+            <label class="form-label" for="customer-phone">Phone</label>
+            <input id="customer-phone"
+                   type="tel"
+                   class="form-input"
+                   value="{{ phone }}"
+                   data-model="phone"
+                   placeholder="+48 600 000 000">
+        </div>
+
+        <div>
+            <label class="form-label" for="customer-company">Company</label>
+            <input id="customer-company"
+                   type="text"
+                   class="form-input"
+                   value="{{ company }}"
+                   data-model="company"
+                   placeholder="Company Sp. z o.o.">
+        </div>
+
+        <div>
+            <label class="form-label" for="customer-taxid">Tax ID (NIP)</label>
+            <input id="customer-taxid"
+                   type="text"
+                   class="form-input"
+                   value="{{ taxId }}"
+                   data-model="taxId"
+                   placeholder="000-000-00-00">
+        </div>
+
+        <div style="grid-column: 1 / -1;">
+            <label class="form-label" for="customer-notes">Notes</label>
+            <textarea id="customer-notes"
+                      class="form-textarea"
+                      data-model="notes"
+                      rows="3"
+                      placeholder="Internal notes…">{{ notes }}</textarea>
+        </div>
+    </div>
+
+    <div style="margin-top: 1.5rem; display: flex; gap: 0.5rem; justify-content: flex-end;">
+        <button type="button" data-action="live#action" data-live-action-param="save" class="btn btn-primary">
+            {{ ux_icon('tabler:device-floppy', {class: 'w-4 h-4'}) }}
+            Save Customer
+        </button>
+    </div>
+</div>

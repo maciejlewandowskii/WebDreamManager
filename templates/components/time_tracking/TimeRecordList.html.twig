@@ -1,0 +1,79 @@
+<div {{ attributes }}>
+    <div style="padding: 1rem 2rem; display: flex; gap: 0.75rem; align-items: center; border-bottom: 1px solid var(--color-outline-variant); flex-wrap: wrap;">
+        <div class="search-wrap" style="flex: 1; max-width: 280px;">
+            {{ ux_icon('tabler:search', {class: 'w-4 h-4'}) }}
+            <input type="search"
+                   class="form-input"
+                   placeholder="Search records…"
+                   value="{{ search }}"
+                   data-model="search"
+                   style="padding-left: 2.25rem;">
+        </div>
+        <label style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.875rem; color: var(--color-on-surface-variant); cursor: pointer;">
+            <input type="checkbox"
+                   {{ uninvoicedOnly ? 'checked' }}
+                   data-model="uninvoicedOnly">
+            Uninvoiced only
+        </label>
+    </div>
+
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th>Title</th>
+                <th>Project</th>
+                <th>Estimated</th>
+                <th>Spent</th>
+                <th>GitHub</th>
+                <th>Invoiced</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for record in records %}
+                <tr>
+                    <td style="font-family: var(--font-mono); font-size: 0.8125rem; white-space: nowrap;">
+                        {{ record.date|date('d.m.Y') }}
+                    </td>
+                    <td>
+                        <div style="font-weight: 500;">{{ record.title }}</div>
+                        {% if record.description %}
+                            <div style="font-size: 0.75rem; color: var(--color-on-surface-variant); margin-top: 0.125rem;">{{ record.description|u.truncate(80, '…') }}</div>
+                        {% endif %}
+                    </td>
+                    <td style="color: var(--color-on-surface-variant);">{{ record.project.name }}</td>
+                    <td style="font-family: var(--font-mono); font-size: 0.8125rem; color: var(--color-on-surface-variant);">
+                        {% if record.estimatedHours %}{{ record.estimatedHours }}h{% else %}—{% endif %}
+                    </td>
+                    <td style="font-family: var(--font-mono); font-size: 0.8125rem;">{{ record.spentHours }}h</td>
+                    <td>
+                        {% if record.githubIssueId %}
+                            <span class="badge badge-outline">#{{ record.githubIssueId }}</span>
+                        {% else %}
+                            <span style="color: var(--color-outline);">—</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if record.invoiced %}
+                            <span class="badge badge-success">yes</span>
+                        {% else %}
+                            <span class="badge badge-default">no</span>
+                        {% endif %}
+                    </td>
+                    <td style="text-align: right;">
+                        <a href="{{ path('app_time_record_edit', {id: record.id}) }}" class="btn btn-ghost btn-sm">
+                            {{ ux_icon('tabler:pencil', {class: 'w-4 h-4'}) }}
+                        </a>
+                    </td>
+                </tr>
+            {% else %}
+                <tr>
+                    <td colspan="8" style="text-align: center; padding: 3rem; color: var(--color-on-surface-variant);">
+                        No time records found.
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>

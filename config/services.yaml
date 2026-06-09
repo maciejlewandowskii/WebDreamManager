@@ -1,0 +1,48 @@
+parameters:
+
+services:
+    _defaults:
+        autowire: true
+        autoconfigure: true
+
+    App\:
+        resource: '../src/'
+        exclude:
+            - '../src/DependencyInjection/'
+            - '../src/Domain/*/Entity/'
+            - '../src/Domain/*/ValueObject/'
+            - '../src/Kernel.php'
+
+    # Explicit bindings for ACL port implementations
+    App\Domain\Invoicing\Port\PaymentGatewayInterface:
+        alias: App\Infrastructure\External\Stripe\StubStripeGateway
+
+    App\Domain\Invoicing\Port\AccountingServiceInterface:
+        alias: App\Infrastructure\External\IFirma\StubIFirmaGateway
+
+    App\Domain\Project\Port\GitHubClientInterface:
+        alias: App\Infrastructure\External\GitHub\StubGitHubClient
+
+    App\Domain\Communications\Port\EmailSenderInterface:
+        alias: App\Infrastructure\External\Email\SymfonyMailerEmailSender
+
+    App\Domain\Communications\Port\SmsSenderInterface:
+        alias: App\Infrastructure\External\Sms\StubSmsSender
+
+    App\Domain\Identity\Repository\UserRepositoryInterface:
+        alias: App\Infrastructure\Persistence\Identity\DoctrineUserRepository
+
+    App\Domain\Customer\Repository\CustomerRepositoryInterface:
+        alias: App\Infrastructure\Persistence\Customer\DoctrineCustomerRepository
+
+    App\Domain\Project\Repository\ProjectRepositoryInterface:
+        alias: App\Infrastructure\Persistence\Project\DoctrineProjectRepository
+
+    App\Domain\Invoicing\Repository\InvoiceRepositoryInterface:
+        alias: App\Infrastructure\Persistence\Invoicing\DoctrineInvoiceRepository
+
+    App\Domain\Invoicing\Repository\QuoteRepositoryInterface:
+        alias: App\Infrastructure\Persistence\Invoicing\DoctrineQuoteRepository
+
+    App\Domain\TimeTracking\Repository\TimeRecordRepositoryInterface:
+        alias: App\Infrastructure\Persistence\TimeTracking\DoctrineTimeRecordRepository

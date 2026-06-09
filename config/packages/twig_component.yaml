@@ -1,0 +1,8 @@
+twig_component:
+    defaults:
+        App\UI\Component\Layout\: 'components/layout/'
+        App\UI\Component\Identity\: 'components/identity/'
+        App\UI\Component\Customer\: 'components/customer/'
+        App\UI\Component\Project\: 'components/project/'
+        App\UI\Component\Invoicing\: 'components/invoicing/'
+        App\UI\Component\TimeTracking\: 'components/time_tracking/'

@@ -1,0 +1,64 @@
+doctrine:
+    dbal:
+        url: '%env(resolve:DATABASE_URL)%'
+        profiling_collect_backtrace: '%kernel.debug%'
+    orm:
+        validate_xml_mapping: true
+        naming_strategy: doctrine.orm.naming_strategy.underscore_number_aware
+        auto_mapping: true
+        mappings:
+            Identity:
+                type: attribute
+                is_bundle: false
+                dir: '%kernel.project_dir%/src/Domain/Identity/Entity'
+                prefix: 'App\Domain\Identity\Entity'
+                alias: Identity
+            Customer:
+                type: attribute
+                is_bundle: false
+                dir: '%kernel.project_dir%/src/Domain/Customer/Entity'
+                prefix: 'App\Domain\Customer\Entity'
+                alias: Customer
+            Project:
+                type: attribute
+                is_bundle: false
+                dir: '%kernel.project_dir%/src/Domain/Project/Entity'
+                prefix: 'App\Domain\Project\Entity'
+                alias: Project
+            Invoicing:
+                type: attribute
+                is_bundle: false
+                dir: '%kernel.project_dir%/src/Domain/Invoicing/Entity'
+                prefix: 'App\Domain\Invoicing\Entity'
+                alias: Invoicing
+            TimeTracking:
+                type: attribute
+                is_bundle: false
+                dir: '%kernel.project_dir%/src/Domain/TimeTracking/Entity'
+                prefix: 'App\Domain\TimeTracking\Entity'
+                alias: TimeTracking
+
+when@test:
+    doctrine:
+        dbal:
+            dbname_suffix: '_test%env(default::TEST_TOKEN)%'
+
+when@prod:
+    doctrine:
+        orm:
+            auto_generate_proxy_classes: false
+            proxy_dir: '%kernel.build_dir%/doctrine/orm/Proxies'
+            query_cache_driver:
+                type: pool
+                pool: doctrine.system_cache_pool
+            result_cache_driver:
+                type: pool
+                pool: doctrine.result_cache_pool
+
+    framework:
+        cache:
+            pools:
+                doctrine.result_cache_pool:
+                    adapter: cache.app
+                doctrine.system_cache_pool:
+                    adapter: cache.system

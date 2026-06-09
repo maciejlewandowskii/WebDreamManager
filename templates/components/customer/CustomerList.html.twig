@@ -1,0 +1,57 @@
+<div {{ attributes }}>
+    <div style="padding: 1rem 2rem; display: flex; gap: 0.75rem; align-items: center; border-bottom: 1px solid var(--color-outline-variant);">
+        <div class="search-wrap" style="flex: 1; max-width: 320px;">
+            {{ ux_icon('tabler:search', {class: 'w-4 h-4'}) }}
+            <input type="search"
+                   class="form-input search-wrap"
+                   placeholder="Search customers…"
+                   value="{{ search }}"
+                   data-model="search"
+                   style="padding-left: 2.25rem;">
+        </div>
+    </div>
+
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Company</th>
+                <th>Email</th>
+                <th>Status</th>
+                <th>Projects</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for customer in customers %}
+                <tr>
+                    <td>
+                        <a href="{{ path('app_customer_show', {id: customer.id}) }}"
+                           style="color: var(--color-on-surface); text-decoration: none; font-weight: 500;">
+                            {{ customer.name }}
+                        </a>
+                    </td>
+                    <td style="color: var(--color-on-surface-variant);">{{ customer.company ?? '—' }}</td>
+                    <td style="color: var(--color-on-surface-variant); font-family: var(--font-mono); font-size: 0.8125rem;">{{ customer.email ?? '—' }}</td>
+                    <td>
+                        <span class="badge badge-{{ customer.status.value == 'active' ? 'success' : (customer.status.value == 'lead' ? 'warning' : 'default') }}">
+                            {{ customer.status.value }}
+                        </span>
+                    </td>
+                    <td style="color: var(--color-on-surface-variant);">{{ customer.projects|length }}</td>
+                    <td style="text-align: right;">
+                        <a href="{{ path('app_customer_show', {id: customer.id}) }}" class="btn btn-ghost btn-sm">
+                            {{ ux_icon('tabler:chevron-right', {class: 'w-4 h-4'}) }}
+                        </a>
+                    </td>
+                </tr>
+            {% else %}
+                <tr>
+                    <td colspan="6" style="text-align: center; padding: 3rem; color: var(--color-on-surface-variant);">
+                        No customers found.
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
