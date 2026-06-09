@@ -6,7 +6,7 @@
     <title>{% block title %}WebDream Manager{% endblock %}</title>
     <link rel="icon" type="image/png" href="{{ asset('favicon.png') }}">
     {% block stylesheets %}{% endblock %}
-    {% importmap 'app' %}
+    {{ importmap('app') }}
 </head>
 <body class="app-layout">
 

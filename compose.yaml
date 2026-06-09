@@ -44,6 +44,7 @@ services:
       database:
         condition: service_healthy
 
+###> doctrine/doctrine-bundle ###
   database:
     image: postgres:${POSTGRES_VERSION:-16}-alpine
     environment:
@@ -57,8 +58,11 @@ services:
       start_period: 60s
     volumes:
       - database_data:/var/lib/postgresql/data:rw
+###< doctrine/doctrine-bundle ###
 
 volumes:
   caddy_data:
   caddy_config:
+###> doctrine/doctrine-bundle ###
   database_data:
+###< doctrine/doctrine-bundle ###

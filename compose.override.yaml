@@ -5,16 +5,30 @@ services:
     build:
       context: .
       target: frankenphp_dev
+    ports: !reset []
     volumes:
       - ./:/app
       - ./frankenphp/Caddyfile:/etc/frankenphp/Caddyfile:ro
       - ./frankenphp/conf.d/20-app.dev.ini:/usr/local/etc/php/app.conf.d/20-app.dev.ini:ro
     environment:
+      SERVER_NAME: "http://manager.localhost"
       FRANKENPHP_WORKER_CONFIG: watch
       FRANKENPHP_SITE_CONFIG: hot_reload
       XDEBUG_MODE: "${XDEBUG_MODE:-develop}"
       APP_ENV: "${APP_ENV:-dev}"
     tty: true
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.webdreammanager.rule=Host(`manager.localhost`)"
+      - "traefik.http.routers.webdreammanager.entrypoints=web"
+      - "traefik.http.routers.webdreammanager-secure.rule=Host(`manager.localhost`)"
+      - "traefik.http.routers.webdreammanager-secure.entrypoints=websecure"
+      - "traefik.http.routers.webdreammanager-secure.tls=true"
+      - "traefik.http.services.webdreammanager.loadbalancer.server.port=80"
+      - "traefik.docker.network=proxy-tier"
+    networks:
+      - proxy-tier
+      - default
 
   worker:
     image: ${IMAGES_PREFIX:-}app-php-dev
@@ -26,6 +40,7 @@ services:
     environment:
       APP_ENV: prod
 
+###> symfony/mailer ###
   mailer:
     image: axllent/mailpit
     ports:
@@ -34,7 +49,15 @@ services:
     environment:
       MP_SMTP_AUTH_ACCEPT_ANY: 1
       MP_SMTP_AUTH_ALLOW_INSECURE: 1
+###< symfony/mailer ###
 
+###> doctrine/doctrine-bundle ###
   database:
     ports:
       - "5433:5432"
+###< doctrine/doctrine-bundle ###
+
+networks:
+  proxy-tier:
+    external: true
+  default:

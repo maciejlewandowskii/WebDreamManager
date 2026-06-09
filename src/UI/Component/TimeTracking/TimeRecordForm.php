@@ -79,6 +79,16 @@ final class TimeRecordForm
         }
     }
 
+    /** @return array<string, string> */
+    public function getAvailableProjects(): array
+    {
+        $projects = [];
+        foreach ($this->projectRepository->findAll() as $project) {
+            $projects[$project->getId()] = $project->getName();
+        }
+        return $projects;
+    }
+
     #[LiveAction]
     public function save(): void
     {
