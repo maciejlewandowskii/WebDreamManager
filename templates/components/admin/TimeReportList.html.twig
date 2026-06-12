@@ -1,0 +1,93 @@
+<div {{ attributes }}>
+    <div class="[padding:1rem_2rem] flex [gap:0.75rem] items-center [border-bottom:1px_solid_var(--color-outline-variant)]">
+        <div class="search-wrap [max-width:280px]">
+            {{ ux_icon('tabler:search', {class: 'w-4 h-4'}) }}
+            <input type="search"
+                   class="form-input [padding-left:2.25rem]"
+                   placeholder="Search users..."
+                   value="{{ this.search }}"
+                   data-model="search"
+            >
+        </div>
+    </div>
+
+    <table class="data-table">
+        <thead>
+        <tr>
+            <th>
+                <twig:SortableHeader label="User" field="fullName" :currentBy="this.sortBy" :currentDirection="this.sortDirection"/>
+            </th>
+            <th class="text-right">
+                <twig:SortableHeader label="Today (h)" field="today" :currentBy="this.sortBy" :currentDirection="this.sortDirection" class="justify-end"/>
+            </th>
+            <th class="text-right">
+                <twig:SortableHeader label="This Month (h)" field="monthly" :currentBy="this.sortBy" :currentDirection="this.sortDirection" class="justify-end"/>
+            </th>
+            <th class="text-right">Last 7 Days (h)</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for entry in this.summaries %}
+            {% set user = entry.user %}
+            {% set todayTotal = entry.todayTotal %}
+            {% set monthlyTotal = entry.monthlyTotal %}
+            <tr>
+                <td>
+                    <div class="flex items-center [gap:0.625rem]">
+                        {% if user.avatarUrl %}
+                            <img src="{{ user.avatarUrl }}" alt="{{ user.fullName }}"
+                                 class="w-8 h-8 rounded-full object-cover">
+                        {% else %}
+                            {% set initials = user.fullName|split(' ')|map(w => w|first|upper)|slice(0, 2)|join('') %}
+                            <div class="w-8 h-8 rounded-full flex items-center justify-center text-xs font-semibold
+                                        [background:var(--color-primary-container)] [color:var(--color-on-primary-container)]">
+                                {{ initials }}
+                            </div>
+                        {% endif %}
+                        <div>
+                            <div class="font-medium text-sm">{{ user.fullName }}</div>
+                            <div class="[color:var(--color-on-surface-variant)] text-xs">{{ user.email }}</div>
+                        </div>
+                    </div>
+                </td>
+                <td class="text-right [font-family:var(--font-mono)] text-sm">
+                    {% if todayTotal > 0 %}
+                        <span class="[color:var(--color-on-surface)]">{{ todayTotal|number_format(2) }}</span>
+                    {% else %}
+                        <span class="[color:var(--color-on-surface-variant)]">—</span>
+                    {% endif %}
+                </td>
+                <td class="text-right [font-family:var(--font-mono)] text-sm">
+                    {% if monthlyTotal > 0 %}
+                        <span class="font-medium">{{ monthlyTotal|number_format(2) }}</span>
+                    {% else %}
+                        <span class="[color:var(--color-on-surface-variant)]">—</span>
+                    {% endif %}
+                </td>
+                <td class="text-right text-sm">
+                    {% if entry.monthly is not empty %}
+                        <div class="flex items-end justify-end [gap:2px] [height:2rem]">
+                            {% set maxVal = max(entry.monthly) %}
+                            {% for day, hours in entry.monthly|slice(-7) %}
+                                {% set barHeight = maxVal > 0 ? ((hours / maxVal) * 100)|round : 0 %}
+                                <div data-tooltip="{{ day }}: {{ hours|number_format(1) }}h"
+                                     class="[width:8px] [border-radius:2px_2px_0_0] [background:var(--color-primary)]"
+                                     style="height: {{ barHeight }}%; min-height: {{ hours > 0 ? '4px' : '0' }}">
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <span class="[color:var(--color-on-surface-variant)]">No data</span>
+                    {% endif %}
+                </td>
+            </tr>
+        {% else %}
+            <tr>
+                <td colspan="4" class="text-center [padding:3rem] [color:var(--color-on-surface-variant)]">
+                    No users found.
+                </td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>

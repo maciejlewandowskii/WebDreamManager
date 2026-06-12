@@ -1,0 +1,20 @@
+<div class="timeline-event flex [gap:0.625rem] items-start" {{ attributes }}>
+    <div
+        class="timeline-icon [width:28px] [height:28px] [border-radius:50%] [background:var(--color-surface-variant)] flex items-center justify-center shrink-0 [margin-top:2px]">
+        {% if icon is defined %}
+            {{ ux_icon(icon, {class: 'w-3 h-3'}) }}
+        {% endif %}
+    </div>
+    <div class="timeline-content flex-1 [min-width:0]">
+        <div class="text-[0.8125rem] font-medium">{{ label }}</div>
+        {% if date is defined %}
+            <div class="text-xs [color:var(--color-on-surface-variant)]">{{ date }}</div>{% endif %}
+        {% if detail is defined %}
+            <div class="text-xs [color:var(--color-on-surface-variant)]">{{ detail }}</div>{% endif %}
+        {% if block('actions') is defined %}
+            <div class="flex [gap:0.25rem] [margin-top:0.375rem]">
+                {{ block('actions') }}
+            </div>
+        {% endif %}
+    </div>
+</div>

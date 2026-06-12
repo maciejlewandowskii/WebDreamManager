@@ -1,0 +1,108 @@
+{% extends 'layout.html.twig' %}
+
+{% block title %}{{ customer.name }} — WebDream Manager{% endblock %}
+
+{% block content %}
+    {% set breadcrumbs = [{label: 'Customers', url: path('app_customer_index')}, {label: customer.name}] %}
+    {% set actions %}
+        <twig:Button variant="secondary" size="sm" href="{{ path('app_customer_edit', {id: customer.id}) }}"
+                     data-turbo-frame="modal" data-modal-title="Edit Customer">
+            {{ ux_icon('tabler:pencil', {class: 'w-4 h-4'}) }}
+            Edit
+        </twig:Button>
+    {% endset %}
+    <twig:layout:PageHeader title="{{ customer.name }}" :breadcrumbs="breadcrumbs" :actions="actions"/>
+
+    <twig:PageContent>
+        <div class="[display:grid] [grid-template-columns:1fr_2fr] [gap:1.5rem]">
+
+            <div>
+                <twig:Card>
+                    <twig:CardHeader title="Contact Info"/>
+                    <twig:CardBody class="flex flex-col [gap:1rem]">
+                        {% if customer.company %}
+                            <twig:PropertyItem label="Company">
+                                {{ customer.company }}
+                            </twig:PropertyItem>
+                        {% endif %}
+                        {% if customer.email %}
+                            <twig:PropertyItem label="Email" is_mono="true">
+                                {{ customer.email }}
+                            </twig:PropertyItem>
+                        {% endif %}
+                        {% if customer.phone %}
+                            <twig:PropertyItem label="Phone" is_mono="true">
+                                {{ customer.phone }}
+                            </twig:PropertyItem>
+                        {% endif %}
+                        {% if customer.taxId %}
+                            <twig:PropertyItem label="Tax ID (NIP)" is_mono="true">
+                                {{ customer.taxId }}
+                            </twig:PropertyItem>
+                        {% endif %}
+                        <twig:PropertyItem label="Status">
+                            {{ customer.status.value }}
+                        </twig:PropertyItem>
+                        {% if customer.notes %}
+                            <twig:PropertyItem label="Notes">
+                                {{ customer.notes }}
+                            </twig:PropertyItem>
+                        {% endif %}
+                    </twig:CardBody>
+                </twig:Card>
+            </div>
+
+            <div>
+                <twig:Card>
+                    <twig:CardHeader title="Projects"
+                                     class="flex items-center justify-between">
+                        <twig:Button variant="ghost" size="sm" href="{{ path('app_project_new') }}"
+                                     data-turbo-frame="modal" data-modal-title="New Project">
+                            {{ ux_icon('tabler:plus', {class: 'w-4 h-4'}) }}
+                            New
+                        </twig:Button>
+                    </twig:CardHeader>
+                    <twig:DataTable>
+                        <twig:block name="head">
+                            <th>Name</th>
+                            <th>Status</th>
+                            <th>Budget</th>
+                            <th>Due</th>
+                            <th></th>
+                        </twig:block>
+
+                        {% for project in customer.projects %}
+                            <tr>
+                                <td>
+                                    <a href="{{ path('app_project_show', {id: project.id}) }}"
+                                       class="[color:var(--color-on-surface)] [text-decoration:none] font-medium">
+                                        {{ project.name }}
+                                    </a>
+                                </td>
+                                <td>
+                                    <twig:Badge variant="default">{{ project.status.value }}</twig:Badge>
+                                </td>
+                                <twig:TableCell mono="true" small="true" muted="true">
+                                    {% if project.budget %}{{ project.budget|number_format(0, '.', ' ') }} {{ project.currency }}{% else %}—{% endif %}
+                                </twig:TableCell>
+                                <twig:TableCell mono="true" small="true" muted="true">
+                                    {% if project.dueDate %}{{ project.dueDate|date('d.m.Y') }}{% else %}—{% endif %}
+                                </twig:TableCell>
+                                <td>
+                                    <twig:Button variant="ghost" size="sm"
+                                                 href="{{ path('app_project_show', {id: project.id}) }}">
+                                        {{ ux_icon('tabler:chevron-right', {class: 'w-4 h-4'}) }}
+                                    </twig:Button>
+                                </td>
+                            </tr>
+                        {% else %}
+                            <twig:EmptyState colspan="5">
+                                No projects.
+                            </twig:EmptyState>
+                        {% endfor %}
+                    </twig:DataTable>
+                </twig:Card>
+            </div>
+        </div>
+    </twig:PageContent>
+{% endblock %}

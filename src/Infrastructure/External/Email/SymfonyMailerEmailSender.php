@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Infrastructure\External\Email;
 
-use App\Domain\Communications\Port\EmailSenderInterface;
+use App\Infrastructure\Communications\Port\EmailSenderInterface;
 use Symfony\Bridge\Twig\Mime\TemplatedEmail;
 use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Mime\Email;

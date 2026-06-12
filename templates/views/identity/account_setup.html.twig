@@ -1,0 +1,186 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Set Up Your Account — WebDream Manager{% endblock %}
+
+{% block body_class %}auth-layout{% endblock %}
+
+{% block body %}
+    <div class="auth-split">
+
+        {# Left — branding panel #}
+        <div class="auth-brand">
+            <div class="auth-brand__inner">
+                <div class="auth-brand__logo">
+                    <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <rect width="32" height="32" rx="6" fill="rgb(var(--primary))"/>
+                        <path d="M8 10h4l3 8 3-8h4M8 22h16" stroke="rgb(var(--primary-foreground))" stroke-width="2"
+                              stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                    <span class="auth-brand__name">WebDream Manager</span>
+                </div>
+
+                <div class="auth-brand__content">
+                    <h1 class="auth-brand__headline">Welcome aboard,<br>{{ user.fullName|split(' ')|first }}.</h1>
+                    <p class="auth-brand__sub">Let's get your account ready in a few quick steps.</p>
+                </div>
+
+                {# Step indicator #}
+                <div class="flex flex-col [gap:0.75rem]">
+                    {% set steps = [
+                        {num: 1, label: 'Profile picture'},
+                        {num: 2, label: 'Personal details'},
+                        {num: 3, label: 'Set your password'},
+                    ] %}
+                    {% for s in steps %}
+                        <div class="flex items-center [gap:0.75rem]">
+                            <div class="[width:1.75rem] [height:1.75rem] [border-radius:50%] flex items-center justify-center flex-shrink-0 text-xs font-semibold
+                                        {{ s.num < step ? '[background:rgb(var(--primary))] [color:rgb(var(--primary-foreground))]' :
+                                           s.num == step ? '[background:rgb(var(--primary))] [color:rgb(var(--primary-foreground))] [opacity:1]' :
+                                           '[border:1.5px_solid_rgb(var(--border))] [color:rgb(var(--muted-foreground))]' }}">
+                                {% if s.num < step %}
+                                    {{ ux_icon('tabler:check', {class: 'w-3 h-3'}) }}
+                                {% else %}
+                                    {{ s.num }}
+                                {% endif %}
+                            </div>
+                            <span class="text-sm {{ s.num == step ? '[color:rgb(var(--foreground))] font-medium' : '[color:rgb(var(--muted-foreground))]' }}">
+                                {{ s.label }}
+                            </span>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        {# Right — form panel #}
+        <div class="auth-form-panel">
+            <div class="auth-form-wrap">
+
+                {% if step == 1 %}
+                    <div class="[margin-bottom:2rem]">
+                        <h2 class="[font-family:var(--font-headline)] [font-size:1.5rem] [font-weight:700] [color:rgb(var(--foreground))] [margin:0_0_0.375rem]">
+                            Profile picture
+                        </h2>
+                        <p class="text-sm [color:rgb(var(--muted-foreground))] [margin:0]">
+                            Add a photo so your team can recognise you. You can skip this step.
+                        </p>
+                    </div>
+
+                    <form method="post" action="{{ path('app_account_setup', {token: token}) }}"
+                          enctype="multipart/form-data">
+
+                        <div class="[margin-bottom:1.5rem]">
+                            {# Current avatar preview #}
+                            <div class="flex items-center [gap:1rem] [margin-bottom:1rem]">
+                                {% if user.avatarUrl %}
+                                    <img src="{{ user.avatarUrl }}" alt="{{ user.fullName }}"
+                                         class="[width:4rem] [height:4rem] [border-radius:50%] [object-fit:cover]">
+                                {% else %}
+                                    {% set initials = user.fullName|split(' ')|map(w => w|first|upper)|slice(0, 2)|join('') %}
+                                    <div class="[width:4rem] [height:4rem] [border-radius:50%] flex items-center justify-center [font-size:1.25rem] font-semibold
+                                                [background:rgb(var(--primary)/0.15)] [color:rgb(var(--primary))]">
+                                        {{ initials }}
+                                    </div>
+                                {% endif %}
+                                <div class="text-sm [color:rgb(var(--muted-foreground))]">
+                                    JPG, PNG or GIF · max 5 MB
+                                </div>
+                            </div>
+                            <input type="file" name="avatar" id="avatar"
+                                   accept="image/jpeg,image/png,image/gif,image/webp"
+                                   class="form-input [padding:0.375rem_0.5rem] [cursor:pointer]">
+                            {% if errors.avatar is defined %}
+                                <div class="form-error">{{ errors.avatar }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="flex [gap:0.75rem]">
+                            <twig:Button variant="ghost" type="submit" name="skip" value="1"
+                                         class="flex-1 justify-center">
+                                Skip for now
+                            </twig:Button>
+                            <twig:Button variant="primary" type="submit"
+                                         class="flex-1 justify-center">
+                                Continue
+                            </twig:Button>
+                        </div>
+                    </form>
+
+                {% elseif step == 2 %}
+                    <div class="[margin-bottom:2rem]">
+                        <h2 class="[font-family:var(--font-headline)] [font-size:1.5rem] [font-weight:700] [color:rgb(var(--foreground))] [margin:0_0_0.375rem]">
+                            Personal details
+                        </h2>
+                        <p class="text-sm [color:rgb(var(--muted-foreground))] [margin:0]">
+                            Confirm how your name appears across the platform.
+                        </p>
+                    </div>
+
+                    <form method="post" action="{{ path('app_account_setup', {token: token}) }}">
+                        <div class="[margin-bottom:1rem]">
+                            <label class="form-label" for="fullName">Full name</label>
+                            <input id="fullName" type="text" name="fullName"
+                                   class="form-input"
+                                   value="{{ user.fullName }}"
+                                   autocomplete="name"
+                                   autofocus required>
+                            {% if errors.fullName is defined %}
+                                <div class="form-error">{{ errors.fullName }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="[margin-bottom:1.5rem]">
+                            <label class="form-label">Email</label>
+                            <input type="email" class="form-input [opacity:0.65] [cursor:not-allowed]"
+                                   value="{{ user.email }}" disabled>
+                        </div>
+
+                        <twig:Button variant="primary" type="submit" class="w-full justify-center">
+                            Continue
+                        </twig:Button>
+                    </form>
+
+                {% elseif step == 3 %}
+                    <div class="[margin-bottom:2rem]">
+                        <h2 class="[font-family:var(--font-headline)] [font-size:1.5rem] [font-weight:700] [color:rgb(var(--foreground))] [margin:0_0_0.375rem]">
+                            Set your password
+                        </h2>
+                        <p class="text-sm [color:rgb(var(--muted-foreground))] [margin:0]">
+                            Choose a strong password. Minimum 8 characters.
+                        </p>
+                    </div>
+
+                    <form method="post" action="{{ path('app_account_setup', {token: token}) }}">
+                        <div class="[margin-bottom:1rem]">
+                            <label class="form-label" for="password">Password</label>
+                            <input id="password" type="password" name="password"
+                                   class="form-input"
+                                   autocomplete="new-password"
+                                   autofocus required>
+                            {% if errors.password is defined %}
+                                <div class="form-error">{{ errors.password }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="[margin-bottom:1.75rem]">
+                            <label class="form-label" for="confirmPassword">Confirm password</label>
+                            <input id="confirmPassword" type="password" name="confirmPassword"
+                                   class="form-input"
+                                   autocomplete="new-password"
+                                   required>
+                            {% if errors.confirmPassword is defined %}
+                                <div class="form-error">{{ errors.confirmPassword }}</div>
+                            {% endif %}
+                        </div>
+
+                        <twig:Button variant="primary" type="submit" class="w-full justify-center">
+                            Finish setup
+                        </twig:Button>
+                    </form>
+                {% endif %}
+
+            </div>
+        </div>
+
+    </div>
+{% endblock %}

@@ -1,0 +1,32 @@
+<twig:Card>
+    <twig:CardHeader>
+        <div class="text-sm font-semibold [color:var(--color-on-surface)]">Profile</div>
+    </twig:CardHeader>
+    <twig:CardBody>
+        {{ form_start(profile_form, {attr: {enctype: 'multipart/form-data'}}) }}
+
+        <div class="flex items-center [gap:1.25rem] [margin-bottom:1.5rem]">
+            {% set userName = app.user.fullName ?? app.user.email %}
+            <div class="w-16 h-16 min-w-16 min-h-16 max-w-16 max-h-16 rounded-full overflow-hidden shrink-0">
+                {% if app.user.avatarUrl %}
+                    <img src="{{ app.user.avatarUrl }}" alt="{{ userName }}" class="w-full h-full object-cover">
+                {% else %}
+                    {% set initials = userName|split(' ')|map(w => w|first|upper)|slice(0, 2)|join('') %}
+                    <div
+                        class="w-full h-full [background:var(--color-primary)] [color:var(--color-on-primary)] flex items-center justify-center text-xl font-bold">{{ initials }}</div>
+                {% endif %}
+            </div>
+            <div class="flex-1">
+                {{ form_row(profile_form.avatarFile) }}
+            </div>
+        </div>
+
+        {{ form_row(profile_form.fullName) }}
+        {{ form_row(profile_form.email) }}
+
+        <div class="flex [justify-content:flex-end] [margin-top:0.5rem]">
+            {{ form_row(profile_form.save) }}
+        </div>
+        {{ form_end(profile_form) }}
+    </twig:CardBody>
+</twig:Card>

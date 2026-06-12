@@ -1,0 +1,37 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Payment — {{ invoice.number }}{% endblock %}
+{% block body_class %}payment-layout{% endblock %}
+
+{% block body %}
+    <div class="payment-topbar">
+        <span class="payment-topbar__brand">{{ company_name }}</span>
+        <span class="payment-topbar__badge">Payment confirmation</span>
+    </div>
+
+    <div class="payment-return-wrap">
+        <div class="payment-return-card">
+            {% if status == 'paid' %}
+                <div class="payment-return-icon payment-return-icon--success">✓</div>
+                <div class="payment-return-title">Payment successful</div>
+                <p class="payment-return-text">Thank you! Your payment has been processed successfully.</p>
+                <div class="payment-return-ref">{{ invoice.number }}</div>
+                <p class="payment-return-text">You will receive a confirmation shortly.</p>
+            {% elseif status == 'unpaid' %}
+                <div class="payment-return-icon payment-return-icon--pending">⏳</div>
+                <div class="payment-return-title">Payment pending</div>
+                <p class="payment-return-text">Your payment is being processed.</p>
+                <div class="payment-return-ref">{{ invoice.number }}</div>
+                <p class="payment-return-text">Please check back in a few minutes.</p>
+            {% else %}
+                <div class="payment-return-icon payment-return-icon--failed">✕</div>
+                <div class="payment-return-title">Something went wrong</div>
+                <p class="payment-return-text">We could not confirm your payment status.</p>
+                <div class="payment-return-ref">{{ invoice.number }}</div>
+                <p class="payment-return-text">Please contact us if you believe this is an error.</p>
+            {% endif %}
+
+            <div class="payment-return-brand">Powered by Stripe &bull; {{ company_name }}</div>
+        </div>
+    </div>
+{% endblock %}

@@ -1,0 +1,22 @@
+{% extends 'layout.html.twig' %}
+
+{% block title %}Roles — WebDream Manager{% endblock %}
+
+{% block content %}
+    {% set actions %}
+        {% if is_granted('role.create') %}
+            <twig:Button variant="primary" href="{{ path('app_admin_role_new') }}"
+                         data-turbo-frame="modal" data-modal-title="New Role">
+                {{ ux_icon('tabler:plus', {class: 'w-4 h-4'}) }}
+                New Role
+            </twig:Button>
+        {% endif %}
+    {% endset %}
+    <twig:layout:PageHeader title="Roles" :actions="actions"/>
+
+    <twig:PageContent>
+        <twig:Card>
+            <twig:RoleList />
+        </twig:Card>
+    </twig:PageContent>
+{% endblock %}

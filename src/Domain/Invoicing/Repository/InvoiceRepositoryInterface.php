@@ -14,6 +14,8 @@ interface InvoiceRepositoryInterface
 
     public function findByNumber(string $number): ?Invoice;
 
+    public function findByPaymentToken(string $token): ?Invoice;
+
     /** @return Invoice[] */
     public function findByCustomer(Customer $customer): array;
 
@@ -22,6 +24,13 @@ interface InvoiceRepositoryInterface
 
     /** @return Invoice[] */
     public function findAll(): array;
+
+    /** @return Invoice[] */
+    public function findFiltered(
+        ?string $search,
+        string $sortBy = 'issuedAt',
+        string $sortDirection = 'DESC',
+    ): array;
 
     public function getNextNumber(): string;
 

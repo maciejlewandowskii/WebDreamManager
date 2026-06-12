@@ -1,0 +1,125 @@
+.alert-container {
+    position: fixed;
+    top: 1.5rem;
+    right: 1.5rem;
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    width: 100%;
+    max-width: 380px;
+    pointer-events: none;
+}
+
+.alert-item {
+    pointer-events: auto;
+    position: relative;
+    width: 100%;
+    display: flex;
+    gap: 0.75rem;
+    padding: 1rem;
+    border: 1px solid var(--color-outline-variant);
+    background: var(--color-surface-container);
+    color: var(--color-on-surface);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+    opacity: 1;
+    transform: translateX(0);
+    transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+@starting-style {
+    .alert-item {
+        opacity: 0;
+        transform: translateX(1rem);
+    }
+}
+
+.alert-item.removing {
+    opacity: 0;
+    transform: translateX(1rem);
+}
+
+.alert-icon {
+    flex-shrink: 0;
+    width: 1.25rem;
+    height: 1.25rem;
+    margin-top: 0.125rem;
+}
+
+.alert-content {
+    flex-grow: 1;
+}
+
+.alert-title {
+    font-weight: 600;
+    font-size: 0.875rem;
+    margin: 0 0 0.25rem 0;
+    line-height: 1.25;
+}
+
+.alert-message {
+    font-size: 0.8125rem;
+    color: var(--color-on-surface-variant);
+    margin: 0;
+    line-height: 1.4;
+}
+
+.alert-close {
+    flex-shrink: 0;
+    cursor: pointer;
+    background: transparent;
+    border: none;
+    color: var(--color-on-surface-variant);
+    font-size: 1.25rem;
+    line-height: 1;
+    padding: 0 0.25rem;
+    margin-top: -0.25rem;
+    align-self: flex-start;
+    transition: color 0.15s;
+}
+
+.alert-close:hover {
+    color: var(--color-on-surface);
+}
+
+/* Variants */
+.alert-success {
+    border-color: rgba(16, 185, 129, 0.3);
+    background: rgba(16, 185, 129, 0.08);
+}
+.alert-success .alert-icon {
+    color: #10b981;
+}
+.alert-success .alert-title {
+    color: #10b981;
+}
+
+.alert-error, .alert-danger {
+    border-color: rgba(239, 68, 68, 0.3);
+    background: rgba(239, 68, 68, 0.08);
+}
+.alert-error .alert-icon, .alert-danger .alert-icon {
+    color: #ef4444;
+}
+.alert-error .alert-title, .alert-danger .alert-title {
+    color: #ef4444;
+}
+
+.alert-warning {
+    border-color: rgba(245, 158, 11, 0.3);
+    background: rgba(245, 158, 11, 0.08);
+}
+.alert-warning .alert-icon {
+    color: #f59e0b;
+}
+.alert-warning .alert-title {
+    color: #f59e0b;
+}
+
+.alert-info {
+    border-color: var(--color-outline-variant);
+    background: var(--color-surface-container);
+}
+.alert-info .alert-icon {
+    color: var(--color-primary);
+}

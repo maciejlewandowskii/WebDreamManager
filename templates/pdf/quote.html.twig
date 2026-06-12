@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <style>
+        {% if colorMode == 'light' %}
+        :root {
+            --bg: #ffffff;
+            --text: #09090b;
+            --text-muted: #71717a;
+            --text-outline: #a1a1aa;
+            --border: #e4e4e7;
+            --row-alt: transparent;
+            --highlight-bg: #f4f4f5;
+        }
+        {% else %}
+        :root {
+            --bg: #18181b;
+            --text: #e4e4e7;
+            --text-muted: #a1a1aa;
+            --text-outline: #52525b;
+            --border: #27272a;
+            --row-alt: transparent;
+            --highlight-bg: #27272a;
+        }
+        {% endif %}
+        
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: DejaVu Sans, sans-serif;
+            font-size: 10.5pt;
+            color: var(--text);
+            background: var(--bg);
+        }
+
+        .header {
+            border-bottom: 1px solid var(--border);
+            padding: 36px 44px;
+            display: table;
+            width: 100%;
+        }
+
+        .header-left {
+            display: table-cell;
+            vertical-align: top;
+        }
+
+        .header-right {
+            display: table-cell;
+            vertical-align: top;
+            text-align: right;
+        }
+
+        .lbl-upper {
+            font-size: 7.5pt;
+            font-weight: 600;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: var(--text-outline);
+            margin-bottom: 6px;
+        }
+
+        .company-name {
+            font-size: 15pt;
+            font-weight: bold;
+            color: var(--text);
+        }
+
+        .company-sub {
+            font-size: 9pt;
+            color: var(--text-muted);
+            margin-top: 2px;
+        }
+
+        .doc-number {
+            font-size: 20pt;
+            font-weight: bold;
+            color: var(--text);
+            letter-spacing: -0.02em;
+        }
+
+        .body {
+            padding: 32px 44px 44px;
+        }
+
+        .meta-row {
+            display: table;
+            width: 100%;
+            margin-bottom: 36px;
+        }
+
+        .meta-cell {
+            display: table-cell;
+            width: 50%;
+            vertical-align: top;
+        }
+
+        .meta-value {
+            font-size: 10.5pt;
+            font-weight: 600;
+            color: var(--text);
+        }
+
+        .meta-detail {
+            font-size: 9pt;
+            color: var(--text-muted);
+            margin-top: 2px;
+        }
+
+        .meta-dates {
+            display: table;
+            width: 100%;
+        }
+
+        .meta-dates-cell {
+            display: table-cell;
+            width: 50%;
+        }
+
+        .divider {
+            border: none;
+            border-top: 1px solid var(--border);
+            margin: 0 0 20px;
+        }
+
+        table.items {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        table.items th {
+            font-size: 7.5pt;
+            font-weight: 600;
+            letter-spacing: 0.07em;
+            text-transform: uppercase;
+            color: var(--text-outline);
+            padding: 0 8px 10px;
+            border-bottom: 1px solid var(--border);
+            text-align: left;
+        }
+
+        table.items th.r { text-align: right; }
+
+        table.items td {
+            padding: 16px 8px;
+            font-size: 10.5pt;
+            color: var(--text);
+            border-bottom: 1px solid var(--border);
+        }
+
+        table.items td.r {
+            text-align: right;
+            color: var(--text-muted);
+            font-family: DejaVu Sans Mono, monospace;
+            font-size: 10pt;
+        }
+
+        table.items td.desc { font-weight: 500; }
+        
+        table.items tr:last-child td { border-bottom: none; }
+
+        .totals-wrap {
+            display: table;
+            width: 100%;
+            margin-top: 28px;
+            border-top: 1px solid var(--border);
+            padding-top: 20px;
+        }
+
+        .totals-spacer {
+            display: table-cell;
+            width: 60%;
+        }
+
+        .totals-table-wrap {
+            display: table-cell;
+            width: 40%;
+            vertical-align: top;
+        }
+
+        table.totals {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        table.totals td {
+            padding: 5px 0;
+            font-size: 10pt;
+        }
+
+        table.totals td.lbl {
+            color: var(--text-muted);
+        }
+
+        table.totals td.amt {
+            text-align: right;
+            font-family: DejaVu Sans Mono, monospace;
+            color: var(--text);
+        }
+
+        table.totals tr.gross {
+            border-top: 2px solid var(--border);
+        }
+
+        table.totals tr.gross td {
+            font-weight: bold;
+            font-size: 13.5pt;
+            padding-top: 12px;
+            margin-top: 8px;
+        }
+
+        .notes {
+            margin-top: 20px;
+            padding: 14px 16px;
+            background: var(--highlight-bg);
+            border: 1px solid var(--border);
+            font-size: 9pt;
+            color: var(--text-muted);
+            line-height: 1.6;
+        }
+
+        .footer-static {
+            position: absolute;
+            bottom: 30px;
+            left: 44px;
+            right: 44px;
+            text-align: center;
+            font-size: 8pt;
+            color: var(--text-outline);
+            border-top: 1px solid var(--border);
+            padding-top: 10px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <div class="header-left">
+        <div class="lbl-upper">From</div>
+        <div class="company-name">{{ company_name }}</div>
+        {% if company_address or company_email %}
+            <div class="company-sub">
+                {% if company_address %}{{ company_address }}{% if company_email %} &bull; {% endif %}{% endif %}
+                {% if company_email %}{{ company_email }}{% endif %}
+            </div>
+        {% endif %}
+    </div>
+    <div class="header-right">
+        <div class="lbl-upper">Quote</div>
+        <div class="doc-number">{{ quote.number }}</div>
+    </div>
+</div>
+
+<div class="body">
+
+    {% if quote.introText %}
+        <div style="font-size: 10pt; color: var(--text); margin-bottom: 24px; line-height: 1.5;">
+            {{ quote.introText|nl2br }}
+        </div>
+    {% endif %}
+
+    <div class="meta-row">
+        <div class="meta-cell">
+            <div class="lbl-upper">Prepared for</div>
+            <div class="meta-value">{{ quote.customer.name }}</div>
+            {% if quote.customer.company %}
+                <div class="meta-detail">{{ quote.customer.company }}</div>{% endif %}
+            {% if quote.customer.taxId %}
+                <div class="meta-detail">NIP: {{ quote.customer.taxId }}</div>{% endif %}
+            {% if quote.customer.address %}
+                <div class="meta-detail">{{ quote.customer.address }}{% if quote.customer.city %}, {{ quote.customer.city }}{% endif %}</div>{% endif %}
+            {% if quote.customer.email %}
+                <div class="meta-detail">{{ quote.customer.email }}</div>{% endif %}
+        </div>
+        <div class="meta-cell text-right">
+            <div class="meta-dates">
+                <div class="meta-dates-cell">
+                    <div class="lbl-upper">Issue date</div>
+                    <div class="meta-value" style="font-size: 10pt;">{{ quote.issuedAt|date('d.m.Y') }}</div>
+                </div>
+                {% if quote.validUntil %}
+                <div class="meta-dates-cell">
+                    <div class="lbl-upper">Valid until</div>
+                    <div class="meta-value" style="font-size: 10pt;">{{ quote.validUntil|date('d.m.Y') }}</div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <hr class="divider">
+
+    <table class="items">
+        <thead>
+        <tr>
+            <th style="width:46%">Description</th>
+            <th class="r" style="width:8%">Qty</th>
+            <th class="r" style="width:14%">Unit price</th>
+            <th class="r" style="width:8%">Tax</th>
+            <th class="r" style="width:12%">Net</th>
+            <th class="r" style="width:12%">Gross</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for item in quote.items %}
+            <tr>
+                <td class="desc">{{ item.description }}</td>
+                <td class="r">{{ item.quantity|number_format(2, '.', ' ') }}{{ item.unit }}</td>
+                <td class="r">{{ item.unitPrice|number_format(2, '.', ' ') }}</td>
+                <td class="r">{{ item.taxRate }}%</td>
+                <td class="r">{{ item.netTotal|number_format(2, '.', ' ') }}</td>
+                <td class="r">{{ item.grossTotal|number_format(2, '.', ' ') }}</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+    <div class="totals-wrap">
+        <div class="totals-spacer"></div>
+        <div class="totals-table-wrap">
+            <table class="totals">
+                <tr>
+                    <td class="lbl">Net total</td>
+                    <td class="amt">{{ quote.netTotal|number_format(2, '.', ' ') }} {{ quote.currency }}</td>
+                </tr>
+                <tr>
+                    <td class="lbl">VAT</td>
+                    <td class="amt">{{ quote.taxTotal|number_format(2, '.', ' ') }} {{ quote.currency }}</td>
+                </tr>
+                <tr class="gross">
+                    <td class="lbl">Total</td>
+                    <td class="amt">{{ quote.grossTotal|number_format(2, '.', ' ') }} {{ quote.currency }}</td>
+                </tr>
+            </table>
+        </div>
+    </div>
+
+    {% if quote.notes %}
+        <div class="notes">
+            {{ quote.notes }}
+        </div>
+    {% endif %}
+
+</div>
+
+<div class="footer-static">
+    {{ company_name }} &bull; Generated {{ "now"|date('d.m.Y') }}
+</div>
+
+</body>
+</html>

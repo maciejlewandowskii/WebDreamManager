@@ -1,4 +1,7 @@
 parameters:
+    uploads_dir: '%kernel.project_dir%/public/uploads'
+    project_files_dir: '%kernel.project_dir%/var/project_files'
+    customer_files_dir: '%kernel.project_dir%/var/customer_files'
 
 services:
     _defaults:
@@ -13,36 +16,18 @@ services:
             - '../src/Domain/*/ValueObject/'
             - '../src/Kernel.php'
 
-    # Explicit bindings for ACL port implementations
-    App\Domain\Invoicing\Port\PaymentGatewayInterface:
-        alias: App\Infrastructure\External\Stripe\StubStripeGateway
+    App\Infrastructure\External\Email\SymfonyMailerEmailSender:
+        arguments:
+            $fromAddress: '%env(MAILER_FROM)%'
+            $fromName: '%env(MAILER_FROM_NAME)%'
 
-    App\Domain\Invoicing\Port\AccountingServiceInterface:
-        alias: App\Infrastructure\External\IFirma\StubIFirmaGateway
-
-    App\Domain\Project\Port\GitHubClientInterface:
-        alias: App\Infrastructure\External\GitHub\StubGitHubClient
-
-    App\Domain\Communications\Port\EmailSenderInterface:
+    App\Infrastructure\Communications\Port\EmailSenderInterface:
         alias: App\Infrastructure\External\Email\SymfonyMailerEmailSender
 
-    App\Domain\Communications\Port\SmsSenderInterface:
-        alias: App\Infrastructure\External\Sms\StubSmsSender
+    App\Infrastructure\Pdf\DocumentPdfGenerator:
+        arguments:
+            $projectFilesDir: '%kernel.project_dir%/var/project_files'
+            $customerFilesDir: '%kernel.project_dir%/var/customer_files'
 
-    App\Domain\Identity\Repository\UserRepositoryInterface:
-        alias: App\Infrastructure\Persistence\Identity\DoctrineUserRepository
-
-    App\Domain\Customer\Repository\CustomerRepositoryInterface:
-        alias: App\Infrastructure\Persistence\Customer\DoctrineCustomerRepository
-
-    App\Domain\Project\Repository\ProjectRepositoryInterface:
-        alias: App\Infrastructure\Persistence\Project\DoctrineProjectRepository
-
-    App\Domain\Invoicing\Repository\InvoiceRepositoryInterface:
-        alias: App\Infrastructure\Persistence\Invoicing\DoctrineInvoiceRepository
-
-    App\Domain\Invoicing\Repository\QuoteRepositoryInterface:
-        alias: App\Infrastructure\Persistence\Invoicing\DoctrineQuoteRepository
-
-    App\Domain\TimeTracking\Repository\TimeRecordRepositoryInterface:
-        alias: App\Infrastructure\Persistence\TimeTracking\DoctrineTimeRecordRepository
+    App\Domain\Invoicing\Port\PaymentGatewayInterface:
+        alias: App\Infrastructure\External\Stripe\StripeGateway

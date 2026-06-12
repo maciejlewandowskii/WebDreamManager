@@ -1,0 +1,150 @@
+<twig:Modal body_class="p-6 min-w-[480px] max-w-[640px]">
+
+    <div
+        class="flex items-center [gap:0.75rem] [margin-bottom:1.25rem] [padding-bottom:1rem] [border-bottom:1px_solid_var(--color-outline-variant)]">
+        <div class="text-xs [color:var(--color-on-surface-variant)]">
+            {{ revisionInfo.timestamp|date('d.m.Y H:i') }}
+            {% if revisionInfo.username %} &bull; {{ revisionInfo.username }}{% endif %}
+        </div>
+    </div>
+
+    {% if mode == 'view' %}
+
+        {% set fields = [
+            {label: 'Number',        value: entity.number},
+            {label: 'Status',        value: entity.status.label()},
+            {label: 'Customer',      value: entity.customer.name},
+            {label: 'Issue date',    value: entity.issuedAt|date('d.m.Y')},
+            {label: 'Due date',      value: entity.dueAt|date('d.m.Y')},
+            {label: 'Currency',      value: entity.currency},
+            {label: 'Default tax %', value: entity.defaultTaxRate},
+            {label: 'Bank account',  value: entity.bankAccount ?? '—'},
+            {label: 'Payment terms', value: entity.paymentTerms ?? '—'},
+            {label: 'Notes',         value: entity.notes ?? '—'},
+        ] %}
+
+        <table class="w-full border-collapse text-[0.8125rem]">
+            {% for field in fields %}
+                <tr class="[border-bottom:1px_solid_var(--color-outline-variant)]">
+                    <td class="[padding:0.5rem_0.75rem_0.5rem_0] [color:var(--color-on-surface-variant)] [width:40%] whitespace-nowrap">{{ field.label }}</td>
+                    <td class="[padding:0.5rem_0] font-medium">{{ field.value }}</td>
+                </tr>
+            {% endfor %}
+            <tr class="[border-bottom:1px_solid_var(--color-outline-variant)]">
+                <td class="[padding:0.5rem_0.75rem_0.5rem_0] [color:var(--color-on-surface-variant)] [width:40%] whitespace-nowrap [vertical-align:top]">Line items</td>
+                <td class="[padding:0.5rem_0] font-medium">
+                    {% if entity.itemsSnapshot %}
+                        <ul class="list-disc pl-4 m-0">
+                            {% for item in entity.itemsSnapshot|default([]) %}
+                                <li>{{ item.qty }}{{ item.unit|default('') }} "{{ item.description }}" — {{ item.price }} {{ entity.currency }} ({{ item.taxRate|default('') }}%)</li>
+                            {% endfor %}
+                        </ul>
+                    {% else %}
+                        —
+                    {% endif %}
+                </td>
+            </tr>
+        </table>
+
+    {% else %}
+
+        {% if previous is null %}
+            <p class="text-[0.8125rem] [color:var(--color-on-surface-variant)] [margin-bottom:1rem]">This is the first
+                revision — all fields were created.</p>
+        {% endif %}
+
+        {% set fieldDefs = [
+            {key: 'number',        label: 'Number'},
+            {key: 'status',        label: 'Status'},
+            {key: 'customer',      label: 'Customer'},
+            {key: 'issuedAt',      label: 'Issue date'},
+            {key: 'dueAt',         label: 'Due date'},
+            {key: 'currency',      label: 'Currency'},
+            {key: 'defaultTaxRate',label: 'Default tax %'},
+            {key: 'bankAccount',   label: 'Bank account'},
+            {key: 'paymentTerms',  label: 'Payment terms'},
+            {key: 'notes',         label: 'Notes'},
+            {key: 'items',         label: 'Line items'},
+        ] %}
+
+        {% set currentVals = {
+            number:        entity.number,
+            status:        entity.status.label(),
+            customer:      entity.customer.name,
+            issuedAt:      entity.issuedAt|date('d.m.Y'),
+            dueAt:         entity.dueAt|date('d.m.Y'),
+            currency:      entity.currency,
+            defaultTaxRate:entity.defaultTaxRate,
+            bankAccount:   entity.bankAccount ?? '',
+            paymentTerms:  entity.paymentTerms ?? '',
+            notes:         entity.notes ?? '',
+            items:         entity.itemsSnapshot ? entity.itemsSnapshot|json_encode : '',
+        } %}
+
+        {% set prevVals = previous is not null ? {
+            number:        previous.number,
+            status:        previous.status.label(),
+            customer:      previous.customer.name,
+            issuedAt:      previous.issuedAt|date('d.m.Y'),
+            dueAt:         previous.dueAt|date('d.m.Y'),
+            currency:      previous.currency,
+            defaultTaxRate:previous.defaultTaxRate,
+            bankAccount:   previous.bankAccount ?? '',
+            paymentTerms:  previous.paymentTerms ?? '',
+            notes:         previous.notes ?? '',
+            items:         previous.itemsSnapshot ? previous.itemsSnapshot|json_encode : '',
+        } : {} %}
+
+        {% set hasChanges = false %}
+        <table class="w-full border-collapse text-[0.8125rem]">
+            {% for field in fieldDefs %}
+                {% set cur = attribute(currentVals, field.key) %}
+                {% set prv = previous is not null ? attribute(prevVals, field.key) : null %}
+                {% set changed = previous is null or cur != prv %}
+                {% if changed %}
+                    {% set hasChanges = true %}
+                    <tr class="[border-bottom:1px_solid_var(--color-outline-variant)]">
+                        <td class="[padding:0.5rem_0.75rem_0.5rem_0] [color:var(--color-on-surface-variant)] [width:35%] whitespace-nowrap [vertical-align:top]">{{ field.label }}</td>
+                        <td class="[padding:0.5rem_0] [vertical-align:top]">
+                            {% if previous is not null and prv != '' %}
+                                <div class="text-xs [color:var(--color-error)] [text-decoration:line-through] [margin-bottom:2px]">
+                                    {% if field.key == 'items' %}
+                                        <ul class="list-disc pl-4 m-0">
+                                            {% for item in previous.itemsSnapshot|default([]) %}
+                                                <li>{{ item.qty }}{{ item.unit|default('') }} "{{ item.description }}" — {{ item.price }} {{ previous.currency }} ({{ item.taxRate|default('') }}%)</li>
+                                            {% endfor %}
+                                        </ul>
+                                    {% else %}
+                                        {{ prv }}
+                                    {% endif %}
+                                </div>
+                            {% endif %}
+                            <div class="font-medium [color:var(--color-on-surface)]">
+                                {% if cur != '' %}
+                                    {% if field.key == 'items' %}
+                                        <ul class="list-disc pl-4 m-0">
+                                            {% for item in entity.itemsSnapshot|default([]) %}
+                                                <li>{{ item.qty }}{{ item.unit|default('') }} "{{ item.description }}" — {{ item.price }} {{ entity.currency }} ({{ item.taxRate|default('') }}%)</li>
+                                            {% endfor %}
+                                        </ul>
+                                    {% else %}
+                                        {{ cur }}
+                                    {% endif %}
+                                {% else %}
+                                    —
+                                {% endif %}
+                            </div>
+                        </td>
+                    </tr>
+                {% endif %}
+            {% endfor %}
+        </table>
+
+        {% if not hasChanges %}
+            <p class="text-[0.8125rem] [color:var(--color-on-surface-variant)] [padding:1rem_0]">No tracked field
+                changes detected in this revision.</p>
+        {% endif %}
+
+    {% endif %}
+
+</twig:Modal>

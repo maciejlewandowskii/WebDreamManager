@@ -1,0 +1,16 @@
+{% extends 'layout.html.twig' %}
+
+    {% block title %}Customers — WebDream Manager{% endblock %}
+
+    {% block content %}
+        {% set actions %}
+            <twig:Button variant="primary" href="{{ path('app_customer_new') }}" data-turbo-frame="modal"
+                         data-modal-title="New Customer">
+                {{ ux_icon('tabler:plus', {class: 'w-4 h-4'}) }}
+                New Customer
+            </twig:Button>
+        {% endset %}
+        <twig:layout:PageHeader title="Customers" :actions="actions"/>
+
+        {{ component('CustomerList') }}
+    {% endblock %}

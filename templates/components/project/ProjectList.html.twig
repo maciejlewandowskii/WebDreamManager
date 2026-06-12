@@ -1,68 +1,84 @@
 <div {{ attributes }}>
-    <div style="padding: 1rem 2rem; display: flex; gap: 0.75rem; align-items: center; border-bottom: 1px solid var(--color-outline-variant);">
-        <div class="search-wrap" style="flex: 1; max-width: 320px;">
+    <div
+        class="[padding:1rem_2rem] flex [gap:0.75rem] items-center [border-bottom:1px_solid_var(--color-outline-variant)]">
+        <div class="search-wrap flex-1 [max-width:320px]">
             {{ ux_icon('tabler:search', {class: 'w-4 h-4'}) }}
             <input type="search"
-                   class="form-input"
+                   class="form-input [padding-left:2.25rem]"
                    placeholder="Search projects…"
-                   value="{{ search }}"
+                   value="{{ this.search }}"
                    data-model="search"
-                   style="padding-left: 2.25rem;">
+            >
         </div>
     </div>
 
     <table class="data-table">
         <thead>
-            <tr>
-                <th>Project</th>
-                <th>Customer</th>
-                <th>Status</th>
-                <th>Budget</th>
-                <th>Due</th>
-                <th></th>
-            </tr>
+        <tr>
+            <th>
+                <twig:SortableHeader label="Project" field="name" :currentBy="this.sortBy"
+                                     :currentDirection="this.sortDirection"/>
+            </th>
+            <th>
+                <twig:SortableHeader label="Customer" field="customer" :currentBy="this.sortBy"
+                                     :currentDirection="this.sortDirection"/>
+            </th>
+            <th>
+                <twig:SortableHeader label="Status" field="status" :currentBy="this.sortBy"
+                                     :currentDirection="this.sortDirection"/>
+            </th>
+            <th>
+                <twig:SortableHeader label="Budget" field="budget" :currentBy="this.sortBy"
+                                     :currentDirection="this.sortDirection"/>
+            </th>
+            <th>
+                <twig:SortableHeader label="Due" field="dueDate" :currentBy="this.sortBy"
+                                     :currentDirection="this.sortDirection"/>
+            </th>
+            <th></th>
+        </tr>
         </thead>
         <tbody>
-            {% for project in projects %}
-                {% set statusColor = {
-                    'planning': 'default',
-                    'active': 'success',
-                    'on_hold': 'warning',
-                    'completed': 'secondary',
-                    'cancelled': 'destructive'
-                } %}
-                <tr>
-                    <td>
-                        <a href="{{ path('app_project_show', {id: project.id}) }}"
-                           style="color: var(--color-on-surface); text-decoration: none; font-weight: 500;">
-                            {{ project.name }}
-                        </a>
-                    </td>
-                    <td style="color: var(--color-on-surface-variant);">{{ project.customer.name }}</td>
-                    <td>
+        {% for project in this.projects %}
+            {% set statusColor = {
+                'planning': 'default',
+                'active': 'success',
+                'on_hold': 'warning',
+                'completed': 'secondary',
+                'cancelled': 'destructive'
+            } %}
+            <tr>
+                <td>
+                    <a href="{{ path('app_project_show', {id: project.id}) }}"
+                       class="[color:var(--color-on-surface)] [text-decoration:none] font-medium">
+                        {{ project.name }}
+                    </a>
+                </td>
+                <td class="[color:var(--color-on-surface-variant)]">{{ project.customer.name }}</td>
+                <td>
                         <span class="badge badge-{{ statusColor[project.status.value] ?? 'default' }}">
                             {{ project.status.value|replace({'_': ' '}) }}
                         </span>
-                    </td>
-                    <td style="font-family: var(--font-mono); font-size: 0.8125rem; color: var(--color-on-surface-variant);">
-                        {% if project.budget %}{{ project.budget|number_format(0, '.', ' ') }} {{ project.currency }}{% else %}—{% endif %}
-                    </td>
-                    <td style="font-family: var(--font-mono); font-size: 0.8125rem; color: var(--color-on-surface-variant);">
-                        {% if project.dueDate %}{{ project.dueDate|date('d.m.Y') }}{% else %}—{% endif %}
-                    </td>
-                    <td style="text-align: right;">
-                        <a href="{{ path('app_project_show', {id: project.id}) }}" class="btn btn-ghost btn-sm">
-                            {{ ux_icon('tabler:chevron-right', {class: 'w-4 h-4'}) }}
-                        </a>
-                    </td>
-                </tr>
-            {% else %}
-                <tr>
-                    <td colspan="6" style="text-align: center; padding: 3rem; color: var(--color-on-surface-variant);">
-                        No projects found.
-                    </td>
-                </tr>
-            {% endfor %}
+                </td>
+                <td class="[font-family:var(--font-mono)] text-[0.8125rem] [color:var(--color-on-surface-variant)]">
+                    {% if project.budget %}{{ project.budget|number_format(0, '.', ' ') }} {{ project.currency }}{% else %}—{% endif %}
+                </td>
+                <td class="[font-family:var(--font-mono)] text-[0.8125rem] [color:var(--color-on-surface-variant)]">
+                    {% if project.dueDate %}{{ project.dueDate|date('d.m.Y') }}{% else %}—{% endif %}
+                </td>
+                <td class="text-right">
+                    <a href="{{ path('app_project_show', {id: project.id}) }}" class="btn btn-ghost btn-sm">
+                        {{ ux_icon('tabler:chevron-right', {class: 'w-4 h-4'}) }}
+                    </a>
+                </td>
+            </tr>
+        {% else %}
+            <tr>
+                <td colspan="6" class="text-center [padding:3rem] [color:var(--color-on-surface-variant)]">
+                    No projects found.
+                </td>
+            </tr>
+        {% endfor %}
         </tbody>
     </table>
 </div>

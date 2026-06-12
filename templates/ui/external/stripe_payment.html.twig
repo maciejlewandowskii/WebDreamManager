@@ -1,0 +1,27 @@
+<script src="https://js.stripe.com/v3/"></script>
+
+<div
+    data-controller="stripe-payment"
+    data-stripe-payment-pubkey-value="{{ config.publicKey }}"
+    data-stripe-payment-session-url-value="{{ sessionUrl }}"
+    data-stripe-payment-return-url-value="{{ returnUrl }}"
+>
+    <div class="payment-panel-loading" data-stripe-payment-target="loading">
+        <div class="payment-panel-loading-dots">
+            <div class="payment-panel-dot"></div>
+            <div class="payment-panel-dot"></div>
+            <div class="payment-panel-dot"></div>
+        </div>
+        Loading payment form…
+    </div>
+
+    <form class="payment-panel-form" data-turbo="false" data-action="submit->stripe-payment#submit">
+        <div class="payment-panel-elements" data-stripe-payment-target="container"></div>
+        <div class="payment-panel-error" data-stripe-payment-target="error" hidden></div>
+        <button type="submit" class="payment-panel-btn" data-stripe-payment-target="submit">
+            Pay now
+        </button>
+    </form>
+</div>
+
+<div class="payment-panel-stripe-badge">Secured &amp; powered by Stripe</div>

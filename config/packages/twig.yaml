@@ -1,7 +1,12 @@
 twig:
     file_name_pattern: '*.html.twig'
+    form_themes:
+        - 'form/webdream_theme.html.twig'
     globals:
         app_name: 'WebDream Manager'
+        company_name: '%env(COMPANY_NAME)%'
+        company_address: '%env(COMPANY_ADDRESS)%'
+        company_email: '%env(MAILER_FROM)%'
 
 when@test:
     twig:

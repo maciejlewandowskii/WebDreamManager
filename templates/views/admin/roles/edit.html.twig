@@ -1,0 +1,135 @@
+<twig:Modal>
+    {{ form_start(form, {attr: {'data-turbo-frame': '_top'}}) }}
+
+    <div class="[margin-bottom:1.25rem]">
+        {{ form_row(form.name, {attr: role.isSystem ? {readonly: 'readonly', class: 'form-input [opacity:0.6] [cursor:not-allowed]'} : {}}) }}
+        {% if role.isSystem %}
+            <p class="text-xs [color:var(--color-on-surface-variant)] [margin-top:0.375rem]">
+                System roles are managed by the application and cannot be modified.
+            </p>
+        {% endif %}
+    </div>
+
+    <div class="form-label [margin-bottom:0.5rem]">Permissions</div>
+
+    {% set standardCols = ['List', 'View', 'Create', 'Update', 'Delete'] %}
+
+    {% if role.isSystem %}
+        {# Consume all permission widgets invisibly so form_end() doesn't re-render them #}
+        <div hidden>
+            {% for child in form.permissions %}
+                {{ form_widget(child) }}
+            {% endfor %}
+        </div>
+
+        {# Read-only matrix for system roles — all perms are always granted #}
+        <table class="perm-matrix">
+            <thead>
+            <tr>
+                <th class="perm-matrix__resource">Resource</th>
+                {% for col in standardCols %}
+                    <th class="perm-col-center">{{ col }}</th>
+                {% endfor %}
+                <th class="perm-col-extras">Additional</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for groupName, groupPerms in permissionGroups %}
+                <tr>
+                    <td class="perm-matrix__resource">{{ groupName }}</td>
+                    {% for col in standardCols %}
+                        {% set found = null %}
+                        {% for p in groupPerms %}
+                            {% if p.actionLabel() == col %}
+                                {% set found = p %}
+                            {% endif %}
+                        {% endfor %}
+                        <td class="perm-matrix__cell">
+                            {% if found is not null %}
+                                <span class="perm-matrix__readonly">{{ ux_icon('tabler:check', {class: 'w-4 h-4'}) }}</span>
+                            {% else %}
+                                <span class="perm-matrix__empty">—</span>
+                            {% endif %}
+                        </td>
+                    {% endfor %}
+                    <td class="perm-matrix__extras-cell">
+                        {% for p in groupPerms %}
+                            {% if p.actionLabel() not in standardCols %}
+                                <span class="perm-matrix__extra-item [cursor:default]">
+                                    <span class="perm-matrix__readonly">{{ ux_icon('tabler:check', {class: 'w-4 h-4'}) }}</span>
+                                    <span>{{ p.actionLabel() }}</span>
+                                </span>
+                            {% endif %}
+                        {% endfor %}
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        {# Editable matrix for custom roles #}
+        {% set permissionsById = {} %}
+        {% for child in form.permissions %}
+            {% set permissionsById = permissionsById|merge({(child.vars.value): child}) %}
+        {% endfor %}
+
+        <table class="perm-matrix">
+            <thead>
+            <tr>
+                <th class="perm-matrix__resource">Resource</th>
+                {% for col in standardCols %}
+                    <th class="perm-col-center">{{ col }}</th>
+                {% endfor %}
+                <th class="perm-col-extras">Additional</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for groupName, groupPerms in permissionGroups %}
+                <tr>
+                    <td class="perm-matrix__resource">{{ groupName }}</td>
+                    {% for col in standardCols %}
+                        {% set found = null %}
+                        {% for p in groupPerms %}
+                            {% if p.actionLabel() == col %}
+                                {% set found = p %}
+                            {% endif %}
+                        {% endfor %}
+                        <td class="perm-matrix__cell">
+                            {% if found is not null and permissionsById[found.value] is defined %}
+                                <label class="perm-matrix__check-wrap">
+                                    {{ form_widget(permissionsById[found.value], {attr: {class: 'form-checkbox'}}) }}
+                                </label>
+                            {% else %}
+                                <span class="perm-matrix__empty">—</span>
+                            {% endif %}
+                        </td>
+                    {% endfor %}
+                    <td class="perm-matrix__extras-cell">
+                        {% for p in groupPerms %}
+                            {% if p.actionLabel() not in standardCols %}
+                                {% if permissionsById[p.value] is defined %}
+                                    <label class="perm-matrix__extra-item">
+                                        {{ form_widget(permissionsById[p.value], {attr: {class: 'form-checkbox'}}) }}
+                                        <span>{{ p.actionLabel() }}</span>
+                                    </label>
+                                {% endif %}
+                            {% endif %}
+                        {% endfor %}
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    {% endif %}
+
+    <div class="flex justify-end [gap:0.5rem]">
+        <twig:Button variant="ghost" type="button" data-action="modal#close">
+            {% if role.isSystem %}Close{% else %}Cancel{% endif %}
+        </twig:Button>
+        {% if not role.isSystem %}
+            <twig:Button variant="primary" type="submit">Save Changes</twig:Button>
+        {% endif %}
+    </div>
+
+    {{ form_end(form) }}
+</twig:Modal>

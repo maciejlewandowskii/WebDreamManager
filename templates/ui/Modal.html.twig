@@ -1,0 +1,5 @@
+<turbo-frame id="modal" {{ attributes }}>
+    <div class="modal-body{% if body_class is defined %} {{ body_class }}{% endif %}">
+        {% block content %}{% endblock %}
+    </div>
+</turbo-frame>

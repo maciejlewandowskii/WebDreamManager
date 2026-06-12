@@ -1,0 +1,106 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Sign In — WebDream Manager{% endblock %}
+
+{% block body_class %}auth-layout{% endblock %}
+
+{% block body %}
+    <div class="auth-split">
+
+        {# Left — branding panel #}
+        <div class="auth-brand">
+            <div class="auth-brand__inner">
+                <div class="auth-brand__logo">
+                    <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <rect width="32" height="32" rx="6" fill="rgb(var(--primary))"/>
+                        <path d="M8 10h4l3 8 3-8h4M8 22h16" stroke="rgb(var(--primary-foreground))" stroke-width="2"
+                              stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                    <span class="auth-brand__name">WebDream Manager</span>
+                </div>
+
+                <div class="auth-brand__content">
+                    <h1 class="auth-brand__headline">Internal operations,<br>without the noise.</h1>
+                    <p class="auth-brand__sub">Clients, projects, invoices and time — all in one place, built for the
+                        team.</p>
+                </div>
+
+                <div class="auth-brand__pills">
+                    <span class="auth-pill">Invoicing</span>
+                    <span class="auth-pill">Quoting</span>
+                    <span class="auth-pill">Time tracking</span>
+                    <span class="auth-pill">Client CRM</span>
+                </div>
+            </div>
+        </div>
+
+        {# Right — form panel #}
+        <div class="auth-form-panel">
+            <div class="auth-form-wrap">
+                <div class="[margin-bottom:2rem]">
+                    <h2 class="[font-family:var(--font-headline)] [font-size:1.5rem] [font-weight:700] [color:rgb(var(--foreground))] [margin:0_0_0.375rem]">
+                        Sign in</h2>
+                    <p class="text-sm [color:rgb(var(--muted-foreground))] [margin:0]">Use your WebDream account
+                        credentials.</p>
+                </div>
+
+                {% if error %}
+                    <div
+                        class="[padding:0.75rem_1rem] [background-color:rgba(var(--destructive),_0.12)] [border:1px_solid_rgba(var(--destructive),_0.3)] [color:rgb(var(--destructive))] text-sm [margin-bottom:1.25rem] [border-radius:0.25rem]">
+                        {{ error.messageKey|trans(error.messageData, 'security') }}
+                    </div>
+                {% endif %}
+
+                <form method="post" action="{{ path('app_identity_login') }}">
+                    <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
+
+                    <div class="[margin-bottom:1.125rem]">
+                        <label class="form-label" for="email">Email</label>
+                        <input id="email"
+                               type="email"
+                               name="email"
+                               class="form-input"
+                               value="{{ last_username }}"
+                               autocomplete="email"
+                               autofocus
+                               required>
+                    </div>
+
+                    <div class="[margin-bottom:1.75rem]">
+                        <label class="form-label" for="password">Password</label>
+                        <input id="password"
+                               type="password"
+                               name="password"
+                               class="form-input"
+                               autocomplete="current-password"
+                               required>
+                    </div>
+
+                    <twig:Button variant="primary" type="submit"
+                                 class="w-full justify-center [padding:0.625rem_1rem] [font-size:0.9375rem]">
+                        Sign in
+                    </twig:Button>
+                </form>
+
+                <div class="flex items-center [gap:0.75rem] [margin:1.5rem_0]">
+                    <div class="flex-1 [height:1px] [background:rgb(var(--border))]"></div>
+                    <span class="text-xs [color:rgb(var(--muted-foreground))]">or</span>
+                    <div class="flex-1 [height:1px] [background:rgb(var(--border))]"></div>
+                </div>
+
+                <div data-controller="passkey"
+                     data-passkey-login-options-url-value="{{ path('app_passkey_options') }}"
+                     data-passkey-login-url-value="{{ path('app_passkey_authenticate') }}"
+                     class="flex justify-center">
+                    <twig:Button variant="ghost" type="button"
+                                 class="w-full justify-center items-center text-center [gap:0.5rem]"
+                                 data-action="passkey#login">
+                        {{ ux_icon('tabler:fingerprint', {class: 'w-5 h-5'}) }}
+                        Sign in with passkey
+                    </twig:Button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+{% endblock %}

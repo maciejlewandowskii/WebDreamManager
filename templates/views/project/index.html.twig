@@ -1,0 +1,16 @@
+{% extends 'layout.html.twig' %}
+
+{% block title %}Projects — WebDream Manager{% endblock %}
+
+{% block content %}
+    {% set actions %}
+        <twig:Button variant="primary" href="{{ path('app_project_new') }}" data-turbo-frame="modal"
+                     data-modal-title="New Project">
+            {{ ux_icon('tabler:plus', {class: 'w-4 h-4'}) }}
+            New Project
+        </twig:Button>
+    {% endset %}
+    <twig:layout:PageHeader title="Projects" :actions="actions"/>
+
+    {{ component('ProjectList') }}
+{% endblock %}

@@ -1,0 +1,25 @@
+<twig:Modal>
+    {{ form_start(form, {attr: {'data-turbo-frame': '_top'}}) }}
+
+    <div class="grid grid-cols-2 gap-4">
+        <div class="col-span-2">{{ form_row(form.email) }}</div>
+        <div class="col-span-2">{{ form_row(form.fullName) }}</div>
+        <div>{{ form_row(form.role) }}</div>
+        <div class="flex flex-col justify-center">
+            <div class="form-label">Status</div>
+            <label class="toggle-label">
+                {{ form_widget(form.isActive, {attr: {class: 'toggle-input'}}) }}
+                <span class="toggle-track"></span>
+                <span class="text-sm [color:var(--color-on-surface)]">Active</span>
+            </label>
+        </div>
+        <div class="col-span-2">{{ form_row(form.plainPassword) }}</div>
+    </div>
+
+    <div class="mt-6 flex justify-end gap-2">
+        <twig:Button variant="ghost" type="button" data-action="modal#close">Cancel</twig:Button>
+        <twig:Button variant="primary" type="submit">Save Changes</twig:Button>
+    </div>
+
+    {{ form_end(form) }}
+</twig:Modal>

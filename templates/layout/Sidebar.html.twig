@@ -1,0 +1,97 @@
+<aside class="app-sidebar">
+    <div class="sidebar-logo">
+        <span>WebDream</span>
+        <span class="[color:var(--color-on-surface-variant)] [font-weight:400]">Manager</span>
+    </div>
+
+    {% set currentRoute = app.request.attributes.get('_route') %}
+
+    <nav class="sidebar-nav">
+        <a href="{{ path('app_dashboard') }}"
+           class="sidebar-nav-item {{ currentRoute starts with 'app_dashboard' ? 'active' }}">
+            {{ ux_icon('tabler:dashboard', {class: 'w-4 h-4'}) }}
+            Dashboard
+        </a>
+
+        <div class="sidebar-nav-section">Clients</div>
+        <a href="{{ path('app_customer_index') }}"
+           class="sidebar-nav-item {{ currentRoute starts with 'app_customer' ? 'active' }}">
+            {{ ux_icon('tabler:users', {class: 'w-4 h-4'}) }}
+            Customers
+        </a>
+        <a href="{{ path('app_project_index') }}"
+           class="sidebar-nav-item {{ currentRoute starts with 'app_project' ? 'active' }}">
+            {{ ux_icon('tabler:folder', {class: 'w-4 h-4'}) }}
+            Projects
+        </a>
+
+        <div class="sidebar-nav-section">Finance</div>
+        <a href="{{ path('app_invoice_index') }}"
+           class="sidebar-nav-item {{ currentRoute starts with 'app_invoice' ? 'active' }}">
+            {{ ux_icon('tabler:file-invoice', {class: 'w-4 h-4'}) }}
+            Invoices
+        </a>
+        <a href="{{ path('app_quote_index') }}"
+           class="sidebar-nav-item {{ currentRoute starts with 'app_quote' ? 'active' }}">
+            {{ ux_icon('tabler:file-text', {class: 'w-4 h-4'}) }}
+            Quotes
+        </a>
+
+        <div class="sidebar-nav-section">Work</div>
+        <a href="{{ path('app_time_index') }}"
+           class="sidebar-nav-item {{ currentRoute starts with 'app_time' ? 'active' }}">
+            {{ ux_icon('tabler:clock', {class: 'w-4 h-4'}) }}
+            Time Tracking
+        </a>
+
+        {% if is_granted('user.list') or is_granted('role.list') or is_granted('time_record.view_summary') %}
+            <div class="sidebar-nav-section">Admin</div>
+            {% if is_granted('user.list') %}
+                <a href="{{ path('app_admin_user_index') }}"
+                   class="sidebar-nav-item {{ currentRoute starts with 'app_admin_user' ? 'active' }}">
+                    {{ ux_icon('tabler:users-group', {class: 'w-4 h-4'}) }}
+                    Users
+                </a>
+            {% endif %}
+            {% if is_granted('role.list') %}
+                <a href="{{ path('app_admin_role_index') }}"
+                   class="sidebar-nav-item {{ currentRoute starts with 'app_admin_role' ? 'active' }}">
+                    {{ ux_icon('tabler:shield-check', {class: 'w-4 h-4'}) }}
+                    Roles
+                </a>
+            {% endif %}
+            {% if is_granted('time_record.view_summary') %}
+                <a href="{{ path('app_admin_time_report_index') }}"
+                   class="sidebar-nav-item {{ currentRoute starts with 'app_admin_time_report' ? 'active' }}">
+                    {{ ux_icon('tabler:chart-bar', {class: 'w-4 h-4'}) }}
+                    Time Report
+                </a>
+            {% endif %}
+        {% endif %}
+    </nav>
+
+    <div class="[padding:1rem] [border-top:1px_solid_var(--color-outline-variant)]">
+        <div class="flex items-center [gap:0.625rem] [margin-bottom:0.625rem]">
+            {% set userName = app.user.fullName ?? app.user.email %}
+            {% if app.user.avatarUrl %}
+                <img src="{{ app.user.avatarUrl }}" alt="{{ userName }}" class="user-avatar">
+            {% else %}
+                {% set initials = userName|split(' ')|map(w => w|first|upper)|slice(0, 2)|join('') %}
+                <div class="user-avatar user-avatar-initials">{{ initials }}</div>
+            {% endif %}
+            <div>
+                <div class="text-[0.8125rem] font-medium [color:var(--color-on-surface)]">{{ userName }}</div>
+                <div class="[font-size:0.7rem] [color:var(--color-on-surface-variant)]">{{ app.user.email }}</div>
+            </div>
+        </div>
+        <a href="{{ path('app_settings') }}"
+           class="btn btn-ghost btn-sm w-full [justify-content:flex-start] [margin-bottom:0.25rem]">
+            {{ ux_icon('tabler:settings', {class: 'w-4 h-4'}) }}
+            Settings
+        </a>
+        <a href="{{ path('app_identity_logout') }}" class="btn btn-ghost btn-sm w-full [justify-content:flex-start]">
+            {{ ux_icon('tabler:logout', {class: 'w-4 h-4'}) }}
+            Sign out
+        </a>
+    </div>
+</aside>

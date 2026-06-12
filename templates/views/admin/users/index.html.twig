@@ -1,0 +1,22 @@
+{% extends 'layout.html.twig' %}
+
+{% block title %}Users — WebDream Manager{% endblock %}
+
+{% block content %}
+    {% set actions %}
+        {% if is_granted('user.create') %}
+            <twig:Button variant="primary" href="{{ path('app_admin_user_new') }}"
+                         data-turbo-frame="modal" data-modal-title="New User">
+                {{ ux_icon('tabler:plus', {class: 'w-4 h-4'}) }}
+                New User
+            </twig:Button>
+        {% endif %}
+    {% endset %}
+    <twig:layout:PageHeader title="Users" :actions="actions"/>
+
+    <twig:PageContent>
+        <twig:Card>
+            <twig:UserList />
+        </twig:Card>
+    </twig:PageContent>
+{% endblock %}

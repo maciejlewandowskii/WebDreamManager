@@ -1,0 +1,89 @@
+<div {{ attributes }}>
+    <div class="[padding:1rem_2rem] flex items-center justify-between [border-bottom:1px_solid_var(--color-outline-variant)]">
+        <div class="search-wrap [max-width:280px]">
+            {{ ux_icon('tabler:search', {class: 'w-4 h-4'}) }}
+            <input type="search"
+                   class="form-input [padding-left:2.25rem]"
+                   placeholder="Search users…"
+                   value="{{ this.search }}"
+                   data-model="search"
+            >
+        </div>
+    </div>
+
+    <table class="data-table">
+        <thead>
+        <tr>
+            <th>
+                <twig:SortableHeader label="User" field="fullName" :currentBy="this.sortBy" :currentDirection="this.sortDirection"/>
+            </th>
+            <th>
+                <twig:SortableHeader label="Role" field="role" :currentBy="this.sortBy" :currentDirection="this.sortDirection"/>
+            </th>
+            <th>
+                <twig:SortableHeader label="Status" field="isActive" :currentBy="this.sortBy" :currentDirection="this.sortDirection"/>
+            </th>
+            <th></th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for user in this.users %}
+            <tr>
+                <td>
+                    <div class="flex items-center [gap:0.625rem]">
+                        {% if user.avatarUrl %}
+                            <img src="{{ user.avatarUrl }}" alt="{{ user.fullName }}"
+                                 class="w-8 h-8 rounded-full object-cover">
+                        {% else %}
+                            {% set initials = user.fullName|split(' ')|map(w => w|first|upper)|slice(0, 2)|join('') %}
+                            <div class="w-8 h-8 rounded-full flex items-center justify-center text-xs font-semibold
+                                        [background:var(--color-primary-container)] [color:var(--color-on-primary-container)]">
+                                {{ initials }}
+                            </div>
+                        {% endif %}
+                        <div>
+                            <div class="font-medium text-sm">{{ user.fullName }}</div>
+                            <div class="[color:var(--color-on-surface-variant)] text-xs">{{ user.email }}</div>
+                        </div>
+                    </div>
+                </td>
+                <td class="text-sm [color:var(--color-on-surface-variant)]">
+                    {{ user.role ? user.role.name : '—' }}
+                </td>
+                <td>
+                    {% if user.isActive %}
+                        <span class="badge badge-success">Active</span>
+                    {% else %}
+                        <span class="badge badge-default">Inactive</span>
+                    {% endif %}
+                </td>
+                <td class="text-right flex items-center justify-end [gap:0.25rem]">
+                    {% if is_granted('user.update') %}
+                        <a href="{{ path('app_admin_user_edit', {id: user.id}) }}"
+                           class="btn btn-ghost btn-sm"
+                           data-turbo-frame="modal" data-modal-title="Edit User — {{ user.fullName }}">
+                            {{ ux_icon('tabler:pencil', {class: 'w-4 h-4'}) }}
+                        </a>
+                    {% endif %}
+                    {% if is_granted('user.delete') and app.user.id != user.id %}
+                        <form method="post" action="{{ path('app_admin_user_delete', {id: user.id}) }}"
+                              onsubmit="return confirm('Delete user {{ user.fullName }}?')">
+                            <input type="hidden" name="_token"
+                                   value="{{ csrf_token('delete_user_' ~ user.id) }}">
+                            <button type="submit" class="btn btn-ghost btn-sm [color:var(--color-error)]">
+                                {{ ux_icon('tabler:trash', {class: 'w-4 h-4'}) }}
+                            </button>
+                        </form>
+                    {% endif %}
+                </td>
+            </tr>
+        {% else %}
+            <tr>
+                <td colspan="4" class="text-center [padding:3rem] [color:var(--color-on-surface-variant)]">
+                    No users found.
+                </td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>

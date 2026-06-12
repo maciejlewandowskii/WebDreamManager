@@ -1,0 +1,6 @@
+<tr>
+    <td colspan="{{ colspan|default(100) }}" class="text-center [color:var(--color-on-surface-variant)] [padding:2rem]">
+        {% if message is defined %}{{ message }}{% endif %}
+        {% block content %}{% endblock %}
+    </td>
+</tr>

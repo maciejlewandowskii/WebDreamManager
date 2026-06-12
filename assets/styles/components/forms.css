@@ -1,0 +1,148 @@
+.form-label {
+    display: block;
+    font-size: 0.75rem;
+    font-family: var(--font-mono);
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--color-on-surface-variant);
+    margin-bottom: 0.375rem;
+}
+
+.form-input,
+.form-select,
+.form-textarea {
+    width: 100%;
+    background-color: var(--color-surface-container-high);
+    border: 1px solid var(--color-outline-variant);
+    color: var(--color-on-surface);
+    font-family: var(--font-body);
+    font-size: 0.875rem;
+    padding: 0.5rem 0.75rem;
+    outline: none;
+    transition: border-color 0.15s ease;
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator {
+    filter: invert(1);
+}
+
+.form-input:focus,
+.form-select:focus,
+.form-textarea:focus {
+    border-color: var(--color-primary);
+}
+
+.form-checkbox {
+    width: 1rem;
+    height: 1rem;
+    accent-color: var(--color-primary);
+    cursor: pointer;
+    border: 1px solid var(--color-outline-variant);
+    background: var(--color-surface-container-high);
+}
+
+.form-error {
+    font-size: 0.75rem;
+    color: var(--color-error);
+    margin-top: 0.25rem;
+}
+
+/* Permission matrix table */
+.perm-matrix {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 1.5rem;
+    font-size: 0.8125rem;
+}
+
+.perm-matrix thead th {
+    font-family: var(--font-mono);
+    font-size: 0.6875rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--color-on-surface-variant);
+    font-weight: 500;
+    padding: 0.3125rem 0.625rem;
+    text-align: left;
+    border-bottom: 1px solid var(--color-outline-variant);
+    white-space: nowrap;
+}
+
+.perm-matrix thead th.perm-col-center,
+.perm-matrix thead th.perm-col-extras {
+    text-align: center;
+}
+
+.perm-matrix tbody tr {
+    border-bottom: 1px solid var(--color-outline-variant);
+}
+
+.perm-matrix tbody tr:last-child {
+    border-bottom: none;
+}
+
+.perm-matrix td {
+    padding: 0.4375rem 0.625rem;
+    vertical-align: middle;
+}
+
+.perm-matrix__resource {
+    font-weight: 500;
+    color: var(--color-on-surface);
+    white-space: nowrap;
+    width: 28%;
+}
+
+.perm-matrix__cell {
+    text-align: center;
+    width: 9%;
+}
+
+.perm-matrix__check-wrap {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+}
+
+.perm-matrix__empty {
+    color: var(--color-outline-variant);
+}
+
+.perm-matrix__extras-cell {
+    padding-left: 0.75rem;
+}
+
+.perm-matrix__extra-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    margin-right: 0.875rem;
+    cursor: pointer;
+    font-size: 0.8rem;
+    color: var(--color-on-surface);
+}
+
+.perm-matrix__readonly {
+    color: var(--color-primary);
+    font-size: 0.875rem;
+}
+
+.search-wrap {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.search-wrap svg {
+    position: absolute;
+    left: 0.625rem;
+    color: var(--color-outline);
+    width: 1rem;
+    height: 1rem;
+    pointer-events: none;
+}
+
+.search-wrap input {
+    padding-left: 2.25rem;
+}

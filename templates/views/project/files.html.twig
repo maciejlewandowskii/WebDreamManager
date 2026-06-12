@@ -1,0 +1,157 @@
+{% extends 'layout.html.twig' %}
+
+{% block title %}{{ project.name }} Files — WebDream Manager{% endblock %}
+
+{% block content %}
+    {% set breadcrumbs = [
+        {label: 'Projects', url: path('app_project_index')},
+        {label: project.customer.name, url: path('app_customer_show', {id: project.customer.id})},
+        {label: project.name, url: path('app_project_show', {id: project.id})},
+        {label: 'Files'}
+    ] %}
+    {% set actions %}
+        <twig:Button variant="ghost" size="sm" href="{{ path('app_project_show', {id: project.id}) }}">
+            {{ ux_icon('tabler:arrow-left', {class: 'w-4 h-4'}) }}
+            Back to Project
+        </twig:Button>
+    {% endset %}
+    <twig:layout:PageHeader title="{{ project.name }} Files" :breadcrumbs="breadcrumbs" :actions="actions"/>
+
+    <twig:PageContent>
+        <twig:Card>
+            <twig:CardBody class="[padding:0] [min-height:600px] flex flex-col">
+                <link rel="stylesheet"
+                      href="https://cdn.jsdelivr.net/npm/@svar-ui/react-filemanager@2.6.0/dist-full/index.css"/>
+                <style>
+                    .wdm-filemanager-wrapper {
+                        flex: 1;
+                        display: flex;
+                        flex-direction: column;
+                        width: 100%;
+                        position: relative;
+                    }
+
+                    .wdm-filemanager {
+                        flex: 1;
+                        display: flex;
+                        flex-direction: column;
+                        width: 100%;
+                        position: relative;
+                    }
+
+                    .wdm-filemanager-wrapper > .wx-willow-dark-theme,
+                    .wdm-filemanager-wrapper > .wx-willow-theme {
+                        flex: 1;
+                        display: flex;
+                        flex-direction: column;
+                        height: 100%;
+                        width: 100%;
+                    }
+
+                    body > .wx-willow-dark-theme,
+                    body > .wx-willow-theme {
+                        position: absolute !important;
+                        top: var(--fm-top, 0) !important;
+                        left: var(--fm-left, 0) !important;
+                        width: var(--fm-width, 100%) !important;
+                        height: var(--fm-height, 100%) !important;
+                        z-index: 1000 !important;
+                        pointer-events: none !important;
+                        background: transparent !important;
+                    }
+
+                    body > .wx-willow-dark-theme *,
+                    body > .wx-willow-theme * {
+                        pointer-events: auto;
+                    }
+
+                    .wx-window {
+                        top: 50% !important;
+                        left: 50% !important;
+                        transform: translate(-50%, -50%) !important;
+                        position: absolute !important;
+                    }
+
+                    .wx-willow-dark-theme,
+                    .wx-willow-theme {
+                        --wx-fm-background: #19191d;
+                        --wx-background: #19191d;
+                        --wx-fm-box-shadow: none;
+                        --wx-fm-select-background: #25252b;
+                        --wx-fm-grid-border: 1px solid #47474e;
+                        --wx-fm-grid-header-color: #1f1f24;
+                        --wx-fm-button-font-color: #acaab1;
+                        --wx-border-color: #47474e;
+
+                        --wx-color-primary: #c6c6c7;
+                        --wx-color-primary-font: #3f4041;
+                        --wx-font-family: var(--font-sans);
+                        --wx-font-size: 0.875rem;
+                        --wx-color-font: #e7e4ec;
+                        --wx-color-secondary: #acaab1;
+                        --wx-color-secondary-light: #25252b;
+                        --wx-border: 1px solid #47474e;
+                        --wx-icon-color: #acaab1;
+                        --wx-selected-background: #25252b;
+                        --wx-selected-color: #e7e4ec;
+                        --wx-toolbar-background: #19191d;
+                        --wx-popup-background: #1f1f24;
+
+                        --wx-button-background: #2b2c32;
+                        --wx-button-border: 1px solid #47474e;
+                        --wx-button-font-color: #e7e4ec;
+                    }
+
+                    .wdm-filemanager .wx-toolbar {
+                        border-bottom: 1px solid #47474e;
+                    }
+
+                    .wdm-filemanager .wx-filemanager {
+                        flex: 1;
+                        height: 100%;
+                        width: 100%;
+                        position: relative;
+                    }
+
+                    .wx-window {
+                        background: #1f1f24 !important;
+                        border: 1px solid #47474e !important;
+                        color: #e7e4ec !important;
+                    }
+
+                    .wx-window button.wx-secondary {
+                        background-color: var(--color-surface-container-highest, #383940) !important;
+                        color: var(--color-on-surface, #e7e4ec) !important;
+                        border: 1px solid var(--color-outline-variant, #55555d) !important;
+                        padding: 0.5rem 1rem !important;
+                        cursor: pointer !important;
+                        font-weight: 500 !important;
+                        transition: background-color 0.15s ease !important;
+                    }
+
+                    .wx-window button.wx-secondary:hover {
+                        background-color: var(--color-surface-container-high, #47474e) !important;
+                    }
+
+                    .wx-window button.wx-primary {
+                        background-color: var(--color-primary, #c6c6c7) !important;
+                        color: var(--color-on-primary, #3f4041) !important;
+                        border: 1px solid var(--color-primary, #c6c6c7) !important;
+                        padding: 0.5rem 1rem !important;
+                        cursor: pointer !important;
+                        font-weight: 500 !important;
+                        transition: background-color 0.15s ease !important;
+                    }
+
+                    .wx-window button.wx-primary:hover {
+                        background-color: var(--color-primary-dim, #b8b9b9) !important;
+                    }
+                </style>
+                <div class="wdm-filemanager-wrapper" {{ react_component('ProjectFileManager', {
+                    apiUrl: path('app_project_files_base', {projectId: project.id}),
+                    projectName: project.name
+                }) }}></div>
+            </twig:CardBody>
+        </twig:Card>
+    </twig:PageContent>
+{% endblock %}

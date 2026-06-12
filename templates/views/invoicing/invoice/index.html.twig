@@ -1,0 +1,22 @@
+{% extends 'layout.html.twig' %}
+
+{% block title %}Invoices — WebDream Manager{% endblock %}
+
+{% block content %}
+    {% set actions %}
+        <twig:Button variant="secondary" href="{{ path('app_invoice_from_time_tracking') }}" data-turbo-frame="modal"
+                     data-modal-title="Invoice from Time Tracking">
+            {{ ux_icon('tabler:clock-dollar', {class: 'w-4 h-4'}) }}
+            From Time Tracking
+        </twig:Button>
+        <twig:Button variant="primary" href="{{ path('app_invoice_new') }}">
+            {{ ux_icon('tabler:plus', {class: 'w-4 h-4'}) }}
+            New Invoice
+        </twig:Button>
+    {% endset %}
+    <twig:layout:PageHeader title="Invoices" :actions="actions"/>
+
+    <div class="surface">
+        <twig:InvoiceList />
+    </div>
+{% endblock %}

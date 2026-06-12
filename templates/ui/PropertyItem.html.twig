@@ -1,0 +1,7 @@
+<div {{ attributes.defaults({'class': 'flex flex-col [gap:0.25rem]'}) }}>
+    <div class="text-[0.7rem] font-medium [color:var(--color-on-surface-variant)] uppercase tracking-wider">{{ label }}</div>
+    <div class="text-[0.9375rem] [color:var(--color-on-surface)]{% if is_mono|default(false) %} font-mono{% endif %}">
+        {% if value is defined %}{{ value }}{% endif %}
+        {% block content %}{% endblock %}
+    </div>
+</div>

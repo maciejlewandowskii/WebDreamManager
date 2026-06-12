@@ -1,0 +1,63 @@
+:root {
+    --background:       14 14 16;
+    --foreground:       231 228 236;
+
+    --card:             25 25 29;
+    --card-foreground:  231 228 236;
+
+    --popover:          25 25 29;
+    --popover-foreground: 231 228 236;
+
+    --primary:          198 198 199;
+    --primary-foreground: 63 64 65;
+
+    --secondary:        59 59 62;
+    --secondary-foreground: 193 190 194;
+
+    --muted:            31 31 36;
+    --muted-foreground: 172 170 177;
+
+    --accent:           37 37 43;
+    --accent-foreground: 231 228 236;
+
+    --destructive:      236 124 138;
+    --destructive-foreground: 73 0 19;
+
+    --border:           71 71 78;
+    --input:            31 31 36;
+    --ring:             198 198 199;
+
+    --radius: 0rem;
+}
+
+@theme {
+    --color-surface:                    #0e0e10;
+    --color-surface-dim:                #0e0e10;
+    --color-surface-bright:             #2b2c32;
+    --color-surface-container-lowest:   #000000;
+    --color-surface-container-low:      #131316;
+    --color-surface-container:          #19191d;
+    --color-surface-container-high:     #1f1f24;
+    --color-surface-container-highest:  #25252b;
+    --color-surface-variant:            #25252b;
+    --color-background:                 #0e0e10;
+    --color-on-background:              #e7e4ec;
+    --color-on-surface:                 #e7e4ec;
+    --color-on-surface-variant:         #acaab1;
+    --color-primary:                    #c6c6c7;
+    --color-primary-container:          #454747;
+    --color-on-primary:                 #3f4041;
+    --color-secondary:                  #9f9da1;
+    --color-secondary-container:        #3b3b3e;
+    --color-on-secondary:               #202023;
+    --color-outline:                    #75757b;
+    --color-outline-variant:            #47474e;
+    --color-error:                      #ec7c8a;
+    --color-error-container:            #7f2737;
+    --color-on-error:                   #490013;
+    --color-on-error-container:         #ff97a3;
+
+    --font-headline: "Space Grotesk", sans-serif;
+    --font-body:     "Inter", sans-serif;
+    --font-mono:     "JetBrains Mono", monospace;
+}

@@ -1,0 +1,63 @@
+.editor-field {
+    background: transparent;
+    border: 1px solid transparent;
+    outline: none;
+    color: var(--color-on-surface);
+    font-family: var(--font-body);
+    transition: border-color 0.15s ease, background-color 0.15s ease;
+    width: 100%;
+}
+
+.editor-field:focus,
+.editor-field:hover {
+    border-color: var(--color-outline-variant);
+    background-color: var(--color-surface-container-high);
+}
+
+.editor-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.editor-table th {
+    font-size: 0.6875rem;
+    font-family: var(--font-mono);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--color-outline);
+    border-bottom: 1px solid var(--color-outline-variant);
+    padding: 0.5rem 0.75rem;
+    text-align: left;
+}
+
+.editor-table td {
+    border-bottom: 1px solid var(--color-surface-container-high);
+    padding: 0;
+}
+
+.editor-table td input {
+    padding: 0.5rem 0.75rem;
+}
+
+.editor-totals {
+    border-top: 1px solid var(--color-outline-variant);
+    margin-top: 1rem;
+    padding-top: 1rem;
+}
+
+.editor-totals-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.25rem 0;
+    font-size: 0.875rem;
+    color: var(--color-on-surface-variant);
+}
+
+.editor-totals-row.gross {
+    font-weight: 600;
+    font-size: 1rem;
+    color: var(--color-on-surface);
+    border-top: 1px solid var(--color-outline-variant);
+    margin-top: 0.5rem;
+    padding-top: 0.5rem;
+}

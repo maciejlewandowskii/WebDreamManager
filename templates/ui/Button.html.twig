@@ -1,0 +1,11 @@
+{% set variant = variant is defined ? variant : 'primary' %}
+{% set size = size is defined ? size : null %}
+{% set type = type is defined ? type : 'button' %}
+{% set href = href is defined ? href : null %}
+{% set cls = 'btn btn-' ~ variant ~ (size ? ' btn-' ~ size : '') %}
+
+{% if href %}
+    <a href="{{ href }}" {{ attributes.defaults({class: cls}).without('href', 'type', 'variant', 'size') }}>{{ block('content') }}</a>
+{% else %}
+    <button type="{{ type }}" {{ attributes.defaults({class: cls}).without('href', 'type', 'variant', 'size') }}>{{ block('content') }}</button>
+{% endif %}

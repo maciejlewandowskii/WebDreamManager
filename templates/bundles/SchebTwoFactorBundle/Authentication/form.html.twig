@@ -3,63 +3,66 @@
 {% block title %}Two-Factor Authentication — WebDream Manager{% endblock %}
 
 {% block body %}
-<div style="min-height: 100dvh; display: flex; align-items: center; justify-content: center; background-color: var(--color-surface);">
-    <div style="width: 100%; max-width: 400px; padding: 2rem;">
-        <div style="margin-bottom: 2rem; text-align: center;">
-            <div style="font-family: var(--font-headline); font-size: 1.25rem; font-weight: 700; color: var(--color-on-surface); margin-bottom: 0.25rem;">
-                WebDream Manager
-            </div>
-            <div style="font-size: 0.875rem; color: var(--color-on-surface-variant);">Two-factor authentication</div>
-        </div>
-
-        {% if authenticationError %}
-            <div style="padding: 0.75rem 1rem; background-color: var(--color-error-container); color: var(--color-on-error-container); font-size: 0.875rem; margin-bottom: 1rem;">
-                {{ authenticationError.messageKey|trans(authenticationError.messageData, 'security') }}
-            </div>
-        {% endif %}
-
-        <form method="post" action="{{ two_factor_form_path() }}">
-            <input type="hidden" name="_csrf_token" value="{{ csrf_token('2fa') }}">
-
-            <div style="margin-bottom: 0.5rem; font-size: 0.875rem; color: var(--color-on-surface-variant);">
-                {% if isTotpAuthenticationEnabled() %}
-                    Enter the 6-digit code from your authenticator app.
-                {% elseif isEmailAuthenticationEnabled() %}
-                    Enter the code sent to your email address.
-                {% endif %}
+    <div class="[min-height:100dvh] flex items-center justify-center [background-color:var(--color-surface)]">
+        <div class="w-full [max-width:400px] [padding:2rem]">
+            <div class="[margin-bottom:2rem] text-center">
+                <div
+                    class="[font-family:var(--font-headline)] [font-size:1.25rem] [font-weight:700] [color:var(--color-on-surface)] [margin-bottom:0.25rem]">
+                    WebDream Manager
+                </div>
+                <div class="text-sm [color:var(--color-on-surface-variant)]">Two-factor authentication</div>
             </div>
 
-            <div style="margin-bottom: 1.5rem;">
-                <label class="form-label" for="2fa-code">Authentication Code</label>
-                <input id="2fa-code"
-                       type="text"
-                       name="{{ two_factor_code_parameter() }}"
-                       class="form-input"
-                       style="font-family: var(--font-mono); font-size: 1.25rem; letter-spacing: 0.15em; text-align: center;"
-                       autocomplete="one-time-code"
-                       inputmode="numeric"
-                       maxlength="8"
-                       autofocus
-                       required>
-            </div>
-
-            <button type="submit" class="btn btn-primary" style="width: 100%; justify-content: center;">
-                Verify
-            </button>
-
-            {% if displayTrustedOption() %}
-                <label style="display: flex; align-items: center; gap: 0.5rem; margin-top: 1rem; font-size: 0.875rem; color: var(--color-on-surface-variant); cursor: pointer;">
-                    <input type="checkbox" name="{{ two_factor_trusted_parameter() }}">
-                    Trust this device for 30 days
-                </label>
+            {% if authenticationError %}
+                <div
+                    class="[padding:0.75rem_1rem] [background-color:var(--color-error-container)] [color:var(--color-on-error-container)] text-sm [margin-bottom:1rem]">
+                    {{ authenticationError|trans({}, 'SchebTwoFactorBundle') }}
+                </div>
             {% endif %}
-        </form>
 
-        <div style="margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid var(--color-outline-variant); text-align: center;">
-            <a href="{{ two_factor_cancel_path() }}" style="font-size: 0.8125rem; color: var(--color-on-surface-variant); text-decoration: none;">
-                Cancel and return to login
-            </a>
+            <form method="post" action="{{ checkPathUrl ?? path(checkPathRoute) }}">
+                {% if isCsrfProtectionEnabled %}
+                    <input type="hidden" name="{{ csrfParameterName }}" value="{{ csrf_token(csrfTokenId) }}">
+                {% endif %}
+
+                <div class="[margin-bottom:0.5rem] text-sm [color:var(--color-on-surface-variant)]">
+                    Enter the code from your authenticator app or the one sent to your email.
+                </div>
+
+                <div class="[margin-bottom:1.5rem]">
+                    <label class="form-label" for="2fa-code">Authentication Code</label>
+                    <input id="2fa-code"
+                           type="text"
+                           name="{{ authCodeParameterName }}"
+                           class="form-input [font-family:var(--font-mono)] [font-size:1.25rem] [letter-spacing:0.15em] text-center"
+
+                           autocomplete="one-time-code"
+                           inputmode="numeric"
+                           maxlength="8"
+                           autofocus
+                           required>
+                </div>
+
+                <button type="submit" class="btn btn-primary w-full justify-center">
+                    Verify
+                </button>
+
+                {% if displayTrustedOption %}
+                    <label
+                        class="flex items-center [gap:0.5rem] [margin-top:1rem] text-sm [color:var(--color-on-surface-variant)] cursor-pointer">
+                        <input type="checkbox" name="{{ trustedParameterName }}">
+                        Trust this device for 30 days
+                    </label>
+                {% endif %}
+            </form>
+
+            <div
+                class="[margin-top:1.5rem] [padding-top:1rem] [border-top:1px_solid_var(--color-outline-variant)] text-center">
+                <a href="{{ logoutPath }}"
+                   class="text-[0.8125rem] [color:var(--color-on-surface-variant)] [text-decoration:none]">
+                    Cancel and return to login
+                </a>
+            </div>
         </div>
     </div>
-</div>
 {% endblock %}

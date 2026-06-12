@@ -4,15 +4,15 @@ declare(strict_types=1);
 
 namespace App\Domain\Customer\Entity;
 
-use App\Domain\Customer\Repository\CustomerRepositoryInterface;
 use App\Domain\Project\Entity\Project;
+use App\Domain\Customer\Infrastructure\DoctrineCustomerRepository;
 use DateTimeImmutable;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
 
-#[ORM\Entity(repositoryClass: CustomerRepositoryInterface::class)]
+#[ORM\Entity(repositoryClass: DoctrineCustomerRepository::class)]
 #[ORM\Table(name: 'customers')]
 #[ORM\HasLifecycleCallbacks]
 class Customer
@@ -58,6 +58,15 @@ class Customer
 
     #[ORM\Column(type: 'string', nullable: true)]
     private ?string $taxId = null;
+
+    #[ORM\Column(type: 'decimal', precision: 10, scale: 2, nullable: true)]
+    private ?string $hourlyRate = null;
+
+    #[ORM\Column(type: 'string', length: 3, options: ['default' => 'PLN'])]
+    private string $hourlyRateCurrency = 'PLN';
+
+    #[ORM\Column(type: 'string', length: 10, enumType: PdfColorMode::class, options: ['default' => 'light'])]
+    private PdfColorMode $pdfColorMode = PdfColorMode::Light;
 
     /** @var Collection<int, Project> */
     #[ORM\OneToMany(targetEntity: Project::class, mappedBy: 'customer', cascade: ['persist', 'remove'], orphanRemoval: true)]
@@ -196,6 +205,36 @@ class Customer
     public function setTaxId(?string $taxId): void
     {
         $this->taxId = $taxId;
+    }
+
+    public function getHourlyRate(): ?string
+    {
+        return $this->hourlyRate;
+    }
+
+    public function setHourlyRate(?string $hourlyRate): void
+    {
+        $this->hourlyRate = $hourlyRate;
+    }
+
+    public function getHourlyRateCurrency(): string
+    {
+        return $this->hourlyRateCurrency;
+    }
+
+    public function setHourlyRateCurrency(string $hourlyRateCurrency): void
+    {
+        $this->hourlyRateCurrency = $hourlyRateCurrency;
+    }
+
+    public function getPdfColorMode(): PdfColorMode
+    {
+        return $this->pdfColorMode;
+    }
+
+    public function setPdfColorMode(PdfColorMode $pdfColorMode): void
+    {
+        $this->pdfColorMode = $pdfColorMode;
     }
 
     /** @return Collection<int, Project> */

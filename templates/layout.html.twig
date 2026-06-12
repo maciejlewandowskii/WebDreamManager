@@ -1,8 +1,23 @@
 {% extends 'base.html.twig' %}
 
 {% block body %}
-    <twig:layout:Sidebar />
+    {% set _flashes = app.flashes %}
+    <twig:layout:Sidebar/>
     <main class="app-main">
         {% block content %}{% endblock %}
     </main>
+
+    <dialog id="app-modal" data-controller="modal">
+        <div class="modal-header">
+            <span class="modal-title" id="modal-title"></span>
+            <button type="button" class="modal-close" data-action="modal#close" aria-label="Close">&#x2715;</button>
+        </div>
+        <turbo-frame id="modal"></turbo-frame>
+    </dialog>
+
+    <div id="alerts-container"
+         data-controller="alerts"
+         data-alerts-initial-value="{{ _flashes is not empty ? _flashes|json_encode|e('html_attr') : '{}' }}"
+         class="alert-container">
+    </div>
 {% endblock %}

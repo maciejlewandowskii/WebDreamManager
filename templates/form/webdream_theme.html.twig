@@ -1,0 +1,56 @@
+{% use "form_div_layout.html.twig" %}
+
+{% block form_label -%}
+    {%- if label is not same as(false) -%}
+        {%- set label_attr = label_attr|merge({'class': ((label_attr.class ?? '') ~ ' form-label')|trim}) -%}
+        {{- parent() -}}
+    {%- endif -%}
+{%- endblock form_label %}
+
+{% block form_widget_simple -%}
+    {%- set type = type|default('text') -%}
+    {%- if type not in ['hidden', 'file'] -%}
+        {%- set attr = attr|merge({'class': ((attr.class ?? '') ~ ' form-input')|trim}) -%}
+    {%- endif -%}
+    {{- parent() -}}
+{%- endblock form_widget_simple %}
+
+{% block choice_widget_collapsed -%}
+    {%- set attr = attr|merge({'class': ((attr.class ?? '') ~ ' form-select')|trim}) -%}
+    {{- parent() -}}
+{%- endblock choice_widget_collapsed %}
+
+{% block textarea_widget -%}
+    {%- set attr = attr|merge({'class': ((attr.class ?? '') ~ ' form-textarea')|trim}) -%}
+    {{- parent() -}}
+{%- endblock textarea_widget %}
+
+{% block form_errors -%}
+    {%- for error in errors -%}
+        <p class="form-error">{{ error.message }}</p>
+    {%- endfor -%}
+{%- endblock form_errors %}
+
+{% block form_row -%}
+    <div class="mb-4">
+        {{- form_label(form) -}}
+        {{- form_widget(form) -}}
+        {{- form_errors(form) -}}
+    </div>
+{%- endblock form_row %}
+
+{% block submit_row -%}
+    {{- form_widget(form) -}}
+{%- endblock submit_row %}
+
+{% block submit_widget -%}
+    {%- set attr = attr|merge({'class': ((attr.class ?? '') ~ ' btn btn-primary')|trim}) -%}
+    {{- parent() -}}
+{%- endblock submit_widget %}
+
+{% block money_currency_widget %}
+    <div class="flex gap-2 items-center">
+        <div class="flex-1">{{ form_widget(form.amount) }}</div>
+        <div class="w-24">{{ form_widget(form.currency) }}</div>
+    </div>
+{% endblock %}

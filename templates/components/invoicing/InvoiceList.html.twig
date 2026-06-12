@@ -1,0 +1,72 @@
+<div {{ attributes }}>
+    <div class="[padding:1rem_2rem] flex items-center justify-between [border-bottom:1px_solid_var(--color-outline-variant)]">
+        <div class="search-wrap [max-width:280px]">
+            {{ ux_icon('tabler:search', {class: 'w-4 h-4'}) }}
+            <input type="search"
+                   class="form-input [padding-left:2.25rem]"
+                   placeholder="Search invoices…"
+                   value="{{ this.search }}"
+                   data-model="search"
+            >
+        </div>
+    </div>
+
+    <table class="data-table">
+        <thead>
+        <tr>
+            <th>
+                <twig:SortableHeader label="Number" field="number" :currentBy="this.sortBy" :currentDirection="this.sortDirection"/>
+            </th>
+            <th>
+                <twig:SortableHeader label="Customer" field="customer" :currentBy="this.sortBy" :currentDirection="this.sortDirection"/>
+            </th>
+            <th>
+                <twig:SortableHeader label="Issued" field="issuedAt" :currentBy="this.sortBy" :currentDirection="this.sortDirection"/>
+            </th>
+            <th>
+                <twig:SortableHeader label="Due" field="dueAt" :currentBy="this.sortBy" :currentDirection="this.sortDirection"/>
+            </th>
+            <th>
+                <twig:SortableHeader label="Net" field="netTotal" :currentBy="this.sortBy" :currentDirection="this.sortDirection"/>
+            </th>
+            <th>
+                <twig:SortableHeader label="Gross" field="grossTotal" :currentBy="this.sortBy" :currentDirection="this.sortDirection"/>
+            </th>
+            <th>
+                <twig:SortableHeader label="Status" field="status" :currentBy="this.sortBy" :currentDirection="this.sortDirection"/>
+            </th>
+            <th></th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for invoice in this.invoices %}
+            <tr>
+                <td class="[font-family:var(--font-mono)] text-[0.8125rem] whitespace-nowrap">
+                    <a href="{{ path('app_invoice_show', {id: invoice.id}) }}" class="[color:var(--color-on-surface)] [text-decoration:none] font-medium">
+                        {{ invoice.number }}
+                    </a>
+                </td>
+                <td>{{ invoice.customer.name }}</td>
+                <td class="[font-family:var(--font-mono)] text-[0.8125rem] [color:var(--color-on-surface-variant)]">{{ invoice.issuedAt|date('d.m.Y') }}</td>
+                <td class="[font-family:var(--font-mono)] text-[0.8125rem] [color:var(--color-on-surface-variant)]">{{ invoice.dueAt|date('d.m.Y') }}</td>
+                <td class="[font-family:var(--font-mono)] text-[0.8125rem] [color:var(--color-on-surface-variant)]">{{ invoice.netTotal|number_format(2, '.', ' ') }}</td>
+                <td class="[font-family:var(--font-mono)] text-[0.8125rem] font-bold">{{ invoice.grossTotal|number_format(2, '.', ' ') }} {{ invoice.currency }}</td>
+                <td>
+                    <span class="badge badge-{{ invoice.status.color }}">{{ invoice.status.value }}</span>
+                </td>
+                <td class="text-right">
+                    <a href="{{ path('app_invoice_show', {id: invoice.id}) }}" class="btn btn-ghost btn-sm">
+                        {{ ux_icon('tabler:pencil', {class: 'w-4 h-4'}) }}
+                    </a>
+                </td>
+            </tr>
+        {% else %}
+            <tr>
+                <td colspan="8" class="text-center [padding:3rem] [color:var(--color-on-surface-variant)]">
+                    No invoices yet.
+                </td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>

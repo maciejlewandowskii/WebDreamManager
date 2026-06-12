@@ -5,25 +5,29 @@ declare(strict_types=1);
 namespace App\Infrastructure\External\Stripe;
 
 use App\Domain\Invoicing\Entity\Invoice;
+use App\Domain\Invoicing\Entity\PaymentStatus;
 use App\Domain\Invoicing\Port\PaymentGatewayInterface;
 
 final class StubStripeGateway implements PaymentGatewayInterface
 {
-    public function createPaymentLink(Invoice $invoice): array
+    public function getClientConfig(): array
     {
-        return [
-            'id' => 'stub_' . $invoice->getId(),
-            'url' => 'https://stripe.com/stub-payment/' . $invoice->getNumber(),
-            'status' => 'pending',
-        ];
+        return ['type' => 'stub', 'publicKey' => 'stub_public_key'];
     }
 
-    public function getPaymentStatus(string $externalId): string
+    public function createEmbeddedCheckout(Invoice $invoice, string $returnUrl): string
     {
-        return 'pending';
+        $invoice->setStripeSessionId('stub_' . $invoice->getId());
+
+        return 'stub_secret_' . $invoice->getId();
     }
 
-    public function cancelPayment(string $externalId): bool
+    public function getPaymentStatus(string $sessionId): PaymentStatus
+    {
+        return PaymentStatus::Unpaid;
+    }
+
+    public function cancelPayment(string $sessionId): bool
     {
         return true;
     }

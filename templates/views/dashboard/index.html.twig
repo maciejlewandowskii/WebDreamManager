@@ -1,0 +1,82 @@
+{% extends 'layout.html.twig' %}
+
+{% block title %}Dashboard — WebDream Manager{% endblock %}
+
+{% block content %}
+    <twig:layout:PageHeader title="Dashboard"/>
+
+    <twig:PageContent>
+        <div class="[display:grid] [grid-template-columns:repeat(4,_1fr)] [gap:1rem] [margin-bottom:2rem]">
+            <twig:StatCard label="Active Projects">
+                <twig:block name="value">{{ activeProjects }}</twig:block>
+            </twig:StatCard>
+            <twig:StatCard label="Open Invoices">
+                <twig:block name="value">{{ openInvoices }}</twig:block>
+            </twig:StatCard>
+            <twig:StatCard label="Pending Quotes">
+                <twig:block name="value">{{ pendingQuotes }}</twig:block>
+            </twig:StatCard>
+            <twig:StatCard label="This Month (h)">
+                <twig:block name="value">{{ monthHours|number_format(1) }}</twig:block>
+            </twig:StatCard>
+        </div>
+
+        <div class="[display:grid] [grid-template-columns:1fr_1fr] [gap:1.5rem]">
+            <twig:Card>
+                <twig:CardHeader title="Recent Invoices"/>
+                <twig:DataTable>
+                    <twig:block name="head">
+                        <th>Number</th>
+                        <th>Customer</th>
+                        <th>Amount</th>
+                        <th>Status</th>
+                    </twig:block>
+
+                    {% for invoice in recentInvoices %}
+                        <tr>
+                            <td class="[font-family:var(--font-mono)] text-[0.8125rem]">
+                                <a href="{{ path('app_invoice_show', {id: invoice.id}) }}"
+                                   class="[color:var(--color-on-surface)] [text-decoration:none]">{{ invoice.number }}</a>
+                            </td>
+                            <td class="[color:var(--color-on-surface-variant)]">{{ invoice.customer.name }}</td>
+                            <td class="[font-family:var(--font-mono)] text-[0.8125rem]">{{ invoice.grossTotal|number_format(2, '.', ' ') }} {{ invoice.currency }}</td>
+                            <td>
+                                <twig:Badge variant="{{ invoice.status.color }}">{{ invoice.status.value }}</twig:Badge>
+                            </td>
+                        </tr>
+                    {% else %}
+                        <twig:EmptyState colspan="4">
+                            No invoices yet.
+                        </twig:EmptyState>
+                    {% endfor %}
+                </twig:DataTable>
+            </twig:Card>
+
+            <twig:Card>
+                <twig:CardHeader title="Recent Time Records"/>
+                <twig:DataTable>
+                    <twig:block name="head">
+                        <th>Date</th>
+                        <th>Title</th>
+                        <th>Project</th>
+                        <th>Spent</th>
+                    </twig:block>
+
+                    {% for record in recentTimeRecords %}
+                        <tr>
+                            <td class="[font-family:var(--font-mono)] text-[0.8125rem] whitespace-nowrap">{{ record.date|date('d.m') }}</td>
+                            <td class="text-sm">{{ record.title|u.truncate(40, '…') }}</td>
+                            <td class="[color:var(--color-on-surface-variant)] text-[0.8125rem]">{{ record.project.name }}</td>
+                            <td class="[font-family:var(--font-mono)] text-[0.8125rem]">{{ record.spentHours }}h
+                            </td>
+                        </tr>
+                    {% else %}
+                        <twig:EmptyState colspan="4">
+                            No records yet.
+                        </twig:EmptyState>
+                    {% endfor %}
+                </twig:DataTable>
+            </twig:Card>
+        </div>
+    </twig:PageContent>
+{% endblock %}

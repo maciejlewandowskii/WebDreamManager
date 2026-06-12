@@ -1,0 +1,40 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Invalid Setup Link — WebDream Manager{% endblock %}
+
+{% block body_class %}auth-layout{% endblock %}
+
+{% block body %}
+    <div class="auth-split">
+        <div class="auth-brand">
+            <div class="auth-brand__inner">
+                <div class="auth-brand__logo">
+                    <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <rect width="32" height="32" rx="6" fill="rgb(var(--primary))"/>
+                        <path d="M8 10h4l3 8 3-8h4M8 22h16" stroke="rgb(var(--primary-foreground))" stroke-width="2"
+                              stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                    <span class="auth-brand__name">WebDream Manager</span>
+                </div>
+                <div class="auth-brand__content">
+                    <h1 class="auth-brand__headline">This link has expired.</h1>
+                    <p class="auth-brand__sub">Setup links are valid for 7 days. Contact your administrator to send a new invitation.</p>
+                </div>
+            </div>
+        </div>
+        <div class="auth-form-panel">
+            <div class="auth-form-wrap text-center">
+                <div class="[font-size:3rem] [margin-bottom:1.5rem]">🔗</div>
+                <h2 class="[font-family:var(--font-headline)] [font-size:1.5rem] [font-weight:700] [margin:0_0_0.75rem]">
+                    Link invalid or expired
+                </h2>
+                <p class="text-sm [color:rgb(var(--muted-foreground))] [margin:0_0_2rem]">
+                    This account setup link is no longer valid. Please ask your administrator to resend the invitation.
+                </p>
+                <a href="{{ path('app_identity_login') }}" class="btn btn-primary w-full justify-center">
+                    Back to sign in
+                </a>
+            </div>
+        </div>
+    </div>
+{% endblock %}

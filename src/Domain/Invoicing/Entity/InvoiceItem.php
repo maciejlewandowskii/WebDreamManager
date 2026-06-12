@@ -36,6 +36,9 @@ class InvoiceItem
     #[ORM\Column(type: 'decimal', precision: 5, scale: 2, options: ['default' => '0'])]
     private string $taxRate = '0';
 
+    #[ORM\Column(type: 'string', length: 20, options: ['default' => 'unit'])]
+    private string $unit = 'unit';
+
     #[ORM\Column(type: 'integer', options: ['default' => 0])]
     private int $sortOrder = 0;
 
@@ -92,6 +95,16 @@ class InvoiceItem
     public function setTaxRate(string $taxRate): void
     {
         $this->taxRate = $taxRate;
+    }
+
+    public function getUnit(): string
+    {
+        return $this->unit;
+    }
+
+    public function setUnit(string $unit): void
+    {
+        $this->unit = $unit;
     }
 
     public function getSortOrder(): int

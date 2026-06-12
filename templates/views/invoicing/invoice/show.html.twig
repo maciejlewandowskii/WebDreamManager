@@ -1,0 +1,163 @@
+{% extends 'layout.html.twig' %}
+
+{% block title %}{{ invoice.number }} — WebDream Manager{% endblock %}
+
+{% block content %}
+    {% set breadcrumbs = [{label: 'Invoices', url: path('app_invoice_index')}, {label: invoice.number}] %}
+
+    {% set actions %}
+        <form method="post" action="{{ path('app_invoice_generate_pdf', {id: invoice.id}) }}" class="inline">
+            <input type="hidden" name="_token" value="{{ csrf_token('generate_pdf_invoice_' ~ invoice.id) }}">
+            <twig:Button variant="secondary" size="sm" type="submit">
+                {{ ux_icon('tabler:file-type-pdf', {class: 'w-4 h-4'}) }}
+                Generate PDF
+            </twig:Button>
+        </form>
+        {% if invoice.customer.email and pdfs|length > 0 %}
+            <form method="post" action="{{ path('app_invoice_send_email', {id: invoice.id}) }}" class="inline">
+                <input type="hidden" name="_token" value="{{ csrf_token('send_email_invoice_' ~ invoice.id) }}">
+                <input type="hidden" name="pdf_id" value="{{ pdfs[0].id }}">
+                <twig:Button variant="secondary" size="sm" type="submit">
+                    {{ ux_icon('tabler:mail', {class: 'w-4 h-4'}) }}
+                    Send to client
+                </twig:Button>
+            </form>
+        {% endif %}
+    {% endset %}
+
+    {% set badge %}
+        <twig:Badge variant="{{ invoice.status.color }}">{{ invoice.status.label() }}</twig:Badge>
+    {% endset %}
+
+    <twig:layout:PageHeader title="{{ invoice.number }}" :breadcrumbs="breadcrumbs" :actions="actions" :badge="badge"/>
+
+    <twig:PageContent>
+        <div class="[display:grid] [grid-template-columns:1fr_320px] [gap:1.5rem] [align-items:start]">
+
+            <div>
+                {{ component('InvoiceEditor', {invoiceId: invoice.id}) }}
+            </div>
+
+            <div class="flex flex-col [gap:1rem]">
+
+                {# PDF History #}
+                <twig:Card>
+                    <twig:CardHeader class="text-sm font-medium [padding:0.75rem_1rem]">
+                        {{ ux_icon('tabler:file-type-pdf', {class: 'inline h-4 w-4'}) }}
+                        PDFs
+                    </twig:CardHeader>
+                    <twig:CardBody class="[padding:0]">
+                        {% if pdfs|length == 0 %}
+                            <div
+                                class="[padding:0.75rem] text-[0.8125rem] [color:var(--color-on-surface-variant)] text-center">
+                                No PDFs generated yet.
+                            </div>
+                        {% else %}
+                            {% for pdf in pdfs %}
+                                <div
+                                    class="flex items-center justify-between [padding:0.125rem_0.5rem] [border-bottom:1px_solid_var(--color-outline-variant)]">
+                                    <div>
+                                        <div class="text-[0.8125rem] font-medium">
+                                            <a href="{{ path('app_invoice_download_pdf', {id: invoice.id, pdfId: pdf.id}) }}"
+                                               target="_blank"
+                                               class="[color:var(--color-on-surface)] [text-decoration:none]">
+                                                {{ ux_icon('tabler:download', {class: 'inline h-3 w-3'}) }}
+                                                {{ pdf.fileName }}
+                                            </a>
+                                        </div>
+                                        <div class="text-xs [color:var(--color-on-surface-variant)] [margin-top:2px]">
+                                            {{ pdf.generatedAt|date('d.m.Y H:i') }} &bull;
+                                            <span
+                                                class="[text-transform:uppercase] [font-size:0.7rem]">{{ pdf.colorMode }}</span>
+                                        </div>
+                                    </div>
+                                    {% if invoice.customer.email %}
+                                        <form method="post"
+                                              action="{{ path('app_invoice_send_email', {id: invoice.id}) }}">
+                                            <input type="hidden" name="_token"
+                                                   value="{{ csrf_token('send_email_invoice_' ~ invoice.id) }}">
+                                            <input type="hidden" name="pdf_id" value="{{ pdf.id }}">
+                                            <twig:Button variant="ghost" size="icon" type="submit"
+                                                         title="Send this PDF by email">
+                                                {{ ux_icon('tabler:mail', {class: 'w-4 h-4'}) }}
+                                            </twig:Button>
+                                        </form>
+                                    {% endif %}
+                                </div>
+                            {% endfor %}
+                        {% endif %}
+                    </twig:CardBody>
+                </twig:Card>
+
+                {# Version Timeline #}
+                <twig:Card>
+                    <twig:CardHeader class="text-sm font-medium [padding:0.75rem_1rem]">
+                        {{ ux_icon('tabler:history', {class: 'inline h-4 w-4'}) }}
+                        Version History
+                    </twig:CardHeader>
+                    <twig:CardBody class="[padding:0]">
+                        {% set timeline = [] %}
+                        {% for rev in revisions %}
+                            {% set timeline = timeline|merge([{
+                                type: 'revision',
+                                at: rev.timestamp,
+                                label: 'Saved',
+                                detail: rev.username ?? 'system',
+                                rev: rev.rev
+                            }]) %}
+                        {% endfor %}
+                        {% for pdf in pdfs %}
+                            {% set timeline = timeline|merge([{
+                                type: 'pdf',
+                                at: pdf.generatedAt,
+                                label: 'PDF generated',
+                                detail: pdf.colorMode ~ ' · ' ~ pdf.fileName,
+                                pdfId: pdf.id
+                            }]) %}
+                        {% endfor %}
+
+                        {% set timeline = timeline|sort((a, b) => b.at.timestamp - a.at.timestamp) %}
+
+                        {% if timeline|length == 0 %}
+                            <div
+                                class="[padding:0.75rem] text-[0.8125rem] [color:var(--color-on-surface-variant)] text-center">
+                                No history yet.
+                            </div>
+                        {% else %}
+                            <div class="flex flex-col [gap:0.125rem]">
+                                {% for event in timeline %}
+                                    <twig:TimelineEvent
+                                        icon="{{ event.type == 'pdf' ? 'tabler:file-type-pdf' : 'tabler:pencil' }}"
+                                        label="{{ event.label }}"
+                                        date="{{ event.at|date('d.m.Y H:i') }}"
+                                        detail="{{ event.detail }}"
+                                    >
+                                        <twig:block name="actions">
+                                            {% if event.type == 'revision' %}
+                                                <twig:Button variant="ghost" size="sm"
+                                                             href="{{ path('app_invoice_revision_view', {id: invoice.id, rev: event.rev}) }}"
+                                                             data-turbo-frame="modal"
+                                                             data-modal-title="Revision #{{ event.rev }}"
+                                                             class="[font-size:0.7rem] [padding:0.125rem_0.5rem]">
+                                                    {{ ux_icon('tabler:eye', {class: 'w-3 h-3'}) }} View
+                                                </twig:Button>
+                                                <twig:Button variant="ghost" size="sm"
+                                                             href="{{ path('app_invoice_revision_diff', {id: invoice.id, rev: event.rev}) }}"
+                                                             data-turbo-frame="modal"
+                                                             data-modal-title="Changes in revision #{{ event.rev }}"
+                                                             class="[font-size:0.7rem] [padding:0.125rem_0.5rem]">
+                                                    {{ ux_icon('tabler:git-compare', {class: 'w-3 h-3'}) }} Diff
+                                                </twig:Button>
+                                            {% endif %}
+                                        </twig:block>
+                                    </twig:TimelineEvent>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </twig:CardBody>
+                </twig:Card>
+
+            </div>
+        </div>
+    </twig:PageContent>
+{% endblock %}

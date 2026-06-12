@@ -1,0 +1,15 @@
+<twig:Card>
+    <twig:CardHeader>
+        <div class="text-sm font-semibold [color:var(--color-on-surface)]">Change Password</div>
+    </twig:CardHeader>
+    <twig:CardBody>
+        {{ form_start(password_form) }}
+        {{ form_row(password_form.currentPassword) }}
+        {{ form_row(password_form.newPassword.first) }}
+        {{ form_row(password_form.newPassword.second) }}
+        <div class="flex [justify-content:flex-end] [margin-top:0.5rem]">
+            {{ form_row(password_form.save) }}
+        </div>
+        {{ form_end(password_form) }}
+    </twig:CardBody>
+</twig:Card>

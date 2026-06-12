@@ -1,0 +1,26 @@
+<twig:Modal>
+    {{ form_start(form, {attr: {'data-turbo-frame': '_top'}}) }}
+
+    <div class="[margin-bottom:1.25rem]">
+        {{ form_row(form.user) }}
+    </div>
+
+    <div class="form-label [margin-bottom:0.5rem]">Project Permissions</div>
+    <div class="[border:1px_solid_var(--color-outline-variant)] [border-radius:0.5rem] [overflow:hidden]">
+        {% for child in form.permissions %}
+            <label class="flex items-center [gap:0.75rem] [padding:0.625rem_0.875rem] [cursor:pointer]
+                          [border-bottom:1px_solid_var(--color-outline-variant)] last:[border-bottom:none]
+                          hover:[background:var(--color-surface-container-high)]">
+                {{ form_widget(child, {attr: {class: 'form-checkbox flex-shrink-0'}}) }}
+                <span class="text-sm [color:var(--color-on-surface)]">{{ form_label(child) }}</span>
+            </label>
+        {% endfor %}
+    </div>
+
+    <div class="flex justify-end [gap:0.5rem] [margin-top:1.5rem]">
+        <twig:Button variant="ghost" type="button" data-action="modal#close">Cancel</twig:Button>
+        <twig:Button variant="primary" type="submit">Save</twig:Button>
+    </div>
+
+    {{ form_end(form) }}
+</twig:Modal>

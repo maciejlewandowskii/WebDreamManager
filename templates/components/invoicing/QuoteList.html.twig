@@ -1,0 +1,70 @@
+<div {{ attributes }}>
+    <div class="[padding:1rem_2rem] flex items-center justify-between [border-bottom:1px_solid_var(--color-outline-variant)]">
+        <div class="search-wrap [max-width:280px]">
+            {{ ux_icon('tabler:search', {class: 'w-4 h-4'}) }}
+            <input type="search"
+                   class="form-input [padding-left:2.25rem]"
+                   placeholder="Search quotes…"
+                   value="{{ this.search }}"
+                   data-model="search"
+            >
+        </div>
+    </div>
+
+    <table class="data-table">
+        <thead>
+        <tr>
+            <th>
+                <twig:SortableHeader label="Number" field="number" :currentBy="this.sortBy" :currentDirection="this.sortDirection"/>
+            </th>
+            <th>
+                <twig:SortableHeader label="Customer" field="customer" :currentBy="this.sortBy" :currentDirection="this.sortDirection"/>
+            </th>
+            <th>
+                <twig:SortableHeader label="Issued" field="createdAt" :currentBy="this.sortBy" :currentDirection="this.sortDirection"/>
+            </th>
+            <th>
+                <twig:SortableHeader label="Valid Until" field="validUntil" :currentBy="this.sortBy" :currentDirection="this.sortDirection"/>
+            </th>
+            <th>
+                <twig:SortableHeader label="Gross" field="grossTotal" :currentBy="this.sortBy" :currentDirection="this.sortDirection"/>
+            </th>
+            <th>
+                <twig:SortableHeader label="Status" field="status" :currentBy="this.sortBy" :currentDirection="this.sortDirection"/>
+            </th>
+            <th></th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for quote in this.quotes %}
+            <tr>
+                <td class="[font-family:var(--font-mono)] text-[0.8125rem] whitespace-nowrap">
+                    <a href="{{ path('app_quote_show', {id: quote.id}) }}" class="[color:var(--color-on-surface)] [text-decoration:none] font-medium">
+                        {{ quote.number }}
+                    </a>
+                </td>
+                <td>{{ quote.customer.name }}</td>
+                <td class="[font-family:var(--font-mono)] text-[0.8125rem] [color:var(--color-on-surface-variant)]">{{ quote.issuedAt|date('d.m.Y') }}</td>
+                <td class="[font-family:var(--font-mono)] text-[0.8125rem] [color:var(--color-on-surface-variant)]">
+                    {% if quote.validUntil %}{{ quote.validUntil|date('d.m.Y') }}{% else %}—{% endif %}
+                </td>
+                <td class="[font-family:var(--font-mono)] text-[0.8125rem] font-bold">{{ quote.grossTotal|number_format(2, '.', ' ') }} {{ quote.currency }}</td>
+                <td>
+                    <span class="badge badge-{{ quote.status.color }}">{{ quote.status.value }}</span>
+                </td>
+                <td class="text-right">
+                    <a href="{{ path('app_quote_show', {id: quote.id}) }}" class="btn btn-ghost btn-sm">
+                        {{ ux_icon('tabler:pencil', {class: 'w-4 h-4'}) }}
+                    </a>
+                </td>
+            </tr>
+        {% else %}
+            <tr>
+                <td colspan="7" class="text-center [padding:3rem] [color:var(--color-on-surface-variant)]">
+                    No quotes yet.
+                </td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>

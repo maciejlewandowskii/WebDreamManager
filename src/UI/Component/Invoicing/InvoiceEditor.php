@@ -6,15 +6,23 @@ namespace App\UI\Component\Invoicing;
 
 use App\Domain\Customer\Entity\Customer;
 use App\Domain\Customer\Repository\CustomerRepositoryInterface;
-use App\Domain\Invoicing\Entity\Invoice;
+use App\Domain\Invoicing\Application\Data\InvoiceFormData;
+use App\Domain\Invoicing\Application\Pipeline\CreateInvoice\CreateInvoiceCommand;
+use App\Domain\Invoicing\Application\Pipeline\UpdateInvoice\UpdateInvoiceCommand;
 use App\Domain\Invoicing\Entity\InvoiceItem;
 use App\Domain\Invoicing\Repository\InvoiceRepositoryInterface;
 use App\Domain\Project\Entity\Project;
 use App\Domain\Project\Repository\ProjectRepositoryInterface;
+use App\Infrastructure\Pipeline\PipelineProcessor;
 use DateInterval;
 use DateTimeImmutable;
+use Symfony\Component\DependencyInjection\Attribute\AutowireIterator;
+use Symfony\Component\HttpFoundation\RedirectResponse;
+use Symfony\Component\HttpFoundation\RequestStack;
+use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\UX\LiveComponent\Attribute\AsLiveComponent;
 use Symfony\UX\LiveComponent\Attribute\LiveAction;
+use Symfony\UX\LiveComponent\Attribute\LiveArg;
 use Symfony\UX\LiveComponent\Attribute\LiveProp;
 use Symfony\UX\LiveComponent\DefaultActionTrait;
 
@@ -26,7 +34,7 @@ final class InvoiceEditor
     #[LiveProp]
     public ?string $invoiceId = null;
 
-    #[LiveProp(writable: true)]
+    #[LiveProp(writable: true, onUpdated: 'updatedCustomerId')]
     public string $customerId = '';
 
     #[LiveProp(writable: true)]
@@ -57,14 +65,19 @@ final class InvoiceEditor
     #[LiveProp(writable: true)]
     public array $items = [];
 
-    private ?Invoice $invoice = null;
-
     public function __construct(
         private readonly InvoiceRepositoryInterface $invoiceRepository,
         private readonly CustomerRepositoryInterface $customerRepository,
         private readonly ProjectRepositoryInterface $projectRepository,
+        private readonly RequestStack $requestStack,
+        private readonly UrlGeneratorInterface $router,
+        #[AutowireIterator('app.invoice.create')] private readonly iterable $createHandlers,
+        #[AutowireIterator('app.invoice.update')] private readonly iterable $updateHandlers,
     ) {
     }
+
+    #[LiveProp]
+    public bool $isReadonly = false;
 
     public function mount(?string $invoiceId = null): void
     {
@@ -72,7 +85,7 @@ final class InvoiceEditor
             $this->invoiceId = $invoiceId;
             $invoice = $this->invoiceRepository->findById($invoiceId);
             if ($invoice !== null) {
-                $this->invoice         = $invoice;
+                $this->isReadonly      = $invoice->getStatus() === \App\Domain\Invoicing\Entity\InvoiceStatus::Paid;
                 $this->customerId      = $invoice->getCustomer()->getId();
                 $this->projectId       = $invoice->getProject()?->getId() ?? '';
                 $this->issuedAt        = $invoice->getIssuedAt()->format('Y-m-d');
@@ -86,6 +99,7 @@ final class InvoiceEditor
                     static fn (InvoiceItem $i) => [
                         'description' => $i->getDescription(),
                         'quantity'    => $i->getQuantity(),
+                        'unit'        => $i->getUnit(),
                         'unitPrice'   => $i->getUnitPrice(),
                         'taxRate'     => $i->getTaxRate(),
                     ],
@@ -97,72 +111,77 @@ final class InvoiceEditor
         $today = new DateTimeImmutable();
         $this->issuedAt = $today->format('Y-m-d');
         $this->dueAt    = $today->add(new DateInterval('P30D'))->format('Y-m-d');
-        $this->items    = [['description' => '', 'quantity' => '1', 'unitPrice' => '0', 'taxRate' => '23']];
+        $this->items    = [['description' => '', 'quantity' => '1', 'unit' => 'unit', 'unitPrice' => '0', 'taxRate' => '23']];
+    }
+
+    public function updatedCustomerId(): void
+    {
+        $rate = $this->resolveHourlyRate();
+        $this->items = array_map(
+            static fn (array $item) => $item['unit'] === 'h' ? array_merge($item, ['unitPrice' => $rate]) : $item,
+            $this->items,
+        );
     }
 
     #[LiveAction]
     public function addItem(): void
     {
-        $this->items[] = ['description' => '', 'quantity' => '1', 'unitPrice' => '0', 'taxRate' => $this->defaultTaxRate];
+        $rate = $this->resolveHourlyRate();
+        $this->items[] = ['description' => '', 'quantity' => '1', 'unit' => 'h', 'unitPrice' => $rate, 'taxRate' => $this->defaultTaxRate];
+    }
+
+    private function resolveHourlyRate(): string
+    {
+        if ($this->customerId === '') {
+            return '0';
+        }
+        $customer = $this->customerRepository->findById($this->customerId);
+
+        return ($customer !== null && $customer->getHourlyRate() !== null) ? $customer->getHourlyRate() : '0';
     }
 
     #[LiveAction]
-    public function removeItem(int $index): void
+    public function removeItem(#[LiveArg] int $index): void
     {
         unset($this->items[$index]);
         $this->items = array_values($this->items);
     }
 
     #[LiveAction]
-    public function save(): void
+    public function save(): RedirectResponse
     {
-        $customer = $this->customerRepository->findById($this->customerId);
-        if ($customer === null) {
-            return;
+        if ($this->isReadonly) {
+            return new RedirectResponse($this->router->generate('app_invoice_show', ['id' => $this->invoiceId]));
         }
 
-        if ($this->invoice !== null) {
-            $invoice = $this->invoice;
+        $data                 = new InvoiceFormData();
+        $data->customerId     = $this->customerId;
+        $data->projectId      = $this->projectId;
+        $data->issuedAt       = $this->issuedAt;
+        $data->dueAt          = $this->dueAt;
+        $data->currency       = $this->currency;
+        $data->defaultTaxRate = $this->defaultTaxRate;
+        $data->notes          = $this->notes;
+        $data->paymentTerms   = $this->paymentTerms;
+        $data->bankAccount    = $this->bankAccount;
+        $data->items          = $this->items;
+
+        if ($this->invoiceId !== null) {
+            $invoice = $this->invoiceRepository->findById($this->invoiceId);
+            if ($invoice === null) {
+                return new RedirectResponse($this->router->generate('app_invoice_index'));
+            }
+            new PipelineProcessor($this->updateHandlers)->run(new UpdateInvoiceCommand($invoice, $data));
+            $invoiceId = $invoice->getId();
         } else {
-            $number  = $this->invoiceRepository->getNextNumber();
-            $invoice = new Invoice($number, $customer);
+            $command = new CreateInvoiceCommand($data);
+            new PipelineProcessor($this->createHandlers)->run($command);
+            $invoiceId = $command->result->getId();
         }
 
-        $invoice->setCustomer($customer);
-        $invoice->setCurrency($this->currency);
-        $invoice->setDefaultTaxRate($this->defaultTaxRate);
-        $invoice->setNotes($this->notes !== '' ? $this->notes : null);
-        $invoice->setPaymentTerms($this->paymentTerms !== '' ? $this->paymentTerms : null);
-        $invoice->setBankAccount($this->bankAccount !== '' ? $this->bankAccount : null);
+        $this->requestStack->getSession()->getFlashBag()->add('success', 'Invoice saved successfully.');
 
-        $issuedAt = DateTimeImmutable::createFromFormat('Y-m-d', $this->issuedAt);
-        $dueAt    = DateTimeImmutable::createFromFormat('Y-m-d', $this->dueAt);
-        if ($issuedAt !== false) {
-            $invoice->setIssuedAt($issuedAt);
-        }
-        if ($dueAt !== false) {
-            $invoice->setDueAt($dueAt);
-        }
-
-        if ($this->projectId !== '') {
-            $invoice->setProject($this->projectRepository->findById($this->projectId));
-        }
-
-        foreach ($invoice->getItems()->toArray() as $existingItem) {
-            $invoice->removeItem($existingItem);
-        }
-
-        foreach ($this->items as $i => $itemData) {
-            $item = new InvoiceItem($invoice);
-            $item->setDescription($itemData['description']);
-            $item->setQuantity($itemData['quantity']);
-            $item->setUnitPrice($itemData['unitPrice']);
-            $item->setTaxRate($itemData['taxRate']);
-            $item->setSortOrder($i);
-            $invoice->addItem($item);
-        }
-
-        $this->invoiceRepository->save($invoice);
+        return new RedirectResponse($this->router->generate('app_invoice_show', ['id' => $invoiceId]));
     }
 
     public function getNetTotal(): float

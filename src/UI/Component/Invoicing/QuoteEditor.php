@@ -6,15 +6,23 @@ namespace App\UI\Component\Invoicing;
 
 use App\Domain\Customer\Entity\Customer;
 use App\Domain\Customer\Repository\CustomerRepositoryInterface;
-use App\Domain\Invoicing\Entity\Quote;
+use App\Domain\Invoicing\Application\Data\QuoteFormData;
+use App\Domain\Invoicing\Application\Pipeline\CreateQuote\CreateQuoteCommand;
+use App\Domain\Invoicing\Application\Pipeline\UpdateQuote\UpdateQuoteCommand;
 use App\Domain\Invoicing\Entity\QuoteItem;
 use App\Domain\Invoicing\Repository\QuoteRepositoryInterface;
 use App\Domain\Project\Entity\Project;
 use App\Domain\Project\Repository\ProjectRepositoryInterface;
+use App\Infrastructure\Pipeline\PipelineProcessor;
 use DateInterval;
 use DateTimeImmutable;
+use Symfony\Component\DependencyInjection\Attribute\AutowireIterator;
+use Symfony\Component\HttpFoundation\RedirectResponse;
+use Symfony\Component\HttpFoundation\RequestStack;
+use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\UX\LiveComponent\Attribute\AsLiveComponent;
 use Symfony\UX\LiveComponent\Attribute\LiveAction;
+use Symfony\UX\LiveComponent\Attribute\LiveArg;
 use Symfony\UX\LiveComponent\Attribute\LiveProp;
 use Symfony\UX\LiveComponent\DefaultActionTrait;
 
@@ -26,7 +34,7 @@ final class QuoteEditor
     #[LiveProp]
     public ?string $quoteId = null;
 
-    #[LiveProp(writable: true)]
+    #[LiveProp(writable: true, onUpdated: 'updatedCustomerId')]
     public string $customerId = '';
 
     #[LiveProp(writable: true)]
@@ -54,12 +62,14 @@ final class QuoteEditor
     #[LiveProp(writable: true)]
     public array $items = [];
 
-    private ?Quote $quote = null;
-
     public function __construct(
         private readonly QuoteRepositoryInterface $quoteRepository,
         private readonly CustomerRepositoryInterface $customerRepository,
         private readonly ProjectRepositoryInterface $projectRepository,
+        private readonly RequestStack $requestStack,
+        private readonly UrlGeneratorInterface $router,
+        #[AutowireIterator('app.quote.create')] private readonly iterable $createHandlers,
+        #[AutowireIterator('app.quote.update')] private readonly iterable $updateHandlers,
     ) {
     }
 
@@ -69,7 +79,6 @@ final class QuoteEditor
             $this->quoteId = $quoteId;
             $quote = $this->quoteRepository->findById($quoteId);
             if ($quote !== null) {
-                $this->quote          = $quote;
                 $this->customerId     = $quote->getCustomer()->getId();
                 $this->projectId      = $quote->getProject()?->getId() ?? '';
                 $this->issuedAt       = $quote->getIssuedAt()->format('Y-m-d');
@@ -82,6 +91,7 @@ final class QuoteEditor
                     static fn (QuoteItem $i) => [
                         'description' => $i->getDescription(),
                         'quantity'    => $i->getQuantity(),
+                        'unit'        => $i->getUnit(),
                         'unitPrice'   => $i->getUnitPrice(),
                         'taxRate'     => $i->getTaxRate(),
                     ],
@@ -92,73 +102,73 @@ final class QuoteEditor
 
         $today = new DateTimeImmutable();
         $this->issuedAt   = $today->format('Y-m-d');
-        $due = $today->add(new DateInterval('P14D'));
-        $this->validUntil = $due->format('Y-m-d');
-        $this->items      = [['description' => '', 'quantity' => '1', 'unitPrice' => '0', 'taxRate' => '23']];
+        $this->validUntil = $today->add(new DateInterval('P14D'))->format('Y-m-d');
+        $this->items      = [['description' => '', 'quantity' => '1', 'unit' => 'h', 'unitPrice' => '0', 'taxRate' => '23']];
+    }
+
+    public function updatedCustomerId(): void
+    {
+        $rate = $this->resolveHourlyRate();
+        $this->items = array_map(
+            static fn (array $item) => $item['unit'] === 'h' ? array_merge($item, ['unitPrice' => $rate]) : $item,
+            $this->items,
+        );
     }
 
     #[LiveAction]
     public function addItem(): void
     {
-        $this->items[] = ['description' => '', 'quantity' => '1', 'unitPrice' => '0', 'taxRate' => $this->defaultTaxRate];
+        $rate = $this->resolveHourlyRate();
+        $this->items[] = ['description' => '', 'quantity' => '1', 'unit' => 'h', 'unitPrice' => $rate, 'taxRate' => $this->defaultTaxRate];
+    }
+
+    private function resolveHourlyRate(): string
+    {
+        if ($this->customerId === '') {
+            return '0';
+        }
+        $customer = $this->customerRepository->findById($this->customerId);
+
+        return ($customer !== null && $customer->getHourlyRate() !== null) ? $customer->getHourlyRate() : '0';
     }
 
     #[LiveAction]
-    public function removeItem(int $index): void
+    public function removeItem(#[LiveArg] int $index): void
     {
         unset($this->items[$index]);
         $this->items = array_values($this->items);
     }
 
     #[LiveAction]
-    public function save(): void
+    public function save(): RedirectResponse
     {
-        $customer = $this->customerRepository->findById($this->customerId);
-        if ($customer === null) {
-            return;
-        }
+        $data                 = new QuoteFormData();
+        $data->customerId     = $this->customerId;
+        $data->projectId      = $this->projectId;
+        $data->issuedAt       = $this->issuedAt;
+        $data->validUntil     = $this->validUntil;
+        $data->currency       = $this->currency;
+        $data->defaultTaxRate = $this->defaultTaxRate;
+        $data->notes          = $this->notes;
+        $data->introText      = $this->introText;
+        $data->items          = $this->items;
 
-        if ($this->quote !== null) {
-            $quote = $this->quote;
+        if ($this->quoteId !== null) {
+            $quote = $this->quoteRepository->findById($this->quoteId);
+            if ($quote === null) {
+                return new RedirectResponse($this->router->generate('app_quote_index'));
+            }
+            new PipelineProcessor($this->updateHandlers)->run(new UpdateQuoteCommand($quote, $data));
+            $quoteId = $quote->getId();
         } else {
-            $number = $this->quoteRepository->getNextNumber();
-            $quote  = new Quote($number, $customer);
+            $command = new CreateQuoteCommand($data);
+            new PipelineProcessor($this->createHandlers)->run($command);
+            $quoteId = $command->result->getId();
         }
 
-        $quote->setCustomer($customer);
-        $quote->setCurrency($this->currency);
-        $quote->setDefaultTaxRate($this->defaultTaxRate);
-        $quote->setNotes($this->notes !== '' ? $this->notes : null);
-        $quote->setIntroText($this->introText !== '' ? $this->introText : null);
+        $this->requestStack->getSession()->getFlashBag()->add('success', 'Quote saved successfully.');
 
-        $issuedAt   = DateTimeImmutable::createFromFormat('Y-m-d', $this->issuedAt);
-        $validUntil = DateTimeImmutable::createFromFormat('Y-m-d', $this->validUntil);
-        if ($issuedAt !== false) {
-            $quote->setIssuedAt($issuedAt);
-        }
-        if ($validUntil !== false) {
-            $quote->setValidUntil($validUntil);
-        }
-
-        if ($this->projectId !== '') {
-            $quote->setProject($this->projectRepository->findById($this->projectId));
-        }
-
-        foreach ($quote->getItems()->toArray() as $existingItem) {
-            $quote->removeItem($existingItem);
-        }
-
-        foreach ($this->items as $i => $itemData) {
-            $item = new QuoteItem($quote);
-            $item->setDescription($itemData['description']);
-            $item->setQuantity($itemData['quantity']);
-            $item->setUnitPrice($itemData['unitPrice']);
-            $item->setTaxRate($itemData['taxRate']);
-            $item->setSortOrder($i);
-            $quote->addItem($item);
-        }
-
-        $this->quoteRepository->save($quote);
+        return new RedirectResponse($this->router->generate('app_quote_show', ['id' => $quoteId]));
     }
 
     public function getNetTotal(): float

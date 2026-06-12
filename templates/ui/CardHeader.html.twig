@@ -1,0 +1,7 @@
+{% props title = null %}
+<div {{ attributes.defaults({class: 'card-header'}) }}>
+    {% if title %}
+        <div class="text-sm font-medium [color:var(--color-on-surface)]">{{ title }}</div>
+    {% endif %}
+    {% block content %}{% endblock %}
+</div>

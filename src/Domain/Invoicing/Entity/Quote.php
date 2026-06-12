@@ -5,15 +5,14 @@ declare(strict_types=1);
 namespace App\Domain\Invoicing\Entity;
 
 use App\Domain\Customer\Entity\Customer;
-use App\Domain\Invoicing\Repository\QuoteRepositoryInterface;
 use App\Domain\Project\Entity\Project;
+use App\Domain\Invoicing\Infrastructure\DoctrineQuoteRepository;
 use DateTimeImmutable;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
-use Symfony\Component\Validator\Constraints as Assert;
 
-#[ORM\Entity(repositoryClass: QuoteRepositoryInterface::class)]
+#[ORM\Entity(repositoryClass: DoctrineQuoteRepository::class)]
 #[ORM\Table(name: 'quotes')]
 #[ORM\HasLifecycleCallbacks]
 class Quote
@@ -67,6 +66,9 @@ class Quote
     #[ORM\Column(type: 'datetime_immutable')]
     private DateTimeImmutable $updatedAt;
 
+    #[ORM\Column(type: 'json', nullable: true)]
+    private ?array $itemsSnapshot = [];
+
     public function __construct(string $number, Customer $customer)
     {
         $this->number = $number;
@@ -79,9 +81,22 @@ class Quote
     }
 
     #[ORM\PreUpdate]
+    #[ORM\PrePersist]
     public function onPreUpdate(): void
     {
         $this->updatedAt = new DateTimeImmutable();
+        $this->itemsSnapshot = array_values(array_map(fn($i) => [
+            'description' => $i->getDescription(),
+            'qty' => $i->getQuantity(),
+            'unit' => $i->getUnit(),
+            'price' => $i->getUnitPrice(),
+            'taxRate' => $i->getTaxRate(),
+        ], $this->items->toArray()));
+    }
+
+    public function getItemsSnapshot(): ?array
+    {
+        return $this->itemsSnapshot;
     }
 
     public function getId(): string { return $this->id; }

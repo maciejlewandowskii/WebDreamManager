@@ -18,7 +18,7 @@ final class LoginController extends AbstractController
             return $this->redirectToRoute('app_dashboard');
         }
 
-        return $this->render('identity/login.html.twig', [
+        return $this->render('views/identity/login.html.twig', [
             'last_username' => $authenticationUtils->getLastUsername(),
             'error'         => $authenticationUtils->getLastAuthenticationError(),
         ]);

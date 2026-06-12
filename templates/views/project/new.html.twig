@@ -1,0 +1,19 @@
+<twig:Modal>
+    {{ form_start(form, {attr: {'data-turbo-frame': '_top'}}) }}
+    <div class="grid grid-cols-2 gap-4">
+        <div class="col-span-2">{{ form_row(form.name) }}</div>
+        <div>{{ form_row(form.customer) }}</div>
+        <div>{{ form_row(form.status) }}</div>
+        <div class="col-span-2">{{ form_row(form.budget) }}</div>
+        <div>{{ form_row(form.websiteUrl) }}</div>
+        <div>{{ form_row(form.githubRepository) }}</div>
+        <div class="col-span-2">{{ form_row(form.description) }}</div>
+    </div>
+    <div class="mt-6 flex justify-end gap-2">
+        <twig:Button variant="ghost" type="button" data-action="modal#close">
+            Cancel
+        </twig:Button>
+        {{ form_widget(form.save) }}
+    </div>
+    {{ form_end(form) }}
+</twig:Modal>

@@ -1,0 +1,45 @@
+{% extends 'layout.html.twig' %}
+
+{% block title %}Settings — WebDream Manager{% endblock %}
+
+{% block content %}
+    <twig:layout:PageHeader title="Settings"/>
+
+    <twig:PageContent>
+        <div class="[display:grid] [grid-template-columns:200px_1fr] [gap:2rem] [max-width:900px]">
+
+            {# --- Side nav --- #}
+            <nav class="flex flex-col [gap:0.25rem] [padding-top:0.25rem]">
+                <a href="{{ path('app_settings_profile') }}"
+                   class="sidebar-nav-item {{ section == 'profile'  ? 'active' }}">{{ ux_icon('tabler:user',         {class: 'w-4 h-4'}) }}
+                    Profile</a>
+                <a href="{{ path('app_settings_work') }}"
+                   class="sidebar-nav-item {{ section == 'work'     ? 'active' }}">{{ ux_icon('tabler:clock',        {class: 'w-4 h-4'}) }}
+                    Work</a>
+                <a href="{{ path('app_settings_security') }}"
+                   class="sidebar-nav-item {{ section == 'security' ? 'active' }}">{{ ux_icon('tabler:lock',         {class: 'w-4 h-4'}) }}
+                    Security</a>
+                <a href="{{ path('app_settings_2fa') }}"
+                   class="sidebar-nav-item {{ section == '2fa'      ? 'active' }}">{{ ux_icon('tabler:shield-check', {class: 'w-4 h-4'}) }}
+                    Two-Factor</a>
+                <a href="{{ path('app_settings_passkeys') }}"
+                   class="sidebar-nav-item {{ section == 'passkeys' ? 'active' }}">{{ ux_icon('tabler:fingerprint',  {class: 'w-4 h-4'}) }}
+                    Passkeys</a>
+            </nav>
+
+            <div>
+                {% if section == 'profile' %}
+                    {% include 'views/settings/sections/profile.html.twig' %}
+                {% elseif section == 'work' %}
+                    {% include 'views/settings/sections/work.html.twig' %}
+                {% elseif section == 'security' %}
+                    {% include 'views/settings/sections/security.html.twig' %}
+                {% elseif section == '2fa' %}
+                    {% include 'views/settings/sections/two_factor.html.twig' %}
+                {% elseif section == 'passkeys' %}
+                    {% include 'views/settings/sections/passkeys.html.twig' %}
+                {% endif %}
+            </div>
+        </div>
+    </twig:PageContent>
+{% endblock %}

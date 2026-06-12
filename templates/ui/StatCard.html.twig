@@ -1,0 +1,5 @@
+<div class="stat-card" {{ attributes }}>
+    <div class="stat-label">{{ label }}</div>
+    <div
+        class="stat-value">{% if block('value') is defined %}{{ block('value') }}{% else %}{{ value|default('') }}{% endif %}</div>
+</div>

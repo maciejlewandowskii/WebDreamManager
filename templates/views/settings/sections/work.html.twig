@@ -1,0 +1,16 @@
+<twig:Card>
+    <twig:CardHeader>
+        <div class="text-sm font-semibold [color:var(--color-on-surface)]">Work Preferences</div>
+    </twig:CardHeader>
+    <twig:CardBody>
+        {{ form_start(work_form) }}
+        {{ form_row(work_form.workingHoursPerDay) }}
+        <p class="text-[0.8125rem] [color:var(--color-on-surface-variant)] [margin-top:-0.75rem] [margin-bottom:1rem]">
+            Used to calculate expected hours in the monthly time-tracking stats.
+        </p>
+        <div class="flex [justify-content:flex-end]">
+            {{ form_row(work_form.save) }}
+        </div>
+        {{ form_end(work_form) }}
+    </twig:CardBody>
+</twig:Card>

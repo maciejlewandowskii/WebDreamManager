@@ -1,0 +1,15 @@
+{% extends 'layout.html.twig' %}
+
+{% block title %}
+    {% if invoice is defined %}Edit {{ invoice.number }}{% else %}New Invoice{% endif %} — WebDream Manager
+{% endblock %}
+
+{% block content %}
+    {% set breadcrumbs = [{label: 'Invoices', url: path('app_invoice_index')}, {label: invoice is defined ? invoice.number : 'New'}] %}
+    <twig:layout:PageHeader title="{{ invoice is defined ? invoice.number : 'New Invoice' }}"
+                            :breadcrumbs="breadcrumbs"/>
+
+    <twig:PageContent>
+        {{ component('InvoiceEditor', {invoiceId: invoice is defined ? invoice.id : null}) }}
+    </twig:PageContent>
+{% endblock %}

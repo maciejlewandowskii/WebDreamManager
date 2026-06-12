@@ -4,7 +4,8 @@ declare(strict_types=1);
 
 namespace App\Domain\Identity\Entity;
 
-use App\Domain\Identity\Repository\UserRepositoryInterface;
+use App\Domain\Authorization\Entity\Role;
+use App\Domain\Identity\Infrastructure\DoctrineUserRepository;
 use Doctrine\ORM\Mapping as ORM;
 use Scheb\TwoFactorBundle\Model\Email\TwoFactorInterface as EmailTwoFactorInterface;
 use Scheb\TwoFactorBundle\Model\Totp\TotpConfiguration;
@@ -15,7 +16,7 @@ use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Validator\Constraints as Assert;
 use DateTimeImmutable;
 
-#[ORM\Entity(repositoryClass: UserRepositoryInterface::class)]
+#[ORM\Entity(repositoryClass: DoctrineUserRepository::class)]
 #[ORM\Table(name: 'users')]
 #[ORM\HasLifecycleCallbacks]
 class User implements UserInterface, PasswordAuthenticatedUserInterface, EmailTwoFactorInterface, TotpTwoFactorInterface
@@ -48,6 +49,9 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, EmailTw
     #[ORM\Column(type: 'string', nullable: true)]
     private ?string $avatarUrl = null;
 
+    #[ORM\Column(type: 'smallint')]
+    private int $workingHoursPerDay = 8;
+
     // 2FA — Email
     #[ORM\Column(type: 'boolean')]
     private bool $emailAuthEnabled = false;
@@ -65,6 +69,16 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, EmailTw
     // 2FA — Backup codes
     #[ORM\Column(type: 'json')]
     private array $backupCodes = [];
+
+    #[ORM\ManyToOne(targetEntity: Role::class)]
+    #[ORM\JoinColumn(nullable: true, onDelete: 'SET NULL')]
+    private ?Role $role = null;
+
+    #[ORM\Column(type: 'string', length: 64, nullable: true, unique: true)]
+    private ?string $setupToken = null;
+
+    #[ORM\Column(type: 'datetime_immutable', nullable: true)]
+    private ?DateTimeImmutable $setupTokenExpiresAt = null;
 
     #[ORM\Column(type: 'datetime_immutable')]
     private DateTimeImmutable $createdAt;
@@ -159,6 +173,16 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, EmailTw
         $this->avatarUrl = $avatarUrl;
     }
 
+    public function getWorkingHoursPerDay(): int
+    {
+        return $this->workingHoursPerDay;
+    }
+
+    public function setWorkingHoursPerDay(int $hours): void
+    {
+        $this->workingHoursPerDay = $hours;
+    }
+
     public function eraseCredentials(): void
     {
     }
@@ -249,6 +273,47 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, EmailTw
     public function getBackupCodes(): array
     {
         return $this->backupCodes;
+    }
+
+    public function getRole(): ?Role
+    {
+        return $this->role;
+    }
+
+    public function setRole(?Role $role): void
+    {
+        $this->role = $role;
+    }
+
+    public function getSetupToken(): ?string
+    {
+        return $this->setupToken;
+    }
+
+    public function generateSetupToken(): string
+    {
+        $this->setupToken = bin2hex(random_bytes(32));
+        $this->setupTokenExpiresAt = new DateTimeImmutable('+7 days');
+
+        return $this->setupToken;
+    }
+
+    public function clearSetupToken(): void
+    {
+        $this->setupToken = null;
+        $this->setupTokenExpiresAt = null;
+    }
+
+    public function isSetupTokenValid(): bool
+    {
+        return $this->setupToken !== null
+            && $this->setupTokenExpiresAt !== null
+            && $this->setupTokenExpiresAt > new DateTimeImmutable();
+    }
+
+    public function isPendingSetup(): bool
+    {
+        return $this->setupToken !== null;
     }
 
     public function getCreatedAt(): DateTimeImmutable

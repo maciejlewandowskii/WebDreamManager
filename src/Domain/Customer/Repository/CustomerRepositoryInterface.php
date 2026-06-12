@@ -11,10 +11,10 @@ interface CustomerRepositoryInterface
     public function findById(string $id): ?Customer;
 
     /** @return Customer[] */
-    public function findAll(): array;
+    public function findAll(string $sortBy = 'name', string $sortDirection = 'ASC'): array;
 
     /** @return Customer[] */
-    public function search(string $query): array;
+    public function search(string $query, string $sortBy = 'name', string $sortDirection = 'ASC'): array;
 
     public function save(Customer $customer, bool $flush = true): void;
 

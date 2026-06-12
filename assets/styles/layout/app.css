@@ -1,0 +1,20 @@
+.app-layout {
+    display: flex;
+}
+
+.app-sidebar {
+    width: 240px;
+    min-height: 100dvh;
+    background-color: var(--color-surface-container-low);
+    border-right: 1px solid var(--color-outline-variant);
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
+}
+
+.app-main {
+    flex: 1;
+    min-height: 100dvh;
+    background-color: var(--color-surface);
+    overflow-x: hidden;
+}

@@ -15,6 +15,15 @@ interface UserRepositoryInterface
     /** @return User[] */
     public function findAll(): array;
 
+    /** @return User[] */
+    public function findFiltered(
+        ?string $search,
+        string $sortBy = 'fullName',
+        string $sortDirection = 'ASC',
+    ): array;
+
+    public function findBySetupToken(string $token): ?User;
+
     public function save(User $user, bool $flush = true): void;
 
     public function remove(User $user, bool $flush = true): void;

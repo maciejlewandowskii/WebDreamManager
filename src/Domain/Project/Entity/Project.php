@@ -5,12 +5,12 @@ declare(strict_types=1);
 namespace App\Domain\Project\Entity;
 
 use App\Domain\Customer\Entity\Customer;
-use App\Domain\Project\Repository\ProjectRepositoryInterface;
+use App\Domain\Project\Infrastructure\DoctrineProjectRepository;
 use DateTimeImmutable;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
 
-#[ORM\Entity(repositoryClass: ProjectRepositoryInterface::class)]
+#[ORM\Entity(repositoryClass: DoctrineProjectRepository::class)]
 #[ORM\Table(name: 'projects')]
 #[ORM\HasLifecycleCallbacks]
 class Project

@@ -1,0 +1,116 @@
+<twig:Modal body_class="min-w-[600px]">
+
+    <form method="get" action="{{ path('app_invoice_from_time_tracking') }}"
+          data-turbo-frame="modal"
+          class="{{ selectedProject ? 'mb-5' : 'mb-0' }}">
+        <label class="form-label">Project</label>
+        <select name="projectId" class="form-select"
+                onchange="this.form.requestSubmit()"
+                autofocus>
+            <option value="">— Choose a project —</option>
+            {% for project in projects %}
+                <option
+                    value="{{ project.id }}" {{ selectedProject and selectedProject.id == project.id ? 'selected' }}>
+                    {{ project.customer.name }} / {{ project.name }}
+                </option>
+            {% endfor %}
+        </select>
+    </form>
+
+    {% if selectedProject is not null %}
+
+        <form method="post" action="{{ path('app_invoice_from_time_tracking_create') }}"
+              data-turbo-frame="_top">
+            <input type="hidden" name="_token" value="{{ csrf_token('from_time_tracking') }}">
+            <input type="hidden" name="projectId" value="{{ selectedProject.id }}">
+
+            {% if records|length == 0 %}
+                <p class="[color:var(--color-on-surface-variant)] text-sm [padding:0.75rem_0]">
+                    No uninvoiced time records for this project.
+                </p>
+            {% else %}
+                <div class="flex justify-between items-center [margin-bottom:0.5rem]">
+                        <span class="text-[0.8125rem] font-medium">
+                            {{ ux_icon('tabler:clock', {class: 'inline h-4 w-4 align-middle'}) }}
+                            {{ records|length }} uninvoiced record(s)
+                        </span>
+                    {% if selectedProject.customer.hourlyRate %}
+                        <span class="text-xs [color:var(--color-on-surface-variant)]">
+                            Rate: {{ selectedProject.customer.hourlyRate }} {{ selectedProject.customer.hourlyRateCurrency }}/h
+                        </span>
+                    {% endif %}
+                </div>
+
+                <table class="w-full border-collapse text-[0.8125rem] [margin-bottom:1rem]">
+                    <thead>
+                    <tr class="[border-bottom:1px_solid_var(--color-outline-variant)]">
+                        <th class="[padding:0.5rem_0.75rem] text-left font-medium [color:var(--color-on-surface-variant)] [width:2.25rem]">
+                            <input type="checkbox" class="form-checkbox" id="select-all"
+                                   onchange="document.querySelectorAll('.record-check').forEach(c => c.checked = this.checked)">
+                        </th>
+                        <th class="[padding:0.5rem_0.25rem] text-left font-medium [color:var(--color-on-surface-variant)]">
+                            Title
+                        </th>
+                        <th class="[padding:0.5rem_0.25rem] text-right font-medium [color:var(--color-on-surface-variant)]">
+                            Date
+                        </th>
+                        <th class="[padding:0.5rem_0.75rem_0.5rem_0.25rem] text-right font-medium [color:var(--color-on-surface-variant)]">
+                            Hours
+                        </th>
+                    </tr>
+                    </thead>
+                    <tbody>
+
+                    {% set totalHours = 0 %}
+                    {% for record in records %}
+                        {% set totalHours = totalHours + record.spentHours %}
+                        <tr class="[border-bottom:1px_solid_var(--color-outline-variant)]">
+                            <td class="[padding:0.5rem_0.75rem]">
+                                <input type="checkbox"
+                                       class="form-checkbox record-check"
+                                       name="recordIds[]"
+                                       value="{{ record.id }}"
+                                       checked>
+                            </td>
+                            <td class="[padding:0.5rem_0.25rem]">
+                                <div class="font-medium">{{ record.title }}</div>
+                                {% if record.description %}
+                                    <div
+                                        class="text-xs [color:var(--color-on-surface-variant)] [margin-top:2px]">{{ record.description|slice(0, 80) }}{% if record.description|length > 80 %}…{% endif %}</div>
+                                {% endif %}
+                            </td>
+                            <td class="[padding:0.5rem_0.25rem] text-right [color:var(--color-on-surface-variant)]">
+                                {{ record.date|date('d.m.Y') }}
+                            </td>
+                            <td class="[padding:0.5rem_0.75rem_0.5rem_0.25rem] text-right [font-family:var(--font-mono,_monospace)]">
+                                {{ record.spentHours }}h
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                    <tfoot>
+                    <tr class="[background:var(--color-surface-container)]">
+                        <td colspan="3" class="[padding:0.5rem_0.75rem] font-semibold text-[0.8125rem]">Total</td>
+                        <td class="[padding:0.5rem_0.75rem_0.5rem_0.25rem] text-right [font-family:var(--font-mono,_monospace)] font-semibold">
+                            {{ totalHours|number_format(2) }}h
+                        </td>
+                    </tr>
+                    </tfoot>
+                </table>
+
+                <div class="flex [justify-content:flex-end] [gap:0.5rem]">
+                    <twig:Button variant="ghost" type="button" data-action="modal#close">
+                        Cancel
+                    </twig:Button>
+                    <twig:Button variant="primary" type="submit">
+                        {{ ux_icon('tabler:file-invoice', {class: 'w-4 h-4'}) }}
+                        Generate Invoice
+                    </twig:Button>
+                </div>
+            {% endif %}
+
+        </form>
+
+    {% endif %}
+
+</twig:Modal>

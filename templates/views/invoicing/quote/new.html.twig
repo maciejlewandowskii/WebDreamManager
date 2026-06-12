@@ -1,0 +1,12 @@
+{% extends 'layout.html.twig' %}
+
+{% block title %}New Quote — WebDream Manager{% endblock %}
+
+{% block content %}
+    {% set breadcrumbs = [{label: 'Quotes', url: path('app_quote_index')}, {label: 'New'}] %}
+    <twig:layout:PageHeader title="New Quote" :breadcrumbs="breadcrumbs"/>
+
+    <twig:PageContent>
+        {{ component('QuoteEditor') }}
+    </twig:PageContent>
+{% endblock %}

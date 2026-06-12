@@ -37,7 +37,7 @@ use Symfony\Component\Config\Loader\ParamConfigurator as Param;
  * @psalm-type ArgumentsType = list<mixed>|array<string, mixed>
  * @psalm-type CallType = array<string, ArgumentsType>|array{0:string, 1?:ArgumentsType, 2?:bool}|array{method:string, arguments?:ArgumentsType, returns_clone?:bool}
  * @psalm-type TagsType = list<string|array<string, array<string, mixed>>> // arrays inside the list must have only one element, with the tag name as the key
- * @psalm-type CallbackType = string|array{0:string|ReferenceConfigurator,1:string}|\Closure|ReferenceConfigurator
+ * @psalm-type CallbackType = string|array{0:string|ReferenceConfigurator,1:string}|\Closure|ReferenceConfigurator|ExpressionConfigurator
  * @psalm-type DeprecationType = array{package: string, version: string, message?: string}
  * @psalm-type DefaultsType = array{
  *     public?: bool,
@@ -1336,10 +1336,6 @@ use Symfony\Component\Config\Loader\ParamConfigurator as Param;
  *     },
  *     default_transport?: scalar|Param|null, // Default: "default"
  * }
- * @psalm-type ReactConfig = array{
- *     controllers_path?: scalar|Param|null, // The path to the directory where React controller components are stored - relevant only when using symfony/asset-mapper. // Default: "%kernel.project_dir%/assets/react/controllers"
- *     name_glob?: list<scalar|Param|null>,
- * }
  * @psalm-type SchebTwoFactorConfig = array{
  *     persister?: scalar|Param|null, // Default: "scheb_two_factor.persister.doctrine"
  *     model_manager_name?: scalar|Param|null, // Default: null
@@ -1386,6 +1382,73 @@ use Symfony\Component\Config\Loader\ParamConfigurator as Param;
  *     postcss_config_file?: scalar|Param|null, // Path to PostCSS config file which is passed to the Tailwind CLI // Default: null
  *     strict_mode?: bool|Param|null, // When enabled, an exception will be thrown if there are no built assets (default: false in `test` env, true otherwise) // Default: null
  * }
+ * @psalm-type TwigExtraConfig = array{
+ *     cache?: bool|array{
+ *         enabled?: bool|Param, // Default: false
+ *     },
+ *     html?: bool|array{
+ *         enabled?: bool|Param, // Default: false
+ *     },
+ *     markdown?: bool|array{
+ *         enabled?: bool|Param, // Default: false
+ *     },
+ *     intl?: bool|array{
+ *         enabled?: bool|Param, // Default: false
+ *     },
+ *     cssinliner?: bool|array{
+ *         enabled?: bool|Param, // Default: false
+ *     },
+ *     inky?: bool|array{
+ *         enabled?: bool|Param, // Default: false
+ *     },
+ *     string?: bool|array{
+ *         enabled?: bool|Param, // Default: true
+ *     },
+ *     commonmark?: array{
+ *         renderer?: array{ // Array of options for rendering HTML.
+ *             block_separator?: scalar|Param|null,
+ *             inner_separator?: scalar|Param|null,
+ *             soft_break?: scalar|Param|null,
+ *         },
+ *         html_input?: "strip"|"allow"|"escape"|Param, // How to handle HTML input.
+ *         allow_unsafe_links?: bool|Param, // Remove risky link and image URLs by setting this to false. // Default: true
+ *         max_nesting_level?: int|Param, // The maximum nesting level for blocks. // Default: 9223372036854775807
+ *         max_delimiters_per_line?: int|Param, // The maximum number of strong/emphasis delimiters per line. // Default: 9223372036854775807
+ *         slug_normalizer?: array{ // Array of options for configuring how URL-safe slugs are created.
+ *             instance?: mixed,
+ *             max_length?: int|Param, // Default: 255
+ *             unique?: mixed,
+ *         },
+ *         commonmark?: array{ // Array of options for configuring the CommonMark core extension.
+ *             enable_em?: bool|Param, // Default: true
+ *             enable_strong?: bool|Param, // Default: true
+ *             use_asterisk?: bool|Param, // Default: true
+ *             use_underscore?: bool|Param, // Default: true
+ *             unordered_list_markers?: list<scalar|Param|null>,
+ *         },
+ *         ...<string, mixed>
+ *     },
+ * }
+ * @psalm-type ReactConfig = array{
+ *     controllers_path?: scalar|Param|null, // The path to the directory where React controller components are stored - relevant only when using symfony/asset-mapper. // Default: "%kernel.project_dir%/assets/react/controllers"
+ *     name_glob?: list<scalar|Param|null>,
+ * }
+ * @psalm-type SimpleThingsEntityAuditConfig = array{
+ *     connection?: scalar|Param|null, // Default: "default"
+ *     entity_manager?: scalar|Param|null, // Default: "default"
+ *     audited_entities?: list<scalar|Param|null>,
+ *     global_ignore_columns?: list<scalar|Param|null>,
+ *     table_prefix?: scalar|Param|null, // Default: ""
+ *     table_suffix?: scalar|Param|null, // Default: "_audit"
+ *     revision_field_name?: scalar|Param|null, // Default: "rev"
+ *     revision_type_field_name?: scalar|Param|null, // Default: "revtype"
+ *     revision_table_name?: scalar|Param|null, // Default: "revisions"
+ *     disable_foreign_keys?: scalar|Param|null, // Default: false
+ *     revision_id_field_type?: scalar|Param|null, // Default: "integer"
+ *     service?: array{
+ *         username_callable?: scalar|Param|null, // Default: "simplethings_entityaudit.username_callable.token_storage"
+ *     },
+ * }
  * @psalm-type ConfigType = array{
  *     imports?: ImportsConfig,
  *     parameters?: ParametersConfig,
@@ -1400,9 +1463,11 @@ use Symfony\Component\Config\Loader\ParamConfigurator as Param;
  *     live_component?: LiveComponentConfig,
  *     ux_icons?: UxIconsConfig,
  *     turbo?: TurboConfig,
- *     react?: ReactConfig,
  *     scheb_two_factor?: SchebTwoFactorConfig,
  *     symfonycasts_tailwind?: SymfonycastsTailwindConfig,
+ *     twig_extra?: TwigExtraConfig,
+ *     react?: ReactConfig,
+ *     simple_things_entity_audit?: SimpleThingsEntityAuditConfig,
  *     "when@dev"?: array{
  *         imports?: ImportsConfig,
  *         parameters?: ParametersConfig,
@@ -1419,10 +1484,12 @@ use Symfony\Component\Config\Loader\ParamConfigurator as Param;
  *         live_component?: LiveComponentConfig,
  *         ux_icons?: UxIconsConfig,
  *         turbo?: TurboConfig,
- *         react?: ReactConfig,
  *         scheb_two_factor?: SchebTwoFactorConfig,
  *         maker?: MakerConfig,
  *         symfonycasts_tailwind?: SymfonycastsTailwindConfig,
+ *         twig_extra?: TwigExtraConfig,
+ *         react?: ReactConfig,
+ *         simple_things_entity_audit?: SimpleThingsEntityAuditConfig,
  *     },
  *     "when@prod"?: array{
  *         imports?: ImportsConfig,
@@ -1438,9 +1505,11 @@ use Symfony\Component\Config\Loader\ParamConfigurator as Param;
  *         live_component?: LiveComponentConfig,
  *         ux_icons?: UxIconsConfig,
  *         turbo?: TurboConfig,
- *         react?: ReactConfig,
  *         scheb_two_factor?: SchebTwoFactorConfig,
  *         symfonycasts_tailwind?: SymfonycastsTailwindConfig,
+ *         twig_extra?: TwigExtraConfig,
+ *         react?: ReactConfig,
+ *         simple_things_entity_audit?: SimpleThingsEntityAuditConfig,
  *     },
  *     "when@test"?: array{
  *         imports?: ImportsConfig,
@@ -1457,9 +1526,11 @@ use Symfony\Component\Config\Loader\ParamConfigurator as Param;
  *         live_component?: LiveComponentConfig,
  *         ux_icons?: UxIconsConfig,
  *         turbo?: TurboConfig,
- *         react?: ReactConfig,
  *         scheb_two_factor?: SchebTwoFactorConfig,
  *         symfonycasts_tailwind?: SymfonycastsTailwindConfig,
+ *         twig_extra?: TwigExtraConfig,
+ *         react?: ReactConfig,
+ *         simple_things_entity_audit?: SimpleThingsEntityAuditConfig,
  *     },
  *     ...<string, ExtensionType|array{ // extra keys must follow the when@%env% pattern or match an extension alias
  *         imports?: ImportsConfig,

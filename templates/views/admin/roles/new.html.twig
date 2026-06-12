@@ -1,0 +1,71 @@
+<twig:Modal>
+    {{ form_start(form, {attr: {'data-turbo-frame': '_top'}}) }}
+
+    <div class="[margin-bottom:1.25rem]">
+        {{ form_row(form.name) }}
+    </div>
+
+    <div class="form-label [margin-bottom:0.5rem]">Permissions</div>
+
+    {% set permissionsById = {} %}
+    {% for child in form.permissions %}
+        {% set permissionsById = permissionsById|merge({(child.vars.value): child}) %}
+    {% endfor %}
+
+    {% set standardCols = ['List', 'View', 'Create', 'Update', 'Delete'] %}
+
+    <table class="perm-matrix">
+        <thead>
+        <tr>
+            <th class="perm-matrix__resource">Resource</th>
+            {% for col in standardCols %}
+                <th class="perm-col-center">{{ col }}</th>
+            {% endfor %}
+            <th class="perm-col-extras">Additional</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for groupName, groupPerms in permissionGroups %}
+            <tr>
+                <td class="perm-matrix__resource">{{ groupName }}</td>
+                {% for col in standardCols %}
+                    {% set found = null %}
+                    {% for p in groupPerms %}
+                        {% if p.actionLabel() == col %}
+                            {% set found = p %}
+                        {% endif %}
+                    {% endfor %}
+                    <td class="perm-matrix__cell">
+                        {% if found is not null and permissionsById[found.value] is defined %}
+                            <label class="perm-matrix__check-wrap">
+                                {{ form_widget(permissionsById[found.value], {attr: {class: 'form-checkbox'}}) }}
+                            </label>
+                        {% else %}
+                            <span class="perm-matrix__empty">—</span>
+                        {% endif %}
+                    </td>
+                {% endfor %}
+                <td class="perm-matrix__extras-cell">
+                    {% for p in groupPerms %}
+                        {% if p.actionLabel() not in standardCols %}
+                            {% if permissionsById[p.value] is defined %}
+                                <label class="perm-matrix__extra-item">
+                                    {{ form_widget(permissionsById[p.value], {attr: {class: 'form-checkbox'}}) }}
+                                    <span>{{ p.actionLabel() }}</span>
+                                </label>
+                            {% endif %}
+                        {% endif %}
+                    {% endfor %}
+                </td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+    <div class="flex justify-end [gap:0.5rem]">
+        <twig:Button variant="ghost" type="button" data-action="modal#close">Cancel</twig:Button>
+        <twig:Button variant="primary" type="submit">Create Role</twig:Button>
+    </div>
+
+    {{ form_end(form) }}
+</twig:Modal>

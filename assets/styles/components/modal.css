@@ -1,0 +1,140 @@
+#app-modal {
+    border: 1px solid var(--color-outline-variant);
+    border-radius: var(--radius, 0) !important;
+    padding: 0;
+    max-width: 720px;
+    width: 90%;
+    background: var(--color-surface-container);
+    color: var(--color-on-surface);
+    box-shadow: 0 24px 48px rgba(0, 0, 0, 0.4);
+    position: fixed !important;
+    top: 50% !important;
+    left: 50% !important;
+    transform: translate(-50%, -50%) !important;
+    margin: 0 !important;
+    opacity: 1;
+    transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+@starting-style {
+    #app-modal[open] {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(0.95) !important;
+    }
+}
+
+#app-modal.closing {
+    animation: modal-out 0.18s ease forwards;
+}
+
+@keyframes modal-out {
+    from { opacity: 1; transform: translate(-50%, -50%) scale(1) !important; }
+    to   { opacity: 0; transform: translate(-50%, -50%) scale(0.95) !important; }
+}
+
+#app-modal::backdrop {
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(2px);
+    opacity: 1;
+    transition: opacity 0.2s ease;
+}
+
+@starting-style {
+    #app-modal[open]::backdrop {
+        opacity: 0;
+    }
+}
+
+.modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.25rem 1.5rem;
+    border-bottom: 1px solid var(--color-outline-variant);
+}
+
+.modal-title {
+    font-size: 1rem;
+    font-weight: 600;
+    margin: 0;
+}
+
+.modal-close {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 2rem;
+    height: 2rem;
+    background: transparent;
+    border: none;
+    color: var(--color-on-surface-variant);
+    cursor: pointer;
+    border-radius: 0 !important;
+    font-size: 1.25rem;
+    line-height: 1;
+    padding: 0;
+    transition: color 0.15s, background 0.15s;
+}
+
+.modal-close:hover {
+    color: var(--color-on-surface);
+    background: var(--color-surface-container-high);
+}
+
+#app-modal .card {
+    box-shadow: none;
+    border: none;
+    max-width: none !important;
+    margin: 0;
+}
+
+#app-modal .card-body {
+    padding: 1.5rem;
+}
+
+#app-modal turbo-frame {
+    display: block;
+}
+
+.modal-body {
+    padding: 1.5rem;
+}
+
+/* Reusable small dialog (e.g. passkey name prompt) */
+.app-dialog {
+    border: 1px solid var(--color-outline-variant);
+    border-radius: var(--radius, 0) !important;
+    padding: 0;
+    max-width: 420px;
+    width: 90%;
+    background: var(--color-surface-container);
+    color: var(--color-on-surface);
+    box-shadow: 0 24px 48px rgba(0, 0, 0, 0.4);
+    position: fixed !important;
+    top: 50% !important;
+    left: 50% !important;
+    transform: translate(-50%, -50%) !important;
+    margin: 0 !important;
+    opacity: 1;
+    transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+@starting-style {
+    .app-dialog[open] {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(0.95) !important;
+    }
+}
+
+.app-dialog::backdrop {
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(2px);
+    opacity: 1;
+    transition: opacity 0.2s ease;
+}
+
+@starting-style {
+    .app-dialog[open]::backdrop {
+        opacity: 0;
+    }
+}

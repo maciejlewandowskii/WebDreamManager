@@ -1,0 +1,66 @@
+*, *::before, *::after {
+    border-radius: 0 !important;
+}
+
+body {
+    background-color: var(--color-surface);
+    color: var(--color-on-background);
+    font-family: var(--font-body);
+    -webkit-font-smoothing: antialiased;
+}
+
+::selection {
+    background-color: var(--color-primary);
+    color: var(--color-on-primary);
+}
+
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: #000; }
+::-webkit-scrollbar-thumb { background: var(--color-outline-variant); }
+
+.turbo-progress-bar {
+    height: 2px;
+    background-color: var(--color-primary);
+}
+
+/* View Transitions */
+@view-transition {
+    navigation: auto;
+}
+
+.app-main {
+    view-transition-name: main-content;
+}
+
+::view-transition-old(main-content) {
+    animation: 100ms cubic-bezier(0.4, 0, 1, 1) both fade-out;
+}
+
+::view-transition-new(main-content) {
+    animation: 200ms cubic-bezier(0, 0, 0.2, 1) 100ms both fade-in;
+}
+
+::view-transition-old(root),
+::view-transition-new(root) {
+    animation: none;
+}
+
+@keyframes fade-in {
+    from {
+        opacity: 0;
+        transform: translateY(8px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes fade-out {
+    from {
+        opacity: 1;
+    }
+    to {
+        opacity: 0;
+    }
+}

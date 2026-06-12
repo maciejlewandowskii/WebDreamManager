@@ -12,13 +12,13 @@ interface ProjectRepositoryInterface
     public function findById(string $id): ?Project;
 
     /** @return Project[] */
-    public function findAll(): array;
+    public function findAll(string $sortBy = 'createdAt', string $sortDirection = 'DESC'): array;
 
     /** @return Project[] */
     public function findByCustomer(Customer $customer): array;
 
     /** @return Project[] */
-    public function search(string $query): array;
+    public function search(string $query, string $sortBy = 'name', string $sortDirection = 'ASC'): array;
 
     public function save(Project $project, bool $flush = true): void;
 

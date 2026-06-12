@@ -1,79 +1,213 @@
 <div {{ attributes }}>
-    <div style="padding: 1rem 2rem; display: flex; gap: 0.75rem; align-items: center; border-bottom: 1px solid var(--color-outline-variant); flex-wrap: wrap;">
-        <div class="search-wrap" style="flex: 1; max-width: 280px;">
-            {{ ux_icon('tabler:search', {class: 'w-4 h-4'}) }}
-            <input type="search"
-                   class="form-input"
-                   placeholder="Search records…"
-                   value="{{ search }}"
-                   data-model="search"
-                   style="padding-left: 2.25rem;">
+    {% set today = this.todayStats %}
+    {% set monthly = this.monthlyStats %}
+    {% set canViewAll = this.canViewAll() %}
+    {% set canManageAll = this.canManageAll() %}
+
+    {# Stats bar #}
+    <div
+        class="[display:grid] [grid-template-columns:repeat(4,_1fr)] [gap:0] [border-bottom:1px_solid_var(--color-outline-variant)]">
+        <div class="[padding:1rem_1.5rem] [border-right:1px_solid_var(--color-outline-variant)]">
+            <div
+                class="[font-size:0.7rem] [text-transform:uppercase] [letter-spacing:0.05em] [color:var(--color-on-surface-variant)] [margin-bottom:0.25rem]">
+                Today — Spent
+            </div>
+            <div
+                class="[font-size:1.25rem] font-semibold [font-family:var(--font-mono)]">{{ today.spent|number_format(2) }}
+                h
+            </div>
         </div>
-        <label style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.875rem; color: var(--color-on-surface-variant); cursor: pointer;">
-            <input type="checkbox"
-                   {{ uninvoicedOnly ? 'checked' }}
-                   data-model="uninvoicedOnly">
-            Uninvoiced only
-        </label>
+        <div class="[padding:1rem_1.5rem] [border-right:1px_solid_var(--color-outline-variant)]">
+            <div
+                class="[font-size:0.7rem] [text-transform:uppercase] [letter-spacing:0.05em] [color:var(--color-on-surface-variant)] [margin-bottom:0.25rem]">
+                Today — Estimated
+            </div>
+            <div
+                class="[font-size:1.25rem] font-semibold [font-family:var(--font-mono)]">{{ today.estimated|number_format(2) }}
+                h
+            </div>
+        </div>
+        <div class="[padding:1rem_1.5rem] [border-right:1px_solid_var(--color-outline-variant)]">
+            <div
+                class="[font-size:0.7rem] [text-transform:uppercase] [letter-spacing:0.05em] [color:var(--color-on-surface-variant)] [margin-bottom:0.25rem]">
+                This Month — Logged
+            </div>
+            <div
+                class="[font-size:1.25rem] font-semibold [font-family:var(--font-mono)]">{{ monthly.spent|number_format(2) }}
+                h
+            </div>
+        </div>
+        <div class="[padding:1rem_1.5rem]">
+            {% if monthlyBudget is not null %}
+                <div
+                    class="[font-size:0.7rem] [text-transform:uppercase] [letter-spacing:0.05em] [color:var(--color-on-surface-variant)] [margin-bottom:0.25rem]">
+                    Monthly Budget
+                </div>
+                <div class="[font-size:1.25rem] font-semibold [font-family:var(--font-mono)]">
+                    {{ monthlyBudget|number_format(0) }}h
+                </div>
+            {% else %}
+                <div
+                    class="[font-size:0.7rem] [text-transform:uppercase] [letter-spacing:0.05em] [color:var(--color-on-surface-variant)] [margin-bottom:0.25rem]">
+                    This Month — Expected
+                </div>
+                <div class="[font-size:1.25rem] font-semibold [font-family:var(--font-mono)]">
+                    {{ monthly.expected }}h
+                    <span class="text-xs [font-weight:400] [color:var(--color-on-surface-variant)]">({{ monthly.days }}d)</span>
+                </div>
+            {% endif %}
+        </div>
     </div>
+
+    {# Filters #}
+    {# Filters #}
+    <div
+        class="[padding:1rem_2rem] flex [gap:0.75rem] items-center justify-between [border-bottom:1px_solid_var(--color-outline-variant)] [flex-wrap:wrap]">
+        
+        <div class="flex items-center gap-4">
+            <div class="search-wrap [max-width:280px]">
+                {{ ux_icon('tabler:search', {class: 'w-4 h-4'}) }}
+                <input type="search"
+                       class="form-input [padding-left:2.25rem]"
+                       placeholder="Search records…"
+                       value="{{ this.search }}"
+                       data-model="search"
+                >
+            </div>
+            <label class="toggle-label">
+                <input type="checkbox"
+                       class="toggle-input"
+                    {{ this.uninvoicedOnly ? 'checked' }}
+                       data-model="uninvoicedOnly">
+                <span class="toggle-track"></span>
+                <span class="text-sm [color:var(--color-on-surface-variant)]">Uninvoiced only</span>
+            </label>
+        </div>
+
+        <div class="flex items-center gap-2">
+            {% if this.viewMode == 'per_day' %}
+                {% set dateValue = this.currentDate ?: 'now'|date('Y-m-d') %}
+                {% set isToday = dateValue == 'now'|date('Y-m-d') %}
+                
+                <div class="flex items-center gap-1 mr-2">
+                    <button data-action="live#action" data-live-action-param="prevDay" class="btn btn-ghost btn-sm px-2">{{ ux_icon('tabler:chevron-left') }}</button>
+                    
+                    <div class="relative flex items-center justify-center min-w-[100px] hover:bg-[var(--color-surface-variant)] rounded px-3 py-1.5 cursor-pointer overflow-hidden transition-colors group">
+                        <span class="text-sm font-medium font-mono {% if isToday %}text-[var(--color-primary)]{% endif %} pointer-events-none group-hover:text-[var(--color-on-surface)]">
+                            {{ isToday ? 'Today' : dateValue|date('d.m.Y') }}
+                        </span>
+                        <input type="date" data-model="currentDate" value="{{ dateValue }}" 
+                               class="absolute inset-0 w-full h-full opacity-0 cursor-pointer m-0 p-0 border-none"
+                               onclick="try{this.showPicker();}catch(e){}">
+                    </div>
+
+                    <button data-action="live#action" data-live-action-param="nextDay" class="btn btn-ghost btn-sm px-2">{{ ux_icon('tabler:chevron-right') }}</button>
+                </div>
+            {% endif %}
+
+            <div class="flex items-center gap-1 bg-[var(--color-surface-variant)] p-1 rounded-md">
+                <button data-action="live#action" data-live-action-param="setViewMode" data-live-mode-param="all" class="cursor-pointer px-3 py-1 text-sm rounded transition-colors {{ this.viewMode == 'all' ? 'bg-[var(--color-surface)] shadow-sm font-medium' : 'text-[var(--color-on-surface-variant)] hover:text-[var(--color-on-surface)]' }}">All</button>
+                <button data-action="live#action" data-live-action-param="setViewMode" data-live-mode-param="per_day" class="cursor-pointer px-3 py-1 text-sm rounded transition-colors {{ this.viewMode == 'per_day' ? 'bg-[var(--color-surface)] shadow-sm font-medium' : 'text-[var(--color-on-surface-variant)] hover:text-[var(--color-on-surface)]' }}">Per Day</button>
+            </div>
+        </div>
+    </div>
+
+
 
     <table class="data-table">
         <thead>
-            <tr>
-                <th>Date</th>
-                <th>Title</th>
-                <th>Project</th>
-                <th>Estimated</th>
-                <th>Spent</th>
-                <th>GitHub</th>
-                <th>Invoiced</th>
-                <th></th>
-            </tr>
+        <tr>
+            <th>
+                <twig:SortableHeader label="Date" field="date" :currentBy="this.sortBy"
+                                     :currentDirection="this.sortDirection"/>
+            </th>
+            <th>
+                <twig:SortableHeader label="Title" field="title" :currentBy="this.sortBy"
+                                     :currentDirection="this.sortDirection"/>
+            </th>
+            <th>
+                <twig:SortableHeader label="Project" field="project" :currentBy="this.sortBy"
+                                     :currentDirection="this.sortDirection"/>
+            </th>
+            {% if canViewAll %}
+                <th>
+                    <twig:SortableHeader label="Worker" field="worker" :currentBy="this.sortBy"
+                                         :currentDirection="this.sortDirection"/>
+                </th>
+            {% endif %}
+            <th>
+                <twig:SortableHeader label="Estimated" field="estimatedHours" :currentBy="this.sortBy"
+                                     :currentDirection="this.sortDirection"/>
+            </th>
+            <th>
+                <twig:SortableHeader label="Spent" field="spentHours" :currentBy="this.sortBy"
+                                     :currentDirection="this.sortDirection"/>
+            </th>
+            <th>
+                <twig:SortableHeader label="Invoiced" field="invoiced" :currentBy="this.sortBy"
+                                     :currentDirection="this.sortDirection"/>
+            </th>
+            <th></th>
+        </tr>
         </thead>
         <tbody>
-            {% for record in records %}
-                <tr>
-                    <td style="font-family: var(--font-mono); font-size: 0.8125rem; white-space: nowrap;">
-                        {{ record.date|date('d.m.Y') }}
-                    </td>
+        {% for record in this.records %}
+            {% set worker = record.worker %}
+            <tr>
+                <td class="[font-family:var(--font-mono)] text-[0.8125rem] whitespace-nowrap">
+                    {{ record.date|date('d.m.Y') }}
+                </td>
+                <td>
+                    <div class="font-medium">{{ record.title }}</div>
+                    {% if record.description %}
+                        <div
+                            class="text-xs [color:var(--color-on-surface-variant)] [margin-top:0.125rem]">{{ record.description|u.truncate(80, '…') }}</div>
+                    {% endif %}
+                </td>
+                <td class="[color:var(--color-on-surface-variant)]">{{ record.project.name }}</td>
+                {% if canViewAll %}
                     <td>
-                        <div style="font-weight: 500;">{{ record.title }}</div>
-                        {% if record.description %}
-                            <div style="font-size: 0.75rem; color: var(--color-on-surface-variant); margin-top: 0.125rem;">{{ record.description|u.truncate(80, '…') }}</div>
-                        {% endif %}
+                        {% set workerName = worker.fullName %}
+                        <div class="flex items-center" data-tooltip="{{ workerName }}">
+                            {% if worker.avatarUrl %}
+                                <img src="{{ worker.avatarUrl }}" alt="{{ workerName }}"
+                                     class="user-avatar [width:1.5rem] [height:1.5rem] [font-size:0.55rem]">
+                            {% else %}
+                                {% set initials = workerName|split(' ')|map(w => w|first|upper)|slice(0, 2)|join('') %}
+                                <div class="user-avatar user-avatar-initials [width:1.5rem] [height:1.5rem] [font-size:0.55rem]">{{ initials }}</div>
+                            {% endif %}
+                        </div>
                     </td>
-                    <td style="color: var(--color-on-surface-variant);">{{ record.project.name }}</td>
-                    <td style="font-family: var(--font-mono); font-size: 0.8125rem; color: var(--color-on-surface-variant);">
-                        {% if record.estimatedHours %}{{ record.estimatedHours }}h{% else %}—{% endif %}
-                    </td>
-                    <td style="font-family: var(--font-mono); font-size: 0.8125rem;">{{ record.spentHours }}h</td>
-                    <td>
-                        {% if record.githubIssueId %}
-                            <span class="badge badge-outline">#{{ record.githubIssueId }}</span>
-                        {% else %}
-                            <span style="color: var(--color-outline);">—</span>
-                        {% endif %}
-                    </td>
-                    <td>
-                        {% if record.invoiced %}
-                            <span class="badge badge-success">yes</span>
-                        {% else %}
-                            <span class="badge badge-default">no</span>
-                        {% endif %}
-                    </td>
-                    <td style="text-align: right;">
-                        <a href="{{ path('app_time_record_edit', {id: record.id}) }}" class="btn btn-ghost btn-sm">
+                {% endif %}
+                <td class="[font-family:var(--font-mono)] text-[0.8125rem] [color:var(--color-on-surface-variant)]">
+                    {% if record.estimatedHours %}{{ record.estimatedHours }}h{% else %}—{% endif %}
+                </td>
+                <td class="[font-family:var(--font-mono)] text-[0.8125rem]">{{ record.spentHours }}h</td>
+                <td>
+                    {% if record.invoiced %}
+                        <span class="badge badge-success">yes</span>
+                    {% else %}
+                        <span class="badge badge-default">no</span>
+                    {% endif %}
+                </td>
+                <td class="text-right">
+                    {% set isOwn = record.worker.id == app.user.id %}
+                    {% if isOwn or canManageAll %}
+                        <a href="{{ path('app_time_edit', {id: record.id}) }}" class="btn btn-ghost btn-sm"
+                           data-turbo-frame="modal" data-modal-title="Edit Time Record">
                             {{ ux_icon('tabler:pencil', {class: 'w-4 h-4'}) }}
                         </a>
-                    </td>
-                </tr>
-            {% else %}
-                <tr>
-                    <td colspan="8" style="text-align: center; padding: 3rem; color: var(--color-on-surface-variant);">
-                        No time records found.
-                    </td>
-                </tr>
-            {% endfor %}
+                    {% endif %}
+                </td>
+            </tr>
+        {% else %}
+            <tr>
+                <td colspan="{{ canViewAll ? 8 : 7 }}"
+                    class="text-center [padding:3rem] [color:var(--color-on-surface-variant)]">
+                    No time records found.
+                </td>
+            </tr>
+        {% endfor %}
         </tbody>
     </table>
 </div>

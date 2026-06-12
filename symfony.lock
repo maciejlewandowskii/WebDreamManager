@@ -72,6 +72,30 @@
             "config/routes/scheb_2fa.yaml"
         ]
     },
+    "sonata-project/entity-audit-bundle": {
+        "version": "1.23",
+        "recipe": {
+            "repo": "github.com/symfony/recipes-contrib",
+            "branch": "main",
+            "version": "1.1",
+            "ref": "15582fec4b2a012e8e9020916e567c641ea4a039"
+        },
+        "files": [
+            "config/routes/sonata_entity_audit.yaml"
+        ]
+    },
+    "stripe/stripe-php": {
+        "version": "20.2",
+        "recipe": {
+            "repo": "github.com/symfony/recipes-contrib",
+            "branch": "main",
+            "version": "19.0",
+            "ref": "d6829c693e3927a8972c7671d74a1a5c505712b0"
+        },
+        "files": [
+            "config/packages/stripe.yaml"
+        ]
+    },
     "symfony/asset-mapper": {
         "version": "7.4",
         "recipe": {
@@ -315,7 +339,7 @@
         ]
     },
     "symfony/ux-react": {
-        "version": "2.36",
+        "version": "3.1",
         "recipe": {
             "repo": "github.com/symfony/recipes",
             "branch": "main",
@@ -389,5 +413,8 @@
         "files": [
             "config/packages/symfonycasts_tailwind.yaml"
         ]
+    },
+    "twig/extra-bundle": {
+        "version": "v3.24.0"
     }
 }

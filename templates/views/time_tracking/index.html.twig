@@ -1,0 +1,16 @@
+{% extends 'layout.html.twig' %}
+
+{% block title %}Time Tracking — WebDream Manager{% endblock %}
+
+{% block content %}
+    {% set actions %}
+        <twig:Button variant="primary" href="{{ path('app_time_new') }}" data-turbo-frame="modal"
+                     data-modal-title="Log Time" data-controller="dynamic-time-log-url">
+            {{ ux_icon('tabler:plus', {class: 'w-4 h-4'}) }}
+            Log Time
+        </twig:Button>
+    {% endset %}
+    <twig:layout:PageHeader title="Time Tracking" :actions="actions"/>
+
+    {{ component('TimeRecordList') }}
+{% endblock %}

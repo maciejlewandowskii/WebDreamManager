@@ -6,12 +6,12 @@ namespace App\Domain\TimeTracking\Entity;
 
 use App\Domain\Identity\Entity\User;
 use App\Domain\Project\Entity\Project;
-use App\Domain\TimeTracking\Repository\TimeRecordRepositoryInterface;
+use App\Domain\TimeTracking\Infrastructure\DoctrineTimeRecordRepository;
 use DateTimeImmutable;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
 
-#[ORM\Entity(repositoryClass: TimeRecordRepositoryInterface::class)]
+#[ORM\Entity(repositoryClass: DoctrineTimeRecordRepository::class)]
 #[ORM\Table(name: 'time_records')]
 #[ORM\HasLifecycleCallbacks]
 class TimeRecord

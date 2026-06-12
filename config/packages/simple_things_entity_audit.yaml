@@ -1,0 +1,4 @@
+simple_things_entity_audit:
+    audited_entities:
+        - App\Domain\Invoicing\Entity\Invoice
+        - App\Domain\Invoicing\Entity\Quote

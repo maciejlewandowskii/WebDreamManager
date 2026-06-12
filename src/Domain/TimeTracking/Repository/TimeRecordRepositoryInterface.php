@@ -28,8 +28,32 @@ interface TimeRecordRepositoryInterface
     /** @return TimeRecord[] */
     public function findUninvoicedByProject(Project $project): array;
 
-    /** @return TimeRecord[] */
-    public function findFiltered(?string $search, ?Project $project, bool $uninvoicedOnly = false): array;
+    /**
+     * @param string[] $visibleProjectIds Project IDs where records from any worker are visible
+     * @return TimeRecord[]
+     */
+    public function findFiltered(
+        ?string $search,
+        ?Project $project,
+        bool $uninvoicedOnly = false,
+        string $sortBy = 'date',
+        string $sortDirection = 'DESC',
+        ?User $workerFilter = null,
+        array $visibleProjectIds = [],
+        ?\DateTimeImmutable $dateFilter = null,
+    ): array;
+
+    /** @return array{spent: float, estimated: float} */
+    public function sumHoursByDate(DateTimeImmutable $date): array;
+
+    /** @return array{spent: float} */
+    public function sumHoursByMonth(int $year, int $month): array;
+
+    /** @return array{spent: float, estimated: float} */
+    public function sumHoursByDateForUser(DateTimeImmutable $date, User $user): array;
+
+    /** @return array{spent: float} */
+    public function sumHoursByMonthForUser(int $year, int $month, User $user): array;
 
     public function save(TimeRecord $record, bool $flush = true): void;
 

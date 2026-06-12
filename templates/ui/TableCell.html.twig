@@ -1,0 +1,6 @@
+<td
+    class="{% if mono|default(false) %}font-mono {% endif %}{% if small|default(false) %}text-[0.8125rem] {% endif %}{% if muted|default(false) %}text-[var(--color-on-surface-variant)] {% endif %}{% if nowrap|default(false) %}whitespace-nowrap {% endif %}{% if bold|default(false) %}font-medium{% endif %}"
+    {{ attributes }}
+>
+    {% block content %}{% endblock %}
+</td>

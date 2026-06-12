@@ -1,0 +1,148 @@
+{% extends 'layout.html.twig' %}
+
+{% block title %}{{ project.name }} — WebDream Manager{% endblock %}
+
+{% block content %}
+    {% set breadcrumbs = [
+        {label: 'Projects', url: path('app_project_index')},
+        {label: project.customer.name, url: path('app_customer_show', {id: project.customer.id})},
+        {label: project.name}
+    ] %}
+    {% set actions %}
+        <twig:Button variant="primary" size="sm" href="{{ path('app_project_files', {id: project.id}) }}">
+            {{ ux_icon('tabler:folder', {class: 'w-4 h-4'}) }}
+            Files
+        </twig:Button>
+        <twig:Button variant="secondary" size="sm" href="{{ path('app_project_edit', {id: project.id}) }}"
+                     data-turbo-frame="modal" data-modal-title="Edit Project">
+            {{ ux_icon('tabler:pencil', {class: 'w-4 h-4'}) }}
+            Edit
+        </twig:Button>
+    {% endset %}
+    <twig:layout:PageHeader title="{{ project.name }}" :breadcrumbs="breadcrumbs" :actions="actions"/>
+
+    <twig:PageContent>
+        <div class="[display:grid] [grid-template-columns:1fr_2fr] [gap:1.5rem]">
+
+            <div>
+                <twig:Card>
+                    <twig:CardHeader title="Details"/>
+                    <twig:CardBody class="flex flex-col [gap:1rem]">
+                        <twig:PropertyItem label="Customer">
+                            <a href="{{ path('app_customer_show', {id: project.customer.id}) }}"
+                               class="[color:var(--color-on-surface)] [text-decoration:none] font-medium hover:underline">{{ project.customer.name }}</a>
+                        </twig:PropertyItem>
+                        <twig:PropertyItem label="Status">
+                            {{ project.status.value }}
+                        </twig:PropertyItem>
+                        {% if project.websiteUrl %}
+                            <twig:PropertyItem label="Website">
+                                <a href="{{ project.websiteUrl }}" target="_blank" rel="noopener"
+                                   class="[color:var(--color-primary)] [text-decoration:none] hover:underline [word-break:break-all]">{{ project.websiteUrl }}</a>
+                            </twig:PropertyItem>
+                        {% endif %}
+                        {% if project.githubRepository %}
+                            <twig:PropertyItem label="GitHub" is_mono="true">
+                                {{ project.githubRepository }}
+                            </twig:PropertyItem>
+                        {% endif %}
+                        {% if project.budget %}
+                            <twig:PropertyItem label="Monthly Budget" is_mono="true">
+                                {{ project.budget|number_format(0, '.', ' ') }}h
+                            </twig:PropertyItem>
+                        {% endif %}
+                        {% if project.dueDate %}
+                            <twig:PropertyItem label="Due Date" is_mono="true">
+                                {{ project.dueDate|date('d.m.Y') }}
+                            </twig:PropertyItem>
+                        {% endif %}
+                        {% if project.description %}
+                            <twig:PropertyItem label="Description">
+                                {{ project.description }}
+                            </twig:PropertyItem>
+                        {% endif %}
+                    </twig:CardBody>
+                </twig:Card>
+            </div>
+
+            <div class="flex flex-col [gap:1rem]">
+                <twig:Card>
+                    <twig:CardHeader title="Time Records"
+                                     class="flex items-center justify-between">
+                        <twig:Button variant="ghost" size="sm" href="{{ path('app_time_new', {project: project.id}) }}"
+                                     data-turbo-frame="modal" data-modal-title="Log Time" data-controller="dynamic-time-log-url">
+                            {{ ux_icon('tabler:plus', {class: 'w-4 h-4'}) }} Log Time
+                        </twig:Button>
+                    </twig:CardHeader>
+                    {{ component('TimeRecordList', {monthlyBudget: project.budget}) }}
+                </twig:Card>
+
+                {% if is_granted('project.assign_members') %}
+                    <twig:Card>
+                        <twig:CardHeader title="Team Members" class="flex items-center justify-between">
+                            <twig:Button variant="ghost" size="sm"
+                                         href="{{ path('app_project_member_add', {id: project.id}) }}"
+                                         data-turbo-frame="modal" data-modal-title="Add Member">
+                                {{ ux_icon('tabler:user-plus', {class: 'w-4 h-4'}) }} Add Member
+                            </twig:Button>
+                        </twig:CardHeader>
+                        {% if members is not empty %}
+                            <table class="data-table">
+                                <thead>
+                                <tr>
+                                    <th>Member</th>
+                                    <th>Permissions</th>
+                                    <th></th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                {% for member in members %}
+                                    <tr>
+                                        <td>
+                                            <div class="flex items-center [gap:0.5rem]">
+                                                {% if member.user.avatarUrl %}
+                                                    <img src="{{ member.user.avatarUrl }}"
+                                                         alt="{{ member.user.fullName }}"
+                                                         class="w-7 h-7 rounded-full object-cover">
+                                                {% else %}
+                                                    {% set initials = member.user.fullName|split(' ')|map(w => w|first|upper)|slice(0, 2)|join('') %}
+                                                    <div class="w-7 h-7 rounded-full flex items-center justify-center text-xs font-semibold
+                                                                [background:var(--color-primary-container)] [color:var(--color-on-primary-container)]">
+                                                        {{ initials }}
+                                                    </div>
+                                                {% endif %}
+                                                <span class="text-sm font-medium">{{ member.user.fullName }}</span>
+                                            </div>
+                                        </td>
+                                        <td class="text-sm [color:var(--color-on-surface-variant)]">
+                                            {{ member.permissions|length }}
+                                            permission{{ member.permissions|length != 1 ? 's' }}
+                                        </td>
+                                        <td class="text-right">
+                                            <form method="post"
+                                                  action="{{ path('app_project_member_remove', {id: project.id, memberId: member.id}) }}"
+                                                  onsubmit="return confirm('Remove {{ member.user.fullName }} from this project?')">
+                                                <input type="hidden" name="_token"
+                                                       value="{{ csrf_token('remove_member_' ~ member.id) }}">
+                                                <button type="submit"
+                                                        class="btn btn-ghost btn-sm [color:var(--color-error)]"
+                                                        title="Remove member">
+                                                    {{ ux_icon('tabler:user-minus', {class: 'w-4 h-4'}) }}
+                                                </button>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                                </tbody>
+                            </table>
+                        {% else %}
+                            <div class="[padding:1.5rem] text-center text-sm [color:var(--color-on-surface-variant)]">
+                                No team members assigned to this project.
+                            </div>
+                        {% endif %}
+                    </twig:Card>
+                {% endif %}
+            </div>
+        </div>
+    </twig:PageContent>
+{% endblock %}

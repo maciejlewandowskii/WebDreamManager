@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Infrastructure\External\Sms;
 
-use App\Domain\Communications\Port\SmsSenderInterface;
+use App\Infrastructure\Communications\Port\SmsSenderInterface;
 
 final class StubSmsSender implements SmsSenderInterface
 {

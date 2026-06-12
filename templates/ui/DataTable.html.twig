@@ -1,0 +1,10 @@
+<table class="data-table" {{ attributes }}>
+    {% if block('head') is defined and block('head') is not empty %}
+        <thead>
+        <tr>{{ block('head') }}</tr>
+        </thead>
+    {% endif %}
+    <tbody>
+    {% block content %}{% endblock %}
+    </tbody>
+</table>

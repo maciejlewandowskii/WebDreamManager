@@ -1,0 +1,11 @@
+{% set isActive = currentBy == field %}
+{% set icon = isActive ? (currentDirection == 'ASC' ? 'tabler:chevron-up' : 'tabler:chevron-down') : 'tabler:selector' %}
+
+<button type="button"
+        data-action="live#action"
+        data-live-action-param="sortBy"
+        data-live-field-param="{{ field }}"
+        class="inline-flex cursor-pointer items-center gap-1 whitespace-nowrap font-semibold">
+    <span class="whitespace-nowrap">{{ label }}</span>
+    {{ ux_icon(icon, {class: 'h-3 w-3 shrink-0'}) }}
+</button>

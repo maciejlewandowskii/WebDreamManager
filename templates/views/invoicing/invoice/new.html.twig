@@ -1,0 +1,12 @@
+{% extends 'layout.html.twig' %}
+
+{% block title %}New Invoice — WebDream Manager{% endblock %}
+
+{% block content %}
+    {% set breadcrumbs = [{label: 'Invoices', url: path('app_invoice_index')}, {label: 'New'}] %}
+    <twig:layout:PageHeader title="New Invoice" :breadcrumbs="breadcrumbs"/>
+
+    <twig:PageContent>
+        {{ component('InvoiceEditor') }}
+    </twig:PageContent>
+{% endblock %}

@@ -1,0 +1,2 @@
+{% set variant = variant is defined ? variant : 'default' %}
+<span class="badge badge-{{ variant }}" {{ attributes }}>{{ block('content') }}</span>

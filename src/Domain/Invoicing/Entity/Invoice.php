@@ -5,15 +5,14 @@ declare(strict_types=1);
 namespace App\Domain\Invoicing\Entity;
 
 use App\Domain\Customer\Entity\Customer;
-use App\Domain\Invoicing\Repository\InvoiceRepositoryInterface;
 use App\Domain\Project\Entity\Project;
+use App\Domain\Invoicing\Infrastructure\DoctrineInvoiceRepository;
 use DateTimeImmutable;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
-use Symfony\Component\Validator\Constraints as Assert;
 
-#[ORM\Entity(repositoryClass: InvoiceRepositoryInterface::class)]
+#[ORM\Entity(repositoryClass: DoctrineInvoiceRepository::class)]
 #[ORM\Table(name: 'invoices')]
 #[ORM\HasLifecycleCallbacks]
 class Invoice
@@ -59,6 +58,12 @@ class Invoice
     #[ORM\Column(type: 'string', length: 200, nullable: true)]
     private ?string $bankAccount = null;
 
+    #[ORM\Column(type: 'string', length: 100, nullable: true)]
+    private ?string $stripeSessionId = null;
+
+    #[ORM\Column(type: 'string', length: 100, unique: true, nullable: true)]
+    private ?string $paymentToken = null;
+
     /** @var Collection<int, InvoiceItem> */
     #[ORM\OneToMany(targetEntity: InvoiceItem::class, mappedBy: 'invoice', cascade: ['persist', 'remove'], orphanRemoval: true)]
     #[ORM\OrderBy(['sortOrder' => 'ASC'])]
@@ -69,6 +74,9 @@ class Invoice
 
     #[ORM\Column(type: 'datetime_immutable')]
     private DateTimeImmutable $updatedAt;
+
+    #[ORM\Column(type: 'json', nullable: true)]
+    private ?array $itemsSnapshot = [];
 
     public function __construct(string $number, Customer $customer)
     {
@@ -82,9 +90,22 @@ class Invoice
     }
 
     #[ORM\PreUpdate]
+    #[ORM\PrePersist]
     public function onPreUpdate(): void
     {
         $this->updatedAt = new DateTimeImmutable();
+        $this->itemsSnapshot = array_values(array_map(fn($i) => [
+            'description' => $i->getDescription(),
+            'qty' => $i->getQuantity(),
+            'unit' => $i->getUnit(),
+            'price' => $i->getUnitPrice(),
+            'taxRate' => $i->getTaxRate(),
+        ], $this->items->toArray()));
+    }
+
+    public function getItemsSnapshot(): ?array
+    {
+        return $this->itemsSnapshot;
     }
 
     public function getId(): string
@@ -233,6 +254,26 @@ class Invoice
     public function getGrossTotal(): float
     {
         return $this->getNetTotal() + $this->getTaxTotal();
+    }
+
+    public function getStripeSessionId(): ?string
+    {
+        return $this->stripeSessionId;
+    }
+
+    public function setStripeSessionId(?string $stripeSessionId): void
+    {
+        $this->stripeSessionId = $stripeSessionId;
+    }
+
+    public function getPaymentToken(): ?string
+    {
+        return $this->paymentToken;
+    }
+
+    public function setPaymentToken(string $paymentToken): void
+    {
+        $this->paymentToken = $paymentToken;
     }
 
     public function getCreatedAt(): DateTimeImmutable

@@ -23,6 +23,13 @@ interface QuoteRepositoryInterface
     /** @return Quote[] */
     public function findAll(): array;
 
+    /** @return Quote[] */
+    public function findFiltered(
+        ?string $search,
+        string $sortBy = 'createdAt',
+        string $sortDirection = 'DESC',
+    ): array;
+
     public function getNextNumber(): string;
 
     public function save(Quote $quote, bool $flush = true): void;
