@@ -1,0 +1,62 @@
+<twig:Card>
+    <twig:CardHeader>
+        <div class="text-sm font-semibold [color:var(--color-on-surface)]">Notification Preferences</div>
+    </twig:CardHeader>
+    <twig:CardBody>
+        <p class="text-sm [color:var(--color-on-surface-variant)] [margin-bottom:1.5rem]">
+            Customize how and when you receive notifications across the platform. Some channels might not be supported for certain event types.
+        </p>
+
+        <form method="post" action="{{ path('app_settings_notifications_save') }}">
+            <div class="flex flex-col [gap:1.5rem] [margin-bottom:2rem]">
+                {% for rule in rules %}
+                    {% set event = rule.eventName %}
+                    {% set title = event == 'user.created' ? 'Teammate Registration' :
+                                   event == 'invoice.paid'   ? 'Invoice Paid' :
+                                   event == 'invoice.sent'   ? 'Invoice Issued' : event|title %}
+                    {% set desc  = event == 'user.created' ? 'Receive updates when a new teammate setup is completed.' :
+                                   event == 'invoice.paid'   ? 'Get notified when a customer marks or completes invoice payment.' :
+                                   event == 'invoice.sent'   ? 'Get notified when invoices are sent out to clients.' : 'Receive notifications for ' ~ event ~ ' events.' %}
+                    {% set icon  = event == 'user.created' ? 'tabler:user-plus' :
+                                   event == 'invoice.paid'   ? 'tabler:cash-banknote' :
+                                   event == 'invoice.sent'   ? 'tabler:mail-forward' : 'tabler:bell' %}
+
+                    <div class="flex items-start justify-between [padding-bottom:1.75rem] [border-bottom:1px_solid_var(--color-outline-variant)] last:[border-bottom:none] last:[padding-bottom:0]">
+                        <div class="flex [gap:1rem] flex-1">
+                            <div class="w-10 h-10 rounded-lg flex items-center justify-center [background:var(--color-surface-variant)] [color:var(--color-primary)] shrink-0 [margin-top:2px]">
+                                {{ ux_icon(icon, {class: 'w-5 h-5'}) }}
+                            </div>
+                            <div class="flex flex-col">
+                                <span class="text-sm font-semibold [color:var(--color-on-surface)]">{{ title }}</span>
+                                <span class="text-xs [color:var(--color-on-surface-variant)] [margin-top:0.125rem]">{{ desc }}</span>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center [gap:1.5rem] shrink-0 [margin-top:6px]">
+                            {% for channel in channels %}
+                                {% set isSupported = rule.hasChannel(channel) %}
+                                {% set userEnabled = preferences[event] is defined ? channel.value in preferences[event] : isSupported %}
+
+                                <label class="flex items-center [gap:0.5rem] [cursor:pointer] {% if not isSupported %}[opacity:0.4] [cursor:not-allowed]{% endif %}">
+                                    <input type="checkbox"
+                                           name="prefs[{{ event }}][]"
+                                           value="{{ channel.value }}"
+                                           class="form-checkbox"
+                                           {% if userEnabled and isSupported %}checked{% endif %}
+                                           {% if not isSupported %}disabled{% endif %}>
+                                    <span class="text-xs font-medium [color:var(--color-on-surface-variant)]">{{ channel.label() }}</span>
+                                </label>
+                            {% endfor %}
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+
+            <div class="flex [justify-content:flex-end] [margin-top:1.5rem]">
+                <twig:Button variant="primary" type="submit">
+                    Save Preferences
+                </twig:Button>
+            </div>
+        </form>
+    </twig:CardBody>
+</twig:Card>

@@ -9,7 +9,8 @@ scheb_two_factor:
         sender_email: '%env(MAILER_FROM)%'
         sender_name: 'WebDream Manager'
         digits: 6
-        template: identity/two_factor/email.html.twig
+        template: '@SchebTwoFactor/Authentication/form.html.twig'
+        mailer: App\Infrastructure\External\Email\TwoFactorEmailMailer
 
     security_tokens:
         - Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken

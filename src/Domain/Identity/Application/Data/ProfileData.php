@@ -10,12 +10,14 @@ final class ProfileData
 {
     public string $fullName = '';
     public string $email = '';
+    public ?string $phone = null;
 
     public static function fromUser(User $user): self
     {
         $data = new self();
         $data->fullName = $user->getFullName();
         $data->email    = $user->getEmail();
+        $data->phone    = $user->getPhone();
 
         return $data;
     }
@@ -24,5 +26,6 @@ final class ProfileData
     {
         $user->setFullName($this->fullName);
         $user->setEmail($this->email);
+        $user->setPhone($this->phone);
     }
 }

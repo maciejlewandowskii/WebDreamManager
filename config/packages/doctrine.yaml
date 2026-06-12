@@ -47,6 +47,18 @@ doctrine:
                 dir: '%kernel.project_dir%/src/Domain/Authorization/Entity'
                 prefix: 'App\Domain\Authorization\Entity'
                 alias: Authorization
+            Notifications:
+                type: attribute
+                is_bundle: false
+                dir: '%kernel.project_dir%/src/Domain/Notifications/Entity'
+                prefix: 'App\Domain\Notifications\Entity'
+                alias: Notifications
+            System:
+                type: attribute
+                is_bundle: false
+                dir: '%kernel.project_dir%/src/Domain/System/Entity'
+                prefix: 'App\Domain\System\Entity'
+                alias: System
 
 when@test:
     doctrine:

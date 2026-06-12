@@ -54,6 +54,30 @@ final class DoctrineUserRepository extends ServiceEntityRepository implements Us
             ->getResult();
     }
 
+    public function findActive(): array
+    {
+        return $this->createQueryBuilder('u')
+            ->leftJoin('u.role', 'r')
+            ->addSelect('r')
+            ->where('u.isActive = true')
+            ->orderBy('u.fullName', 'ASC')
+            ->getQuery()
+            ->getResult();
+    }
+
+    public function findActiveWithPermission(string $permission): array
+    {
+        return $this->createQueryBuilder('u')
+            ->innerJoin('u.role', 'r')
+            ->addSelect('r')
+            ->where('u.isActive = true')
+            ->andWhere("r.permissions LIKE :perm")
+            ->setParameter('perm', '%"' . $permission . '"%')
+            ->orderBy('u.fullName', 'ASC')
+            ->getQuery()
+            ->getResult();
+    }
+
     public function findFiltered(
         ?string $search,
         string $sortBy = 'fullName',

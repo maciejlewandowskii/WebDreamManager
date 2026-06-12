@@ -63,10 +63,21 @@ final class AccountSetupController extends AbstractController
             }
         } elseif ($step === 2) {
             $fullName = trim((string) $request->request->get('fullName', ''));
+            $phone = trim((string) $request->request->get('phone', ''));
+            if ($phone === '') {
+                $phone = null;
+            }
+
             if (mb_strlen($fullName) < 2) {
                 $errors['fullName'] = 'Full name must be at least 2 characters.';
-            } else {
+            }
+            if ($phone !== null && mb_strlen($phone) > 50) {
+                $errors['phone'] = 'Phone number cannot exceed 50 characters.';
+            }
+
+            if (empty($errors)) {
                 $user->setFullName($fullName);
+                $user->setPhone($phone);
                 $this->userRepository->save($user);
             }
         } elseif ($step === 3) {

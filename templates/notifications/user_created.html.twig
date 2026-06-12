@@ -1,0 +1,24 @@
+{% extends 'email/layout.html.twig' %}
+
+{% block email_header %}
+    <p style="margin:0;font-size:0.7rem;text-transform:uppercase;letter-spacing:0.08em;color:#71717a;">New User Created</p>
+{% endblock %}
+
+{% block email_body %}
+    <p style="margin:0 0 1rem 0;">A new user account has been created in WebDream Manager.</p>
+
+    <table class="summary-table" style="width:100%;border-collapse:collapse;margin-bottom:1.5rem;">
+        <tr>
+            <td style="padding:0.625rem 0;color:#71717a;border-bottom:1px solid #27272a;">Name</td>
+            <td style="padding:0.625rem 0;text-align:right;border-bottom:1px solid #27272a;">{{ user.fullName }}</td>
+        </tr>
+        <tr>
+            <td style="padding:0.625rem 0;color:#71717a;">Email</td>
+            <td style="padding:0.625rem 0;text-align:right;font-family:monospace;">{{ user.email }}</td>
+        </tr>
+    </table>
+{% endblock %}
+
+{% block email_footer %}
+    WebDream Manager — Automated Notification
+{% endblock %}

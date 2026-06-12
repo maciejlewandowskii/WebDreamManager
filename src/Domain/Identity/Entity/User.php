@@ -6,6 +6,7 @@ namespace App\Domain\Identity\Entity;
 
 use App\Domain\Authorization\Entity\Role;
 use App\Domain\Identity\Infrastructure\DoctrineUserRepository;
+use App\Infrastructure\Security\TwoFactor\Sms\SmsTwoFactorInterface;
 use Doctrine\ORM\Mapping as ORM;
 use Scheb\TwoFactorBundle\Model\Email\TwoFactorInterface as EmailTwoFactorInterface;
 use Scheb\TwoFactorBundle\Model\Totp\TotpConfiguration;
@@ -19,7 +20,7 @@ use DateTimeImmutable;
 #[ORM\Entity(repositoryClass: DoctrineUserRepository::class)]
 #[ORM\Table(name: 'users')]
 #[ORM\HasLifecycleCallbacks]
-class User implements UserInterface, PasswordAuthenticatedUserInterface, EmailTwoFactorInterface, TotpTwoFactorInterface
+class User implements UserInterface, PasswordAuthenticatedUserInterface, EmailTwoFactorInterface, TotpTwoFactorInterface, SmsTwoFactorInterface
 {
     #[ORM\Id]
     #[ORM\Column(type: 'uuid', unique: true)]
@@ -48,6 +49,9 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, EmailTw
 
     #[ORM\Column(type: 'string', nullable: true)]
     private ?string $avatarUrl = null;
+
+    #[ORM\Column(type: 'string', length: 50, nullable: true)]
+    private ?string $phone = null;
 
     #[ORM\Column(type: 'smallint')]
     private int $workingHoursPerDay = 8;
@@ -85,6 +89,20 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, EmailTw
 
     #[ORM\Column(type: 'datetime_immutable')]
     private DateTimeImmutable $updatedAt;
+
+    #[ORM\Column(type: 'json', nullable: true)]
+    private ?array $notificationPreferences = null;
+
+    // 2FA — SMS
+    #[ORM\Column(type: 'boolean')]
+    private bool $smsAuthEnabled = false;
+
+    #[ORM\Column(type: 'string', length: 6, nullable: true)]
+    private ?string $smsAuthCode = null;
+
+    // Google OAuth
+    #[ORM\Column(type: 'text', nullable: true)]
+    private ?string $googleRefreshToken = null;
 
     public function __construct(string $email, string $fullName)
     {
@@ -171,6 +189,16 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, EmailTw
     public function setAvatarUrl(?string $avatarUrl): void
     {
         $this->avatarUrl = $avatarUrl;
+    }
+
+    public function getPhone(): ?string
+    {
+        return $this->phone;
+    }
+
+    public function setPhone(?string $phone): void
+    {
+        $this->phone = $phone;
     }
 
     public function getWorkingHoursPerDay(): int
@@ -324,5 +352,81 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, EmailTw
     public function getUpdatedAt(): DateTimeImmutable
     {
         return $this->updatedAt;
+    }
+
+    public function getNotificationPreferences(): ?array
+    {
+        return $this->notificationPreferences;
+    }
+
+    public function setNotificationPreferences(?array $preferences): void
+    {
+        $this->notificationPreferences = $preferences;
+    }
+
+    /**
+     * @param string $eventName
+     * @param \App\Domain\Notifications\Entity\NotificationChannelType $channel
+     * @param \App\Domain\Notifications\Entity\NotificationChannelType[] $defaultChannels
+     */
+    // --- SMS 2FA ---
+
+    public function isSmsAuthEnabled(): bool
+    {
+        return $this->smsAuthEnabled;
+    }
+
+    public function setSmsAuthEnabled(bool $enabled): void
+    {
+        $this->smsAuthEnabled = $enabled;
+    }
+
+    public function getSmsAuthRecipient(): ?string
+    {
+        return $this->phone;
+    }
+
+    public function getSmsAuthCode(): ?string
+    {
+        return $this->smsAuthCode;
+    }
+
+    public function setSmsAuthCode(string $code): void
+    {
+        $this->smsAuthCode = $code;
+    }
+
+    // --- Google OAuth ---
+
+    public function getGoogleRefreshToken(): ?string
+    {
+        return $this->googleRefreshToken;
+    }
+
+    public function setGoogleRefreshToken(?string $token): void
+    {
+        $this->googleRefreshToken = $token;
+    }
+
+    public function isNotificationChannelEnabled(
+        string $eventName,
+        \App\Domain\Notifications\Entity\NotificationChannelType $channel,
+        array $defaultChannels
+    ): bool {
+        if ($this->notificationPreferences === null || !array_key_exists($eventName, $this->notificationPreferences)) {
+            foreach ($defaultChannels as $defaultChannel) {
+                if ($defaultChannel === $channel) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        $userChannels = $this->notificationPreferences[$eventName];
+        if (!is_array($userChannels)) {
+            return false;
+        }
+
+        return in_array($channel->value, $userChannels, true);
     }
 }

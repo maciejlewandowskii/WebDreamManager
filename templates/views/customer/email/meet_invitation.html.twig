@@ -1,0 +1,46 @@
+{% extends 'email/layout.html.twig' %}
+
+{% block email_header %}
+    <div class="logo">
+        <svg width="28" height="28" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect width="32" height="32" rx="8" fill="#ffffff"/>
+            <path d="M8 10h4l3 8 3-8h4M8 22h16" stroke="#09090b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <span style="margin-left:10px;">WebDream Manager</span>
+    </div>
+{% endblock %}
+
+{% block email_body %}
+    <h1>You've been invited to a meeting</h1>
+
+    <p>Hi {{ customer.name }},</p>
+    <p>{{ organizer.fullName }} has scheduled a Google Meet with you.</p>
+
+    <table class="summary-table">
+        <tr>
+            <td class="label">Meeting</td>
+            <td class="val">{{ event_title }}</td>
+        </tr>
+        {% if event_start %}
+        <tr>
+            <td class="label">Scheduled for</td>
+            <td class="val">{{ event_start|date('d M Y, H:i') }}</td>
+        </tr>
+        {% endif %}
+        <tr>
+            <td class="label">Organiser</td>
+            <td class="val">{{ organizer.fullName }}</td>
+        </tr>
+    </table>
+
+    <div class="btn-container">
+        <a href="{{ meet_url }}" class="btn">Join Google Meet</a>
+        <span class="url">{{ meet_url }}</span>
+    </div>
+
+    <p>If the button doesn't work, copy and paste the link above into your browser.</p>
+{% endblock %}
+
+{% block email_footer %}
+    WebDream Manager &bull; This invitation was sent on behalf of {{ organizer.fullName }}.
+{% endblock %}

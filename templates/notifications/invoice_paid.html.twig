@@ -1,0 +1,42 @@
+{% extends 'email/layout.html.twig' %}
+
+{% block email_header %}
+    <table style="width:100%;border-collapse:collapse;">
+        <tr>
+            <td style="padding:0 0 1rem 0;">
+                <span style="font-size:0.7rem;text-transform:uppercase;letter-spacing:0.08em;color:#71717a;">Invoice Paid</span><br>
+                <span style="font-size:1.5rem;font-weight:700;font-family:monospace;">{{ invoice.number }}</span>
+            </td>
+        </tr>
+    </table>
+{% endblock %}
+
+{% block email_body %}
+    <p style="margin:0 0 1rem 0;color:#a1a1aa;">Hi {{ customer.name }},</p>
+    <p style="margin:0 0 1.5rem 0;">
+        Your invoice <strong style="color:#ffffff;">{{ invoice.number }}</strong>
+        for <strong style="color:#ffffff;">{{ invoice.grossTotal|number_format(2, '.', ' ') }} {{ invoice.currency }}</strong>
+        has been marked as paid.
+    </p>
+
+    <table class="summary-table" style="width:100%;border-collapse:collapse;margin-bottom:1.5rem;">
+        <tr>
+            <td style="padding:0.625rem 0;color:#71717a;border-bottom:1px solid #27272a;">Date</td>
+            <td style="padding:0.625rem 0;text-align:right;border-bottom:1px solid #27272a;font-family:monospace;">{{ invoice.issuedAt|date('d.m.Y') }}</td>
+        </tr>
+        <tr>
+            <td style="padding:0.625rem 0;color:#71717a;border-bottom:1px solid #27272a;">Net</td>
+            <td style="padding:0.625rem 0;text-align:right;border-bottom:1px solid #27272a;font-family:monospace;">{{ invoice.netTotal|number_format(2, '.', ' ') }} {{ invoice.currency }}</td>
+        </tr>
+        <tr>
+            <td style="padding:0.625rem 0;color:#71717a;">Total</td>
+            <td style="padding:0.625rem 0;text-align:right;font-family:monospace;font-weight:700;color:#ffffff;">{{ invoice.grossTotal|number_format(2, '.', ' ') }} {{ invoice.currency }}</td>
+        </tr>
+    </table>
+
+    <p style="margin:0;color:#52525b;font-size:0.875rem;">Thank you for your business.</p>
+{% endblock %}
+
+{% block email_footer %}
+    WebDream Manager — Automated Notification
+{% endblock %}

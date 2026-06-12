@@ -1,0 +1,97 @@
+<div class="flex flex-col [gap:1.5rem]">
+
+    {# Current version #}
+    <twig:Card>
+        <twig:CardHeader>
+            <div class="text-sm font-semibold [color:var(--color-on-surface)]">Version Information</div>
+        </twig:CardHeader>
+        <twig:CardBody>
+            <div class="flex items-center justify-between [padding:0.75rem_0] [border-bottom:1px_solid_var(--color-outline-variant)]">
+                <span class="text-sm [color:var(--color-on-surface-variant)]">Current version</span>
+                <span class="text-sm font-mono font-medium [color:var(--color-on-surface)]">{{ current_version }}</span>
+            </div>
+            <div class="flex items-center justify-between [padding:0.75rem_0] [border-bottom:1px_solid_var(--color-outline-variant)]">
+                <span class="text-sm [color:var(--color-on-surface-variant)]">Latest release</span>
+                <span class="text-sm font-mono [color:var(--color-on-surface-variant)]">
+                    {{ latest_version ?? '—' }}
+                </span>
+            </div>
+            <div class="flex items-center justify-between [padding:0.75rem_0]">
+                <span class="text-sm [color:var(--color-on-surface-variant)]">Status</span>
+                {% if current_version == 'dev' %}
+                    <span class="badge badge-default">Development build</span>
+                {% elseif update_available %}
+                    <span class="badge badge-warning">Update available</span>
+                {% else %}
+                    <span class="badge badge-success">Up to date</span>
+                {% endif %}
+            </div>
+
+            <div class="flex [gap:0.75rem] [margin-top:1rem]">
+                <form method="post" action="{{ path('app_admin_system_version_check') }}">
+                    <twig:Button variant="secondary" type="submit">
+                        {{ ux_icon('tabler:refresh', {class: 'w-4 h-4'}) }}
+                        Check for updates
+                    </twig:Button>
+                </form>
+
+                {% if update_available and latest_version %}
+                    <div class="flex flex-col [gap:0.5rem] flex-1">
+                        <p class="text-xs [color:var(--color-on-surface-variant)]">
+                            Run on your host to update:
+                        </p>
+                        <code class="text-xs [background:var(--color-surface-variant)] [padding:0.5rem_0.75rem] rounded [color:var(--color-on-surface)] font-mono block">
+                            docker compose pull &amp;&amp; docker compose up -d
+                        </code>
+                    </div>
+                {% endif %}
+            </div>
+        </twig:CardBody>
+    </twig:Card>
+
+    {# Auto-update settings #}
+    <twig:Card>
+        <twig:CardHeader>
+            <div class="text-sm font-semibold [color:var(--color-on-surface)]">Auto-Update</div>
+        </twig:CardHeader>
+        <twig:CardBody>
+            <p class="text-sm [color:var(--color-on-surface-variant)] [margin-bottom:1.25rem]">
+                Auto-update uses <a href="https://containrrr.dev/watchtower" target="_blank" rel="noopener"
+                class="[color:var(--color-primary)]">Watchtower</a> to pull and restart the container when a new image
+                is published to the registry. Add the Watchtower service to your <code>compose.yaml</code> to enable it.
+            </p>
+
+            <form method="post" action="{{ path('app_admin_system_version_auto_update') }}" class="flex flex-col [gap:1rem]">
+                <div class="flex flex-col [gap:0.375rem]">
+                    <label class="text-xs font-medium [color:var(--color-on-surface-variant)]">GitHub Repository</label>
+                    <input type="text"
+                           name="github_repo"
+                           value="{{ github_repo }}"
+                           placeholder="owner/repo"
+                           class="form-input text-sm font-mono">
+                    <p class="text-xs [color:var(--color-on-surface-variant)]">Used for update checks (e.g. <code>acme/web-dream-manager</code>).</p>
+                </div>
+
+                <label class="flex items-center [gap:0.625rem] [cursor:pointer]">
+                    <input type="checkbox" name="auto_update" value="1" class="form-checkbox"
+                           {{ auto_update ? 'checked' : '' }}>
+                    <span class="text-sm [color:var(--color-on-surface)]">Enable automatic update notifications</span>
+                </label>
+
+                <div class="[background:var(--color-surface-variant)] rounded [padding:0.875rem_1rem] text-xs [color:var(--color-on-surface-variant)] [line-height:1.6]">
+                    <strong class="[color:var(--color-on-surface)]">Watchtower compose snippet:</strong><br>
+                    <code class="block [margin-top:0.5rem] font-mono whitespace-pre">  watchtower:
+    image: containrrr/watchtower
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    command: --interval 3600 --cleanup
+    restart: unless-stopped</code>
+                </div>
+
+                <div class="flex [justify-content:flex-end]">
+                    <twig:Button variant="primary" type="submit">Save</twig:Button>
+                </div>
+            </form>
+        </twig:CardBody>
+    </twig:Card>
+</div>

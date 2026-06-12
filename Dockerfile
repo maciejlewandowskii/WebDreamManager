@@ -6,6 +6,9 @@ FROM frankenphp_upstream AS frankenphp_base
 
 SHELL ["/bin/bash", "-euxo", "pipefail", "-c"]
 
+ARG APP_VERSION=dev
+ENV APP_VERSION=${APP_VERSION}
+
 WORKDIR /app
 
 VOLUME /app/var/

@@ -59,6 +59,10 @@ enum Permission: string
     case RoleUpdate = 'role.update';
     case RoleDelete = 'role.delete';
 
+    // System
+    case SystemView   = 'system.view';
+    case SystemManage = 'system.manage';
+
     public function actionLabel(): string
     {
         return match ($this) {
@@ -109,6 +113,9 @@ enum Permission: string
             'Roles' => [
                 self::RoleList, self::RoleView, self::RoleCreate,
                 self::RoleUpdate, self::RoleDelete,
+            ],
+            'System' => [
+                self::SystemView, self::SystemManage,
             ],
         ];
     }

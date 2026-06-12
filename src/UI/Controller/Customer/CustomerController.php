@@ -6,14 +6,18 @@ namespace App\UI\Controller\Customer;
 
 use App\Domain\Customer\Application\Data\CustomerData;
 use App\Domain\Customer\Application\Pipeline\CreateCustomer\CreateCustomerCommand;
+use App\Domain\Customer\Application\Pipeline\CreateMeeting\CreateMeetingCommand;
 use App\Domain\Customer\Application\Pipeline\DeleteCustomer\DeleteCustomerCommand;
 use App\Domain\Customer\Application\Pipeline\UpdateCustomer\UpdateCustomerCommand;
 use App\Domain\Customer\Entity\Customer;
 use App\Domain\Customer\Repository\CustomerRepositoryInterface;
+use App\Domain\Identity\Entity\User;
+use App\Infrastructure\External\Google\GoogleCalendarService;
 use App\Infrastructure\Pipeline\PipelineProcessor;
 use App\UI\Controller\AppController;
 use App\UI\Form\CustomerType;
 use Symfony\Component\DependencyInjection\Attribute\AutowireIterator;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
@@ -25,9 +29,11 @@ final class CustomerController extends AppController
 {
     public function __construct(
         private readonly CustomerRepositoryInterface $repository,
+        private readonly GoogleCalendarService $google,
         #[AutowireIterator('app.customer.create')] private readonly iterable $createHandlers,
         #[AutowireIterator('app.customer.update')] private readonly iterable $updateHandlers,
         #[AutowireIterator('app.customer.delete')] private readonly iterable $deleteHandlers,
+        #[AutowireIterator('app.customer.meet')] private readonly iterable $meetHandlers,
     ) {
     }
 
@@ -95,6 +101,24 @@ final class CustomerController extends AppController
         return $this->render('views/customer/show.html.twig', [
             'customer' => $customer,
         ]);
+    }
+
+    #[Route('/{id}/meet', name: 'meet', requirements: ['id' => '[0-9a-f-]{36}'], methods: ['POST'])]
+    public function createMeet(Customer $customer): RedirectResponse
+    {
+        /** @var User $user */
+        $user = $this->getUser();
+
+        if ($user->getGoogleRefreshToken() === null) {
+            return $this->redirect($this->google->getAuthUrl($customer->getId()));
+        }
+
+        $accessToken = $this->google->getAccessToken($user->getGoogleRefreshToken());
+        $command     = new CreateMeetingCommand($customer, $user, $accessToken);
+        new PipelineProcessor($this->meetHandlers)->run($command);
+
+        $this->addFlash('success', 'Google Meet created' . ($command->meetUrl ? ': ' . $command->meetUrl : '') . '.');
+        return $this->redirectToRoute('app_customer_show', ['id' => $customer->getId()]);
     }
 
     #[Route('/{id}/delete', name: 'delete', requirements: ['id' => '[0-9a-f-]{36}'], methods: ['POST'])]

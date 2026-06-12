@@ -2,6 +2,8 @@ parameters:
     uploads_dir: '%kernel.project_dir%/public/uploads'
     project_files_dir: '%kernel.project_dir%/var/project_files'
     customer_files_dir: '%kernel.project_dir%/var/customer_files'
+    app.github_repo_default: ''
+    app.github_repo: '%env(default:app.github_repo_default:GITHUB_REPO)%'
 
 services:
     _defaults:
@@ -31,3 +33,36 @@ services:
 
     App\Domain\Invoicing\Port\PaymentGatewayInterface:
         alias: App\Infrastructure\External\Stripe\StripeGateway
+
+    App\Domain\Notifications\Repository\NotificationRuleRepositoryInterface:
+        alias: App\Domain\Notifications\Infrastructure\DoctrineNotificationRuleRepository
+
+    App\Domain\System\Repository\SystemSettingRepositoryInterface:
+        alias: App\Domain\System\Infrastructure\DoctrineSystemSettingRepository
+
+    App\Infrastructure\External\Sms\TwilioSmsSender:
+        arguments:
+            $fromNumber: '%env(TWILIO_FROM_NUMBER)%'
+
+    App\Infrastructure\Communications\Port\SmsSenderInterface:
+        alias: App\Infrastructure\External\Sms\TwilioSmsSender
+
+    App\Infrastructure\External\Google\GoogleCalendarService:
+        arguments:
+            $clientId: '%env(GOOGLE_CLIENT_ID)%'
+            $clientSecret: '%env(GOOGLE_CLIENT_SECRET)%'
+            $redirectUri: '%env(GOOGLE_REDIRECT_URI)%'
+
+    App\Infrastructure\Security\TwoFactor\Sms\SmsCodeSender: ~
+
+    app.security.sms_two_factor_form_renderer:
+        class: Scheb\TwoFactorBundle\Security\TwoFactor\Provider\DefaultTwoFactorFormRenderer
+        arguments:
+            - '@twig'
+            - '@@SchebTwoFactor/Authentication/form.html.twig'
+
+    App\Infrastructure\Security\TwoFactor\Sms\SmsTwoFactorProvider:
+        arguments:
+            $formRenderer: '@app.security.sms_two_factor_form_renderer'
+        tags:
+            - { name: scheb_two_factor.provider, alias: sms }

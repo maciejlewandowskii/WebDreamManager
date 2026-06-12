@@ -27,6 +27,11 @@ final class ProfileType extends AbstractType
                 'label'       => 'Email',
                 'constraints' => [new Assert\NotBlank(), new Assert\Email()],
             ])
+            ->add('phone', TextType::class, [
+                'label'       => 'Phone Number',
+                'required'    => false,
+                'constraints' => [new Assert\Length(max: 50)],
+            ])
             ->add('avatarFile', FileType::class, [
                 'label'    => 'Profile Photo',
                 'required' => false,

@@ -25,6 +25,9 @@
                 <a href="{{ path('app_settings_passkeys') }}"
                    class="sidebar-nav-item {{ section == 'passkeys' ? 'active' }}">{{ ux_icon('tabler:fingerprint',  {class: 'w-4 h-4'}) }}
                     Passkeys</a>
+                <a href="{{ path('app_settings_notifications') }}"
+                   class="sidebar-nav-item {{ section == 'notifications' ? 'active' }}">{{ ux_icon('tabler:bell', {class: 'w-4 h-4'}) }}
+                    Notifications</a>
             </nav>
 
             <div>
@@ -38,6 +41,8 @@
                     {% include 'views/settings/sections/two_factor.html.twig' %}
                 {% elseif section == 'passkeys' %}
                     {% include 'views/settings/sections/passkeys.html.twig' %}
+                {% elseif section == 'notifications' %}
+                    {% include 'views/settings/sections/notifications.html.twig' %}
                 {% endif %}
             </div>
         </div>

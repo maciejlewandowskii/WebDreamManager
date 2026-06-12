@@ -16,6 +16,12 @@ interface UserRepositoryInterface
     public function findAll(): array;
 
     /** @return User[] */
+    public function findActive(): array;
+
+    /** @return User[] */
+    public function findActiveWithPermission(string $permission): array;
+
+    /** @return User[] */
     public function findFiltered(
         ?string $search,
         string $sortBy = 'fullName',

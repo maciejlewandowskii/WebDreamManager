@@ -7,6 +7,38 @@
         <div class="flex items-center justify-between [padding:1rem] [border:1px_solid_var(--color-outline-variant)]">
             <div>
                 <div class="text-sm font-medium [color:var(--color-on-surface)] flex items-center [gap:0.375rem]">
+                    {{ ux_icon('tabler:message', {class: 'w-4 h-4'}) }} SMS Code
+                </div>
+                <div class="text-[0.8125rem] [color:var(--color-on-surface-variant)] [margin-top:0.25rem]">
+                    Receive a one-time code by SMS on each login.
+                </div>
+                {% if not app.user.phone %}
+                    <div class="text-[0.75rem] [color:var(--color-error)] [margin-top:0.25rem]">
+                        Add a phone number in your profile first.
+                    </div>
+                {% endif %}
+            </div>
+            <form method="post" action="{{ path('app_settings_2fa_sms') }}">
+                <input type="hidden" name="_token" value="{{ csrf_token('2fa_sms') }}">
+                {% if app.user.smsAuthEnabled %}
+                    <twig:Button variant="ghost" size="sm" type="submit" class="[color:var(--color-error)]">
+                        Disable
+                    </twig:Button>
+                {% elseif app.user.phone %}
+                    <twig:Button variant="primary" size="sm" type="submit">
+                        Enable
+                    </twig:Button>
+                {% else %}
+                    <twig:Button variant="primary" size="sm" type="submit" disabled="disabled">
+                        Enable
+                    </twig:Button>
+                {% endif %}
+            </form>
+        </div>
+
+        <div class="flex items-center justify-between [padding:1rem] [border:1px_solid_var(--color-outline-variant)]">
+            <div>
+                <div class="text-sm font-medium [color:var(--color-on-surface)] flex items-center [gap:0.375rem]">
                     {{ ux_icon('tabler:mail', {class: 'w-4 h-4'}) }} Email Code
                 </div>
                 <div class="text-[0.8125rem] [color:var(--color-on-surface-variant)] [margin-top:0.25rem]">

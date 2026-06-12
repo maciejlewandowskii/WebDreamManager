@@ -14,7 +14,10 @@ use App\Domain\Identity\Entity\PasskeyCredential;
 use App\Domain\Identity\Entity\User;
 use App\Domain\Identity\Repository\PasskeyCredentialRepositoryInterface;
 use App\Domain\Identity\Repository\UserRepositoryInterface;
+use App\Domain\Notifications\Entity\NotificationChannelType;
+use App\Domain\Notifications\Repository\NotificationRuleRepositoryInterface;
 use App\Infrastructure\Pipeline\PipelineProcessor;
+use App\UI\Controller\AppController;
 use App\UI\Form\ChangePasswordType;
 use App\UI\Form\ProfileType;
 use App\UI\Form\WorkSettingsType;
@@ -40,7 +43,7 @@ use Symfony\Component\String\Slugger\SluggerInterface;
 use Throwable;
 
 #[Route('/settings', name: 'app_settings')]
-final class SettingsController extends AbstractController
+final class SettingsController extends AppController
 {
     private const string WEBAUTHN_RP_NAME = 'WebDream Manager';
 
@@ -277,6 +280,26 @@ final class SettingsController extends AbstractController
         return $this->redirectToRoute('app_settings_2fa');
     }
 
+    #[Route('/2fa/sms', name: '_2fa_sms', methods: ['POST'])]
+    public function toggleSms(): RedirectResponse
+    {
+        /** @var User $user */
+        $user = $this->getUser();
+
+        if ($user->getPhone() === null) {
+            $this->addFlash('error', 'Please add a phone number to your profile first.');
+            return $this->redirectToRoute('app_settings_2fa');
+        }
+
+        $user->setSmsAuthEnabled(!$user->isSmsAuthEnabled());
+        $this->userRepository->save($user);
+
+        $state = $user->isSmsAuthEnabled() ? 'enabled' : 'disabled';
+        $this->addFlash('success', "SMS two-factor authentication $state.");
+
+        return $this->redirectToRoute('app_settings_2fa');
+    }
+
     #[Route('/passkeys', name: '_passkeys', methods: ['GET'])]
     public function passkeys(): Response
     {
@@ -381,6 +404,60 @@ final class SettingsController extends AbstractController
         }
 
         return $this->redirectToRoute('app_settings_passkeys');
+    }
+
+    #[Route('/notifications', name: '_notifications', methods: ['GET'])]
+    public function notifications(NotificationRuleRepositoryInterface $ruleRepository): Response
+    {
+        /** @var User $user */
+        $user = $this->getUser();
+        $rules = $ruleRepository->findAll();
+        $preferences = $user->getNotificationPreferences() ?? [];
+
+        return $this->render('views/settings/index.html.twig', [
+            'section'     => 'notifications',
+            'rules'       => $rules,
+            'preferences' => $preferences,
+            'channels'    => NotificationChannelType::cases(),
+        ]);
+    }
+
+    #[Route('/notifications', name: '_notifications_save', methods: ['POST'])]
+    public function notificationsSave(
+        Request $request,
+        NotificationRuleRepositoryInterface $ruleRepository
+    ): Response
+    {
+        /** @var User $user */
+        $user = $this->getUser();
+        $rules = $ruleRepository->findAll();
+
+        $preferences = [];
+        $postedPrefs = $request->request->all('prefs');
+
+        foreach ($rules as $rule) {
+            $eventName = $rule->getEventName();
+            $enabledChannels = [];
+
+            if (isset($postedPrefs[$eventName]) && is_array($postedPrefs[$eventName])) {
+                foreach ($postedPrefs[$eventName] as $channelStr) {
+                    if (is_string($channelStr)) {
+                        $channel = NotificationChannelType::tryFrom($channelStr);
+                        if ($channel !== null && $rule->hasChannel($channel)) {
+                            $enabledChannels[] = $channel->value;
+                        }
+                    }
+                }
+            }
+            $preferences[$eventName] = $enabledChannels;
+        }
+
+        $user->setNotificationPreferences($preferences);
+        $this->userRepository->save($user);
+
+        $this->addFlash('success', 'Notification preferences updated.');
+
+        return $this->noContentResponse();
     }
 
     private function createWebAuthn(): WebAuthn

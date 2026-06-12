@@ -67,6 +67,13 @@
                     Time Report
                 </a>
             {% endif %}
+            {% if is_granted('system.view') %}
+                <a href="{{ path('app_admin_system_version') }}"
+                   class="sidebar-nav-item {{ currentRoute starts with 'app_admin_system' ? 'active' }}">
+                    {{ ux_icon('tabler:server-cog', {class: 'w-4 h-4'}) }}
+                    System
+                </a>
+            {% endif %}
         {% endif %}
     </nav>
 

@@ -1,0 +1,33 @@
+{% extends 'layout.html.twig' %}
+
+{% block title %}System — WebDream Manager{% endblock %}
+
+{% block content %}
+    <twig:layout:PageHeader title="System"/>
+
+    <twig:PageContent>
+        <div class="[display:grid] [grid-template-columns:200px_1fr] [gap:2rem] [max-width:960px]">
+
+            <nav class="flex flex-col [gap:0.25rem] [padding-top:0.25rem]">
+                <a href="{{ path('app_admin_system_version') }}"
+                   class="sidebar-nav-item {{ section == 'version' ? 'active' }}">
+                    {{ ux_icon('tabler:refresh', {class: 'w-4 h-4'}) }}
+                    Version & Updates
+                </a>
+                <a href="{{ path('app_admin_system_settings') }}"
+                   class="sidebar-nav-item {{ section == 'settings' ? 'active' }}">
+                    {{ ux_icon('tabler:adjustments', {class: 'w-4 h-4'}) }}
+                    Configuration
+                </a>
+            </nav>
+
+            <div>
+                {% if section == 'version' %}
+                    {% include 'views/admin/system/sections/version.html.twig' %}
+                {% elseif section == 'settings' %}
+                    {% include 'views/admin/system/sections/settings.html.twig' %}
+                {% endif %}
+            </div>
+        </div>
+    </twig:PageContent>
+{% endblock %}

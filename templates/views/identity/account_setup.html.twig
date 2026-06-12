@@ -129,10 +129,21 @@
                             {% endif %}
                         </div>
 
-                        <div class="[margin-bottom:1.5rem]">
+                        <div class="[margin-bottom:1rem]">
                             <label class="form-label">Email</label>
                             <input type="email" class="form-input [opacity:0.65] [cursor:not-allowed]"
                                    value="{{ user.email }}" disabled>
+                        </div>
+
+                        <div class="[margin-bottom:1.5rem]">
+                            <label class="form-label" for="phone">Phone number</label>
+                            <input id="phone" type="tel" name="phone"
+                                   class="form-input"
+                                   value="{{ user.phone }}"
+                                   autocomplete="tel">
+                            {% if errors.phone is defined %}
+                                <div class="form-error">{{ errors.phone }}</div>
+                            {% endif %}
                         </div>
 
                         <twig:Button variant="primary" type="submit" class="w-full justify-center">
