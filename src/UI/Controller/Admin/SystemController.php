@@ -20,13 +20,6 @@ final class SystemController extends AppController
     /** @var string[] Key suffixes */
     private const array SECRET_SUFFIXES = ['SECRET', 'KEY', 'DSN', 'TOKEN'];
 
-    /** @var string[] Settings that must not be editable via the UI */
-    private const array BLOCKED_KEYS = [
-        'APP_ENV', 'APP_SECRET', 'APP_SHARE_DIR', 'APP_DOMAIN',
-        'WEBAUTHN_RP_ID', 'DATABASE_URL', 'MESSENGER_TRANSPORT_DSN',
-        'TWO_FACTOR_ENCRYPTION_KEY', 'APP_VERSION',
-    ];
-
     /** @var array<string, array<string, string>> Settings exposed in the editable form, grouped by section */
     private const array EDITABLE_SETTINGS = [
         'company' => [
@@ -149,9 +142,6 @@ final class SystemController extends AppController
 
         foreach (self::EDITABLE_SETTINGS as $keys) {
             foreach (array_keys($keys) as $key) {
-                if (in_array($key, self::BLOCKED_KEYS, true)) {
-                    continue;
-                }
                 if (!array_key_exists($key, $posted)) {
                     continue;
                 }
@@ -170,12 +160,6 @@ final class SystemController extends AppController
 
     private function isSecretKey(string $key): bool
     {
-        foreach (self::SECRET_SUFFIXES as $suffix) {
-            if (str_ends_with($key, $suffix)) {
-                return true;
-            }
-        }
-
-        return false;
+        return array_any(self::SECRET_SUFFIXES, static fn(string $suffix) => str_ends_with($key, $suffix));
     }
 }
