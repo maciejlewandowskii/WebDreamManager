@@ -11,31 +11,32 @@ use Doctrine\ORM\Query\SqlWalker;
 use Doctrine\ORM\Query\TokenType;
 
 /**
- * TSMATCH(text, query)
+ * TRGM_MATCH(query, text)
  *
- * Compiles to: (to_tsvector('simple', text) @@ websearch_to_tsquery('simple', query))
+ * Compiles to: (word_similarity(query, text) > 0.25)
+ * Requires pg_trgm extension.
  */
-class TsMatchFunction extends FunctionNode
+class TrgmMatchFunction extends FunctionNode
 {
-    private Node $vectorExpr;
     private Node $queryExpr;
+    private Node $textExpr;
 
     public function parse(Parser $parser): void
     {
         $parser->match(TokenType::T_IDENTIFIER);
         $parser->match(TokenType::T_OPEN_PARENTHESIS);
-        $this->vectorExpr = $parser->StringPrimary();
-        $parser->match(TokenType::T_COMMA);
         $this->queryExpr = $parser->StringPrimary();
+        $parser->match(TokenType::T_COMMA);
+        $this->textExpr = $parser->StringPrimary();
         $parser->match(TokenType::T_CLOSE_PARENTHESIS);
     }
 
     public function getSql(SqlWalker $sqlWalker): string
     {
         return sprintf(
-            "(to_tsvector('simple', %s) @@ websearch_to_tsquery('simple', %s))",
-            $this->vectorExpr->dispatch($sqlWalker),
-            $this->queryExpr->dispatch($sqlWalker)
+            '(word_similarity(%s, %s) > 0.25)',
+            $this->queryExpr->dispatch($sqlWalker),
+            $this->textExpr->dispatch($sqlWalker)
         );
     }
 }

@@ -20,4 +20,14 @@ enum CustomerStatus: string
             self::Archived => 'Archived',
         };
     }
+
+    public function color(): string
+    {
+        return match($this) {
+            self::Active   => 'success',
+            self::Inactive => 'secondary',
+            self::Lead     => 'primary',
+            self::Archived => 'outline',
+        };
+    }
 }

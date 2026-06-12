@@ -41,7 +41,7 @@
                             </twig:PropertyItem>
                         {% endif %}
                         <twig:PropertyItem label="Status">
-                            {{ customer.status.value }}
+                            <twig:Badge variant="{{ customer.status.color }}">{{ customer.status.label() }}</twig:Badge>
                         </twig:PropertyItem>
                         {% if customer.notes %}
                             <twig:PropertyItem label="Notes">
@@ -80,7 +80,7 @@
                                     </a>
                                 </td>
                                 <td>
-                                    <twig:Badge variant="default">{{ project.status.value }}</twig:Badge>
+                                    <twig:Badge variant="{{ project.status.color }}">{{ project.status.label() }}</twig:Badge>
                                 </td>
                                 <twig:TableCell mono="true" small="true" muted="true">
                                     {% if project.budget %}{{ project.budget|number_format(0, '.', ' ') }} {{ project.currency }}{% else %}—{% endif %}

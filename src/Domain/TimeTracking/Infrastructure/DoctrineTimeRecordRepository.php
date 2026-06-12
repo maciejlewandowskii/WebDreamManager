@@ -109,7 +109,7 @@ final class DoctrineTimeRecordRepository extends ServiceEntityRepository impleme
             ->addOrderBy('t.date', 'DESC');
 
         if ($search !== null) {
-            $qb->andWhere('TSMATCH(CONCAT(t.title, \' \', COALESCE(t.description, \'\')), :search) = true')
+            $qb->andWhere('TRGM_MATCH(:search, t.title) = true OR TRGM_MATCH(:search, COALESCE(t.description, \'\')) = true')
                ->setParameter('search', $search);
         }
 

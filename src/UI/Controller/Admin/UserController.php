@@ -10,7 +10,6 @@ use App\Domain\Authorization\Application\Pipeline\DeleteUser\DeleteUserCommand;
 use App\Domain\Authorization\Application\Pipeline\UpdateUser\UpdateUserCommand;
 use App\Domain\Authorization\Entity\Permission;
 use App\Domain\Identity\Entity\User;
-use App\Domain\Identity\Repository\UserRepositoryInterface;
 use App\Infrastructure\Pipeline\PipelineProcessor;
 use App\UI\Controller\AppController;
 use App\UI\Form\Admin\UserManageType;
@@ -25,7 +24,6 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
 final class UserController extends AppController
 {
     public function __construct(
-        private readonly UserRepositoryInterface $userRepository,
         #[AutowireIterator('app.authorization.user.create')] private readonly iterable $createHandlers,
         #[AutowireIterator('app.authorization.user.update')] private readonly iterable $updateHandlers,
         #[AutowireIterator('app.authorization.user.delete')] private readonly iterable $deleteHandlers,
@@ -54,7 +52,7 @@ final class UserController extends AppController
             new PipelineProcessor($this->createHandlers)->run($command);
             $this->addFlash('success', 'User created.');
 
-            return $this->redirectToRoute('app_admin_user_index');
+            return $this->noContentResponse('user:mutated');
         }
 
         return $this->render('views/admin/users/new.html.twig', [
@@ -78,9 +76,10 @@ final class UserController extends AppController
             new PipelineProcessor($this->updateHandlers)->run(
                 new UpdateUserCommand($user, $data, $plain !== '' ? $plain : null),
             );
+
             $this->addFlash('success', 'User updated.');
 
-            return $this->redirectToRoute('app_admin_user_index');
+            return $this->noContentResponse('user:mutated');
         }
 
         return $this->render('views/admin/users/edit.html.twig', [
@@ -98,14 +97,17 @@ final class UserController extends AppController
         if ($user->getId() === $currentUser->getId()) {
             $this->addFlash('error', 'You cannot delete your own account.');
 
-            return $this->redirectToRoute('app_admin_user_index');
+            return $this->noContentResponse('', Response::HTTP_FORBIDDEN);
         }
 
         if ($this->isCsrfTokenValid('delete_user_' . $user->getId(), (string) $request->request->get('_token'))) {
             new PipelineProcessor($this->deleteHandlers)->run(new DeleteUserCommand($user));
+
             $this->addFlash('success', 'User deleted.');
+
+            return $this->noContentResponse('user:mutated');
         }
 
-        return $this->redirectToRoute('app_admin_user_index');
+        return new Response(null, Response::HTTP_NO_CONTENT);
     }
 }

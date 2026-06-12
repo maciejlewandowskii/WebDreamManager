@@ -1,4 +1,4 @@
-<div {{ attributes }}>
+<div {{ attributes.defaults({'data-action': 'time-record:mutated@document->live#$render'}) }}>
     {% set today = this.todayStats %}
     {% set monthly = this.monthlyStats %}
     {% set canViewAll = this.canViewAll() %}
@@ -71,7 +71,7 @@
                        class="form-input [padding-left:2.25rem]"
                        placeholder="Search records…"
                        value="{{ this.search }}"
-                       data-model="search"
+                       data-model="debounce(400)|search"
                 >
             </div>
             <label class="toggle-label">

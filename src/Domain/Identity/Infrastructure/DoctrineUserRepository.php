@@ -67,7 +67,7 @@ final class DoctrineUserRepository extends ServiceEntityRepository implements Us
             ->orderBy($field, $direction);
 
         if ($search !== null) {
-            $qb->andWhere("TSMATCH(CONCAT(u.fullName, ' ', u.email), :search) = true")
+            $qb->andWhere('TRGM_MATCH(:search, u.fullName) = true OR TRGM_MATCH(:search, u.email) = true')
                ->setParameter('search', $search);
         }
 

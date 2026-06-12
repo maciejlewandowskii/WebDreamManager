@@ -39,7 +39,7 @@ final class TimeReportList
 
         $users = $this->userRepository->findFiltered(
             search: $this->search !== '' ? $this->search : null,
-            sortBy: $this->sortBy === 'fullName' ? 'fullName' : 'fullName',
+            sortBy: 'fullName',
             sortDirection: $this->sortBy === 'fullName' ? $this->sortDirection : 'ASC',
         );
 

@@ -71,7 +71,7 @@ final class TimeRecordController extends AppController
             new PipelineProcessor($this->createHandlers)->run(new CreateTimeRecordCommand($data, $user));
             $this->addFlash('success', 'Time record saved.');
 
-            return $this->redirectToReferer($request, 'app_time_index');
+            return $this->noContentResponse('time-record:mutated');
         }
 
         return $this->render('views/time_tracking/new.html.twig', [
@@ -95,7 +95,7 @@ final class TimeRecordController extends AppController
             new PipelineProcessor($this->updateHandlers)->run(new UpdateTimeRecordCommand($record, $data));
             $this->addFlash('success', 'Time record updated.');
 
-            return $this->redirectToReferer($request, 'app_time_index');
+            return $this->noContentResponse('time-record:mutated');
         }
 
         return $this->render('views/time_tracking/edit.html.twig', [
@@ -113,8 +113,10 @@ final class TimeRecordController extends AppController
         if ($this->isCsrfTokenValid('delete_time_' . $record->getId(), (string) $request->request->get('_token'))) {
             new PipelineProcessor($this->deleteHandlers)->run(new DeleteTimeRecordCommand($record));
             $this->addFlash('success', 'Time record deleted.');
+
+            return $this->noContentResponse('time-record:mutated');
         }
 
-        return $this->redirectToReferer($request, 'app_time_index');
+        return new Response(null, Response::HTTP_NO_CONTENT);
     }
 }

@@ -15,6 +15,19 @@
         <turbo-frame id="modal"></turbo-frame>
     </dialog>
 
+    <dialog class="app-dialog" id="confirm-dialog">
+        <div class="[padding:1.25rem_1.5rem] [border-bottom:1px_solid_var(--color-outline-variant)]">
+            <p class="text-sm font-semibold" id="confirm-dialog-title">Are you sure?</p>
+        </div>
+        <div class="[padding:1rem_1.5rem_0.5rem]">
+            <p class="text-sm [color:var(--color-on-surface-variant)]" id="confirm-dialog-message"></p>
+        </div>
+        <div class="[padding:0.75rem_1.5rem_1.25rem] flex justify-end gap-2">
+            <button class="btn btn-ghost btn-sm" id="confirm-dialog-cancel">Cancel</button>
+            <button class="btn btn-destructive btn-sm" id="confirm-dialog-confirm">Delete</button>
+        </div>
+    </dialog>
+
     <div id="alerts-container"
          data-controller="alerts"
          data-alerts-initial-value="{{ _flashes is not empty ? _flashes|json_encode|e('html_attr') : '{}' }}"

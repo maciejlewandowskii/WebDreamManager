@@ -11,7 +11,6 @@ use App\Domain\Authorization\Application\Pipeline\DeleteRole\DeleteRoleCommand;
 use App\Domain\Authorization\Application\Pipeline\UpdateRole\UpdateRoleCommand;
 use App\Domain\Authorization\Entity\Permission;
 use App\Domain\Authorization\Entity\Role;
-use App\Domain\Authorization\Repository\RoleRepositoryInterface;
 use App\Infrastructure\Pipeline\PipelineProcessor;
 use App\UI\Controller\AppController;
 use App\UI\Form\Admin\RoleType;
@@ -26,7 +25,6 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
 final class RoleController extends AppController
 {
     public function __construct(
-        private readonly RoleRepositoryInterface $roleRepository,
         #[AutowireIterator('app.authorization.role.create')] private readonly iterable $createHandlers,
         #[AutowireIterator('app.authorization.role.update')] private readonly iterable $updateHandlers,
         #[AutowireIterator('app.authorization.role.delete')] private readonly iterable $deleteHandlers,
@@ -54,7 +52,7 @@ final class RoleController extends AppController
             new PipelineProcessor($this->createHandlers)->run($command);
             $this->addFlash('success', 'Role created.');
 
-            return $this->redirectToRoute('app_admin_role_index');
+            return $this->noContentResponse('role:mutated');
         }
 
         return $this->render('views/admin/roles/new.html.twig', [
@@ -75,9 +73,10 @@ final class RoleController extends AppController
 
         if ($form->isSubmitted() && $form->isValid()) {
             new PipelineProcessor($this->updateHandlers)->run(new UpdateRoleCommand($role, $data));
+
             $this->addFlash('success', 'Role updated.');
 
-            return $this->redirectToRoute('app_admin_role_index');
+            return $this->noContentResponse('role:mutated');
         }
 
         return $this->render('views/admin/roles/edit.html.twig', [
@@ -92,16 +91,19 @@ final class RoleController extends AppController
     public function delete(Role $role, Request $request): Response
     {
         if ($role->isSystem()) {
-            $this->addFlash('error', 'The system Admin role cannot be deleted.');
+            $this->addFlash('error', 'System roles cannot be deleted.');
 
-            return $this->redirectToRoute('app_admin_role_index');
+            return $this->noContentResponse('', Response::HTTP_FORBIDDEN);
         }
 
         if ($this->isCsrfTokenValid('delete_role_' . $role->getId(), (string) $request->request->get('_token'))) {
             new PipelineProcessor($this->deleteHandlers)->run(new DeleteRoleCommand($role));
+
             $this->addFlash('success', 'Role deleted.');
+
+            return $this->noContentResponse('role:mutated');
         }
 
-        return $this->redirectToRoute('app_admin_role_index');
+        return new Response(null, Response::HTTP_NO_CONTENT);
     }
 }

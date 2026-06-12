@@ -24,7 +24,7 @@
     <twig:PageContent>
         <div class="[display:grid] [grid-template-columns:1fr_2fr] [gap:1.5rem]">
 
-            <div>
+            <div class="flex flex-col [gap:1rem]">
                 <twig:Card>
                     <twig:CardHeader title="Details"/>
                     <twig:CardBody class="flex flex-col [gap:1rem]">
@@ -33,7 +33,7 @@
                                class="[color:var(--color-on-surface)] [text-decoration:none] font-medium hover:underline">{{ project.customer.name }}</a>
                         </twig:PropertyItem>
                         <twig:PropertyItem label="Status">
-                            {{ project.status.value }}
+                            <twig:Badge variant="{{ project.status.color }}">{{ project.status.label() }}</twig:Badge>
                         </twig:PropertyItem>
                         {% if project.websiteUrl %}
                             <twig:PropertyItem label="Website">
@@ -62,19 +62,6 @@
                             </twig:PropertyItem>
                         {% endif %}
                     </twig:CardBody>
-                </twig:Card>
-            </div>
-
-            <div class="flex flex-col [gap:1rem]">
-                <twig:Card>
-                    <twig:CardHeader title="Time Records"
-                                     class="flex items-center justify-between">
-                        <twig:Button variant="ghost" size="sm" href="{{ path('app_time_new', {project: project.id}) }}"
-                                     data-turbo-frame="modal" data-modal-title="Log Time" data-controller="dynamic-time-log-url">
-                            {{ ux_icon('tabler:plus', {class: 'w-4 h-4'}) }} Log Time
-                        </twig:Button>
-                    </twig:CardHeader>
-                    {{ component('TimeRecordList', {monthlyBudget: project.budget}) }}
                 </twig:Card>
 
                 {% if is_granted('project.assign_members') %}
@@ -142,6 +129,21 @@
                         {% endif %}
                     </twig:Card>
                 {% endif %}
+            </div>
+
+            <div class="flex flex-col [gap:1rem]">
+                <twig:Card>
+                    <twig:CardHeader title="Time Records"
+                                     class="flex items-center justify-between">
+                        <twig:Button variant="ghost" size="sm" href="{{ path('app_time_new', {project: project.id}) }}"
+                                     data-turbo-frame="modal" data-modal-title="Log Time" data-controller="dynamic-time-log-url">
+                            {{ ux_icon('tabler:plus', {class: 'w-4 h-4'}) }} Log Time
+                        </twig:Button>
+                    </twig:CardHeader>
+                    {{ component('TimeRecordList', {monthlyBudget: project.budget}) }}
+                </twig:Card>
+
+
             </div>
         </div>
     </twig:PageContent>

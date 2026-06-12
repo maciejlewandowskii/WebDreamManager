@@ -6,6 +6,7 @@ doctrine:
         dql:
             string_functions:
                 TSMATCH: App\Infrastructure\Doctrine\DQL\TsMatchFunction
+                TRGM_MATCH: App\Infrastructure\Doctrine\DQL\TrgmMatchFunction
         validate_xml_mapping: true
         naming_strategy: doctrine.orm.naming_strategy.underscore_number_aware
         auto_mapping: true

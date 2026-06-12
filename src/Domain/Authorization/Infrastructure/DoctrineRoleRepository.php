@@ -54,7 +54,7 @@ final class DoctrineRoleRepository extends ServiceEntityRepository implements Ro
             ->orderBy($field, $direction);
 
         if ($search !== null) {
-            $qb->andWhere('TSMATCH(r.name, :search) = true')
+            $qb->andWhere('TRGM_MATCH(:search, r.name) = true')
                ->setParameter('search', $search);
         }
 

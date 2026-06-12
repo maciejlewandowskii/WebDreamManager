@@ -3,6 +3,16 @@ import { Controller } from '@hotwired/stimulus';
 export default class extends Controller {
     connect() {
         this._lastFrameUrl = null;
+        this._pendingDispatch = null;
+
+        this._onBeforeFetchResponse = (e) => {
+            try {
+                const response = e.detail?.fetchResponse?.response;
+                if (!response) return;
+                const event = response.headers.get('X-Dispatch-Event');
+                if (event) this._pendingDispatch = event;
+            } catch {}
+        };
 
         this._onFrameRender = (e) => {
             if (e.target.id === 'modal' && e.target.closest('#app-modal')) {
@@ -16,11 +26,16 @@ export default class extends Controller {
                 if (hasContent && !this.element.open) {
                     this.element.showModal();
                 } else if (!hasContent && this.element.open) {
-                    const url = this._lastFrameUrl;
-                    this._lastFrameUrl = null;
+                    const pendingDispatch = this._pendingDispatch;
                     this._closeImmediate();
-                    if (url && window.Turbo) {
-                        window.Turbo.visit(url);
+                    if (pendingDispatch) {
+                        document.dispatchEvent(new CustomEvent(pendingDispatch));
+                    } else {
+                        const url = this._lastFrameUrl;
+                        this._lastFrameUrl = null;
+                        if (url && window.Turbo) {
+                            window.Turbo.visit(url);
+                        }
                     }
                 }
             }
@@ -34,6 +49,7 @@ export default class extends Controller {
             }
         };
 
+        document.addEventListener('turbo:before-fetch-response', this._onBeforeFetchResponse);
         document.addEventListener('turbo:frame-render', this._onFrameRender);
         document.addEventListener('turbo:frame-load', this._onFrameLoad);
         document.addEventListener('click', this._onLinkClick);
@@ -55,6 +71,7 @@ export default class extends Controller {
     }
 
     disconnect() {
+        document.removeEventListener('turbo:before-fetch-response', this._onBeforeFetchResponse);
         document.removeEventListener('turbo:frame-render', this._onFrameRender);
         document.removeEventListener('turbo:frame-load', this._onFrameLoad);
         document.removeEventListener('click', this._onLinkClick);
@@ -74,5 +91,6 @@ export default class extends Controller {
         if (frame) frame.innerHTML = '';
         const titleEl = document.getElementById('modal-title');
         if (titleEl) titleEl.textContent = '';
+        this._pendingDispatch = null;
     }
 }

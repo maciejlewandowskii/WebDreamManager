@@ -83,7 +83,7 @@ final class DoctrineQuoteRepository extends ServiceEntityRepository implements Q
             ->orderBy($field, $direction);
 
         if ($search !== null) {
-            $qb->andWhere("TSMATCH(CONCAT(q.number, ' ', c.name, ' ', COALESCE(q.title, '')), :search) = true")
+            $qb->andWhere('TRGM_MATCH(:search, q.number) = true OR TRGM_MATCH(:search, c.name) = true OR TRGM_MATCH(:search, COALESCE(q.title, \'\')) = true')
                ->setParameter('search', $search);
         }
 

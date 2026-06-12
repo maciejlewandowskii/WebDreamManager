@@ -7,9 +7,30 @@ namespace App\UI\Controller;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 
 abstract class AppController extends AbstractController
 {
+    protected function noContentResponse(string $dispatchEvent = '', int $status = Response::HTTP_OK): Response
+    {
+        $headers = array_filter([
+            'Content-Type'     => 'text/html',
+            'X-Dispatch-Event' => $dispatchEvent ?: null,
+        ]);
+
+        /** @noinspection PhpUnhandledExceptionInspection */
+        $request = $this->container->get('request_stack')->getCurrentRequest();
+        if ($request !== null && $request->hasSession()) {
+            $flashes = $request->getSession()->getFlashBag()->all();
+            if ($flashes !== []) {
+                /** @noinspection JsonEncodingApiUsageInspection */
+                $headers['X-Flash-Messages'] = json_encode($flashes);
+            }
+        }
+
+        return new Response('<turbo-frame id="modal"></turbo-frame>', $status, $headers);
+    }
+
     protected function redirectToReferer(Request $request, string $fallbackRoute, array $params = []): RedirectResponse
     {
         $referer = $request->headers->get('referer');

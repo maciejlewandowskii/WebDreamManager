@@ -89,7 +89,7 @@ final class DoctrineInvoiceRepository extends ServiceEntityRepository implements
             ->orderBy($field, $direction);
 
         if ($search !== null) {
-            $qb->andWhere("TSMATCH(CONCAT(i.number, ' ', c.name), :search) = true")
+            $qb->andWhere('TRGM_MATCH(:search, i.number) = true OR TRGM_MATCH(:search, c.name) = true')
                ->setParameter('search', $search);
         }
 

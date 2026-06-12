@@ -22,4 +22,15 @@ enum ProjectStatus: string
             self::Cancelled  => 'Cancelled',
         };
     }
+
+    public function color(): string
+    {
+        return match($this) {
+            self::Planning   => 'secondary',
+            self::Active     => 'success',
+            self::OnHold     => 'warning',
+            self::Completed  => 'primary',
+            self::Cancelled  => 'outline',
+        };
+    }
 }
