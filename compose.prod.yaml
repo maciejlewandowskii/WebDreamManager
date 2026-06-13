@@ -17,6 +17,7 @@ services:
       MERCURE_JWT_SECRET: ${CADDY_MERCURE_JWT_SECRET}
       MERCURE_PUBLISHER_JWT_KEY: ${CADDY_MERCURE_JWT_SECRET}
       MERCURE_SUBSCRIBER_JWT_KEY: ${CADDY_MERCURE_JWT_SECRET}
+      CADDY_SERVER_EXTRA_DIRECTIVES: "tls /etc/caddy/certs/cf-origin.pem /etc/caddy/certs/cf-origin.key"
     depends_on:
       database:
         condition: service_healthy
@@ -24,10 +25,11 @@ services:
       - caddy_data:/data
       - caddy_config:/config
       - app_var:/app/var
+      - ./frankenphp/certs:/etc/caddy/certs:ro
     ports:
-      - "80:80"
-      - "443:443"
-      - "443:443/udp"
+      - "[::]:80:80"
+      - "[::]:443:443"
+      - "[::]:443:443/udp"
 
   worker:
     image: ghcr.io/maciejlewandowskii/webdreammanager:latest
