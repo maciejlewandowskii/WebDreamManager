@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Infrastructure\Console;
 
+use App\Domain\Authorization\Repository\RoleRepositoryInterface;
 use App\Domain\Identity\Entity\User;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Console\Attribute\AsCommand;
@@ -20,6 +21,7 @@ final class CreateUserCommand extends Command
     public function __construct(
         private readonly EntityManagerInterface $em,
         private readonly UserPasswordHasherInterface $hasher,
+        private readonly RoleRepositoryInterface $roleRepository,
     ) {
         parent::__construct();
     }
@@ -57,7 +59,12 @@ final class CreateUserCommand extends Command
         $user->setPassword($this->hasher->hashPassword($user, $password));
 
         if ($admin) {
-            $user->setRoles(['ROLE_ADMIN']);
+            $adminRole = $this->roleRepository->findAdminRole();
+            if ($adminRole === null) {
+                $io->error('Admin role not found. Run migrations first.');
+                return Command::FAILURE;
+            }
+            $user->setRole($adminRole);
         }
 
         $this->em->persist($user);
