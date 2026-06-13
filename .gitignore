@@ -30,6 +30,7 @@
 
 # Docker
 frankenphp/certs/
+/.env.prod
 
 # Build artifacts
 /public/build/
