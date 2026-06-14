@@ -32,7 +32,8 @@ final class AccountSetupController extends AbstractController
         }
 
         $session = $request->getSession();
-        $step = (int) $session->get(self::SESSION_KEY . '_' . substr($token, 0, 8), 1);
+        $sessionStep = $session->get(self::SESSION_KEY . '_' . substr($token, 0, 8), 1);
+        $step = is_int($sessionStep) ? $sessionStep : 1;
 
         if (!$request->isMethod('POST')) {
             return $this->render('views/identity/account_setup.html.twig', [

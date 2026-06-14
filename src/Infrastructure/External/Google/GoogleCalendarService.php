@@ -31,6 +31,7 @@ final readonly class GoogleCalendarService
         ]);
     }
 
+    /** @return array<string, mixed> */
     public function exchangeCode(string $code): array
     {
         $response = $this->http->request('POST', 'https://oauth2.googleapis.com/token', [
@@ -46,7 +47,7 @@ final readonly class GoogleCalendarService
         $data = $response->toArray(false);
 
         if (isset($data['error'])) {
-            throw new RuntimeException('Google OAuth error: ' . $data['error_description'] ?? $data['error']);
+            throw new RuntimeException('Google OAuth error: ' . ($data['error_description'] ?? $data['error']));
         }
 
         return $data;
@@ -72,6 +73,7 @@ final readonly class GoogleCalendarService
         return $data['access_token'];
     }
 
+    /** @return array<string, mixed> */
     public function createMeetEvent(string $accessToken, string $customerName, ?string $customerEmail): array
     {
         $start = new DateTimeImmutable('+30 minutes');
@@ -113,15 +115,21 @@ final readonly class GoogleCalendarService
         return $data;
     }
 
+    /** @param array<string, mixed> $event */
     public static function extractMeetUrl(array $event): ?string
     {
-        $entryPoints = $event['conferenceData']['entryPoints'] ?? [];
-        foreach ($entryPoints as $ep) {
-            if (($ep['entryPointType'] ?? '') === 'video') {
-                return $ep['uri'];
+        $conferenceData = $event['conferenceData'] ?? null;
+        if (is_array($conferenceData)) {
+            $entryPoints = $conferenceData['entryPoints'] ?? null;
+            if (is_array($entryPoints)) {
+                foreach ($entryPoints as $ep) {
+                    if (is_array($ep) && ($ep['entryPointType'] ?? '') === 'video' && is_string($ep['uri'] ?? null)) {
+                        return $ep['uri'];
+                    }
+                }
             }
         }
 
-        return $event['hangoutLink'] ?? null;
+        return is_string($event['hangoutLink'] ?? null) ? $event['hangoutLink'] : null;
     }
 }

@@ -66,6 +66,7 @@ class Quote
     #[ORM\Column(type: 'datetime_immutable')]
     private DateTimeImmutable $updatedAt;
 
+    /** @var array<int, array<string, mixed>>|null */
     #[ORM\Column(type: 'json', nullable: true)]
     private ?array $itemsSnapshot = [];
 
@@ -94,6 +95,7 @@ class Quote
         ], $this->items->toArray()));
     }
 
+    /** @return array<int, array<string, mixed>>|null */
     public function getItemsSnapshot(): ?array
     {
         return $this->itemsSnapshot;

@@ -38,6 +38,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, EmailTw
     #[Assert\Length(min: 2, max: 100)]
     private string $fullName;
 
+    /** @var array<string> */
     #[ORM\Column(type: 'json')]
     private array $roles = [];
 
@@ -71,6 +72,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, EmailTw
     private ?string $totpSecret = null;
 
     // 2FA — Backup codes
+    /** @var array<string> */
     #[ORM\Column(type: 'json')]
     private array $backupCodes = [];
 
@@ -90,6 +92,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, EmailTw
     #[ORM\Column(type: 'datetime_immutable')]
     private DateTimeImmutable $updatedAt;
 
+    /** @var array<string, mixed>|null */
     #[ORM\Column(type: 'json', nullable: true)]
     private ?array $notificationPreferences = null;
 
@@ -145,6 +148,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, EmailTw
 
     public function getUserIdentifier(): string
     {
+        assert($this->email !== '');
         return $this->email;
     }
 
@@ -156,6 +160,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, EmailTw
         return array_unique($roles);
     }
 
+    /** @param array<string> $roles */
     public function setRoles(array $roles): void
     {
         $this->roles = $roles;
@@ -293,11 +298,13 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, EmailTw
         ));
     }
 
+    /** @param array<string> $codes */
     public function setBackupCodes(array $codes): void
     {
         $this->backupCodes = $codes;
     }
 
+    /** @return array<string> */
     public function getBackupCodes(): array
     {
         return $this->backupCodes;
@@ -354,21 +361,18 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, EmailTw
         return $this->updatedAt;
     }
 
+    /** @return array<string, mixed>|null */
     public function getNotificationPreferences(): ?array
     {
         return $this->notificationPreferences;
     }
 
+    /** @param array<string, mixed>|null $preferences */
     public function setNotificationPreferences(?array $preferences): void
     {
         $this->notificationPreferences = $preferences;
     }
 
-    /**
-     * @param string $eventName
-     * @param \App\Domain\Notifications\Entity\NotificationChannelType $channel
-     * @param \App\Domain\Notifications\Entity\NotificationChannelType[] $defaultChannels
-     */
     // --- SMS 2FA ---
 
     public function isSmsAuthEnabled(): bool
@@ -408,6 +412,9 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, EmailTw
         $this->googleRefreshToken = $token;
     }
 
+    /**
+     * @param \App\Domain\Notifications\Entity\NotificationChannelType[] $defaultChannels
+     */
     public function isNotificationChannelEnabled(
         string $eventName,
         \App\Domain\Notifications\Entity\NotificationChannelType $channel,

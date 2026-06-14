@@ -15,6 +15,7 @@ use Symfony\Bridge\Doctrine\Attribute\MapEntity;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\ResponseHeaderBag;
@@ -64,7 +65,7 @@ final class FileManagerController extends AbstractController
     public function upload(#[MapEntity(id: 'projectId')] Project $project, Request $request): Response
     {
         $file = $request->files->get('file');
-        if (!$file) {
+        if (!$file instanceof UploadedFile) {
             return $this->json(['error' => 'No file uploaded'], 400);
         }
 
@@ -87,9 +88,10 @@ final class FileManagerController extends AbstractController
     public function create(#[MapEntity(id: 'projectId')] Project $project, string $path, Request $request): Response
     {
         $body     = json_decode($request->getContent(), true, 512, JSON_THROW_ON_ERROR);
+        /** @var array{name?: string, type?: string} $body */
         $parentId = $path === '' ? '/' : $this->decodePath($path);
-        $name     = basename((string) ($body['name'] ?? ''));
-        $type     = (string) ($body['type'] ?? 'folder');
+        $name     = basename($body['name'] ?? '');
+        $type     = $body['type'] ?? 'folder';
 
         if ($name === '') {
             return $this->json(['error' => 'Name is required'], 400);
@@ -116,7 +118,8 @@ final class FileManagerController extends AbstractController
     public function update(#[MapEntity(id: 'projectId')] Project $project, string $path, Request $request): Response
     {
         $body      = json_decode($request->getContent(), true, 512, JSON_THROW_ON_ERROR);
-        $operation = (string) ($body['operation'] ?? '');
+        /** @var array{operation?: string, target?: string, ids?: string[], name?: string} $body */
+        $operation = $body['operation'] ?? '';
         $basePath  = $this->ensureProjectPath($project->getId());
 
         if ($operation === 'move') {
@@ -138,13 +141,14 @@ final class FileManagerController extends AbstractController
     public function delete(#[MapEntity(id: 'projectId')] Project $project, Request $request): Response
     {
         $body     = json_decode($request->getContent(), true, 512, JSON_THROW_ON_ERROR);
+        /** @var array{ids?: string[]} $body */
         $basePath = $this->ensureProjectPath($project->getId());
 
-        foreach ((array) ($body['ids'] ?? []) as $id) {
-            if ($this->isProtectedInvoicePath((string) $id)) {
+        foreach ($body['ids'] ?? [] as $id) {
+            if ($this->isProtectedInvoicePath($id)) {
                 return $this->json(['error' => 'Invoice PDFs cannot be deleted via the file manager.'], 403);
             }
-            $fsPath = $this->resolveSafePath($basePath, (string) $id);
+            $fsPath = $this->resolveSafePath($basePath, $id);
             $this->removeRecursive($fsPath);
         }
 
@@ -176,6 +180,7 @@ final class FileManagerController extends AbstractController
         return $response;
     }
 
+    /** @param array<string, mixed> $body */
     private function doRename(string $basePath, string $fsPath, array $body): Response
     {
         $id = $this->pathToId($basePath, $fsPath);
@@ -183,7 +188,7 @@ final class FileManagerController extends AbstractController
             return $this->json(['error' => 'Invoice PDFs cannot be renamed via the file manager.'], 403);
         }
 
-        $newName = basename((string) ($body['name'] ?? ''));
+        $newName = basename(is_string($body['name'] ?? null) ? $body['name'] : '');
         if ($newName === '') {
             return $this->json(['error' => 'Name is required'], 400);
         }
@@ -199,12 +204,17 @@ final class FileManagerController extends AbstractController
         return str_contains($relativePath, '/invoices/') || str_contains($relativePath, '/quotes/');
     }
 
+    /** @param array<string, mixed> $body */
     private function doMove(string $basePath, array $body): Response
     {
-        $targetPath = $this->resolveSafePath($basePath, (string) ($body['target'] ?? '/'));
+        $targetPath = $this->resolveSafePath($basePath, is_string($body['target'] ?? null) ? $body['target'] : '/');
         $results    = [];
-        foreach ((array) ($body['ids'] ?? []) as $id) {
-            $src  = $this->resolveSafePath($basePath, (string) $id);
+        $rawIds = $body['ids'] ?? null;
+        foreach (is_array($rawIds) ? $rawIds : [] as $id) {
+            if (!is_string($id)) {
+                continue;
+            }
+            $src  = $this->resolveSafePath($basePath, $id);
             $dest = $targetPath . '/' . basename($src);
             rename($src, $dest);
             $results[] = ['id' => $this->pathToId($basePath, $dest), 'name' => basename($dest)];
@@ -212,12 +222,17 @@ final class FileManagerController extends AbstractController
         return $this->json(['result' => $results]);
     }
 
+    /** @param array<string, mixed> $body */
     private function doCopy(string $basePath, array $body): Response
     {
-        $targetPath = $this->resolveSafePath($basePath, (string) ($body['target'] ?? '/'));
+        $targetPath = $this->resolveSafePath($basePath, is_string($body['target'] ?? null) ? $body['target'] : '/');
         $results    = [];
-        foreach ((array) ($body['ids'] ?? []) as $id) {
-            $src  = $this->resolveSafePath($basePath, (string) $id);
+        $rawIds = $body['ids'] ?? null;
+        foreach (is_array($rawIds) ? $rawIds : [] as $id) {
+            if (!is_string($id)) {
+                continue;
+            }
+            $src  = $this->resolveSafePath($basePath, $id);
             $dest = $targetPath . '/' . basename($src);
             $this->copyRecursive($src, $dest);
             $results[] = ['id' => $this->pathToId($basePath, $dest), 'name' => basename($dest)];
@@ -225,6 +240,7 @@ final class FileManagerController extends AbstractController
         return $this->json(['result' => $results]);
     }
 
+    /** @return array<int, array<string, mixed>> */
     private function listDirectory(string $basePath, string $relativePath, string $search = ''): array
     {
         $dirPath = $relativePath === '/' ? $basePath : $basePath . '/' . ltrim($relativePath, '/');
@@ -245,6 +261,7 @@ final class FileManagerController extends AbstractController
         }
 
         foreach ($iter as $item) {
+            /** @var \DirectoryIterator $item */
             if ($item->isDot() || str_starts_with($item->getFilename(), '.')) {
                 continue;
             }

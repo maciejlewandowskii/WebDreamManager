@@ -83,7 +83,7 @@ final class DoctrineQuoteRepository extends ServiceEntityRepository implements Q
             ->orderBy($field, $direction);
 
         if ($search !== null) {
-            $qb->andWhere('TRGM_MATCH(:search, q.number) = true OR TRGM_MATCH(:search, c.name) = true OR TRGM_MATCH(:search, COALESCE(q.title, \'\')) = true')
+            $qb->andWhere('TRGM_MATCH(:search, q.number) = true OR TRGM_MATCH(:search, c.name) = true')
                ->setParameter('search', $search);
         }
 
@@ -101,7 +101,7 @@ final class DoctrineQuoteRepository extends ServiceEntityRepository implements Q
         $direction = strtoupper($sortDirection) === 'ASC' ? 'ASC' : 'DESC';
 
         if (!isset(self::SORT_FIELDS[$sortBy])) {
-            $direction = $defaultSortDirection;
+            $direction = strtoupper($defaultSortDirection) === 'ASC' ? 'ASC' : 'DESC';
         }
 
         return [$field, $direction];

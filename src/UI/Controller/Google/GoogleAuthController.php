@@ -42,7 +42,7 @@ final class GoogleAuthController extends AppController
         $user   = $this->getUser();
         $tokens = $this->google->exchangeCode((string) $code);
 
-        if (isset($tokens['refresh_token'])) {
+        if (isset($tokens['refresh_token']) && is_string($tokens['refresh_token'])) {
             $user->setGoogleRefreshToken($tokens['refresh_token']);
             $this->userRepository->save($user);
         }
@@ -59,7 +59,8 @@ final class GoogleAuthController extends AppController
             return $this->redirectToRoute('app_customer_index');
         }
 
-        $command = new CreateMeetingCommand($customer, $user, (string) $tokens['access_token']);
+        $accessToken = $tokens['access_token'] ?? '';
+        $command = new CreateMeetingCommand($customer, $user, is_string($accessToken) ? $accessToken : '');
         new PipelineProcessor($this->meetHandlers)->run($command);
 
         $this->addFlash('success', 'Google Meet created' . ($command->meetUrl ? ': ' . $command->meetUrl : '') . '.');

@@ -58,7 +58,7 @@ final class ApplyInvoiceDataStage implements PipelineHandlerInterface
             $item = new InvoiceItem($invoice);
             $item->setDescription($itemData['description']);
             $item->setQuantity($itemData['quantity']);
-            $item->setUnit($itemData['unit'] ?? 'unit');
+            $item->setUnit($itemData['unit']);
             $item->setUnitPrice($itemData['unitPrice']);
             $item->setTaxRate($itemData['taxRate']);
             $item->setSortOrder($i);

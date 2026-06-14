@@ -48,7 +48,7 @@ final class CustomerData
         $customer->setStatus($this->status);
         $amount = $this->hourlyRate['amount'] ?? null;
         $customer->setHourlyRate($amount !== '' && $amount !== null ? (string) $amount : null);
-        $customer->setHourlyRateCurrency($this->hourlyRate['currency'] ?? 'PLN');
+        $customer->setHourlyRateCurrency($this->hourlyRate['currency']);
         $customer->setPdfColorMode($this->pdfColorMode);
     }
 }

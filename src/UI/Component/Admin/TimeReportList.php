@@ -33,6 +33,7 @@ final class TimeReportList
     ) {
     }
 
+    /** @return array<int, array<string, mixed>> */
     public function getSummaries(): array
     {
         $now = new DateTimeImmutable();

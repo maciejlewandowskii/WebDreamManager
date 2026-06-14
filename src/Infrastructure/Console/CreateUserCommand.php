@@ -49,6 +49,10 @@ final class CreateUserCommand extends Command
             return Command::FAILURE;
         }
 
+        assert(is_string($email));
+        assert(is_string($name));
+        assert(is_string($password));
+
         $existing = $this->em->getRepository(User::class)->findOneBy(['email' => $email]);
         if ($existing) {
             $io->error("A user with email $email already exists.");

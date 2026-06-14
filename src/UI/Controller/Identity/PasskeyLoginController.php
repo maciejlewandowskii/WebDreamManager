@@ -46,7 +46,7 @@ final class PasskeyLoginController extends AbstractController
     public function authenticate(Request $request): Response
     {
         $challengeHex = $request->getSession()->get('passkey_login_challenge');
-        if ($challengeHex === null) {
+        if (!is_string($challengeHex)) {
             return $this->json(['error' => 'Session expired.'], 400);
         }
 
@@ -55,9 +55,10 @@ final class PasskeyLoginController extends AbstractController
         } catch (JsonException) {
             return $this->json(['error' => 'Invalid request.'], 400);
         }
+        /** @var array<string, mixed> $body */
 
         $credentialId = $body['id'] ?? null;
-        if (!$credentialId) {
+        if (!is_string($credentialId) || $credentialId === '') {
             return $this->json(['error' => 'Missing credential ID.'], 400);
         }
 
@@ -67,10 +68,12 @@ final class PasskeyLoginController extends AbstractController
         }
 
         try {
-            $webAuthn    = $this->createWebAuthn();
-            $clientData  = base64_decode($body['response']['clientDataJSON'] ?? '');
-            $authData    = base64_decode($body['response']['authenticatorData'] ?? '');
-            $signature   = base64_decode($body['response']['signature'] ?? '');
+            $webAuthn = $this->createWebAuthn();
+            $response = is_array($body['response'] ?? null) ? $body['response'] : [];
+            /** @var array<string, mixed> $response */
+            $clientData  = base64_decode(is_string($response['clientDataJSON'] ?? null) ? $response['clientDataJSON'] : '');
+            $authData    = base64_decode(is_string($response['authenticatorData'] ?? null) ? $response['authenticatorData'] : '');
+            $signature   = base64_decode(is_string($response['signature'] ?? null) ? $response['signature'] : '');
             $challenge   = ByteBuffer::fromHex($challengeHex);
 
             $webAuthn->processGet(

@@ -57,7 +57,7 @@ final class ApplyQuoteDataStage implements PipelineHandlerInterface
             $item = new QuoteItem($quote);
             $item->setDescription($itemData['description']);
             $item->setQuantity($itemData['quantity']);
-            $item->setUnit($itemData['unit'] ?? 'h');
+            $item->setUnit($itemData['unit']);
             $item->setUnitPrice($itemData['unitPrice']);
             $item->setTaxRate($itemData['taxRate']);
             $item->setSortOrder($i);

@@ -6,6 +6,9 @@ namespace App\Infrastructure\Messenger\Notification;
 
 final readonly class DispatchNotificationMessage
 {
+    /**
+     * @param array<string, mixed> $templateContext
+     */
     public function __construct(
         public string $eventName,
         public string $emailSubject,

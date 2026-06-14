@@ -22,6 +22,7 @@ use App\UI\Form\ChangePasswordType;
 use App\UI\Form\ProfileType;
 use App\UI\Form\WorkSettingsType;
 use Endroid\QrCode\Builder\Builder;
+use Endroid\QrCode\Color\Color;
 use Endroid\QrCode\Encoding\Encoding;
 use Endroid\QrCode\ErrorCorrectionLevel;
 use Endroid\QrCode\Writer\SvgWriter;
@@ -196,7 +197,7 @@ final class SettingsController extends AppController
 
         $pendingTotpSecret = $request->getSession()->get('totp_pending_secret');
         $totpQrUri = null;
-        if ($pendingTotpSecret !== null) {
+        if (is_string($pendingTotpSecret)) {
             $totpQrUri = $this->generateTotpQrUri($user, $pendingTotpSecret);
         }
 
@@ -238,7 +239,7 @@ final class SettingsController extends AppController
         $secret = $request->getSession()->get('totp_pending_secret');
         $code   = $request->request->getString('totp_code');
 
-        if ($secret === null) {
+        if (!is_string($secret)) {
             $this->addFlash('error', 'Session expired. Please restart the setup.');
             return $this->redirectToRoute('app_settings_2fa');
         }
@@ -355,7 +356,7 @@ final class SettingsController extends AppController
         $user = $this->getUser();
 
         $challengeHex = $request->getSession()->get('passkey_challenge');
-        if ($challengeHex === null) {
+        if (!is_string($challengeHex)) {
             return $this->json(['error' => 'Session expired.'], 400);
         }
 
@@ -367,11 +368,14 @@ final class SettingsController extends AppController
         if (!is_array($body)) {
             return $this->json(['error' => 'Invalid request.'], 400);
         }
+        /** @var array<string, mixed> $body */
 
         try {
-            $webAuthn   = $this->createWebAuthn();
-            $clientData = base64_decode($body['response']['clientDataJSON'] ?? '');
-            $attObj     = base64_decode($body['response']['attestationObject'] ?? '');
+            $webAuthn = $this->createWebAuthn();
+            $response = is_array($body['response'] ?? null) ? $body['response'] : [];
+            /** @var array<string, mixed> $response */
+            $clientData = base64_decode(is_string($response['clientDataJSON'] ?? null) ? $response['clientDataJSON'] : '');
+            $attObj     = base64_decode(is_string($response['attestationObject'] ?? null) ? $response['attestationObject'] : '');
             $challenge  = ByteBuffer::fromHex($challengeHex);
 
             $data = $webAuthn->processCreate($clientData, $attObj, $challenge, false, true, false);
@@ -379,7 +383,7 @@ final class SettingsController extends AppController
             $credentialId = rtrim(strtr(base64_encode($data->credentialId), '+/', '-_'), '=');
             $publicKey    = $data->credentialPublicKey;
             $signCount    = $data->signatureCounter ?? 0;
-            $name         = trim($body['name'] ?? '') ?: 'Passkey';
+            $name         = trim(is_string($body['name'] ?? null) ? $body['name'] : '') ?: 'Passkey';
 
             $credential = new PasskeyCredential($user, $credentialId, $publicKey, $signCount, $name);
             $this->passkeyRepository->save($credential);

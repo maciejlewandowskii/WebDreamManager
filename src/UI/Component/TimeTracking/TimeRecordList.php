@@ -134,6 +134,7 @@ final class TimeRecordList
         $this->currentDate = (new \DateTimeImmutable('today'))->format('Y-m-d');
     }
 
+    /** @return array<string, mixed> */
     public function getTodayStats(): array
     {
         /** @var User $user */
@@ -146,6 +147,7 @@ final class TimeRecordList
         return $this->recordRepository->sumHoursByDateForUser(new DateTimeImmutable('today'), $user);
     }
 
+    /** @return array{spent: mixed, expected: int, days: int} */
     public function getMonthlyStats(): array
     {
         $now = new DateTimeImmutable();

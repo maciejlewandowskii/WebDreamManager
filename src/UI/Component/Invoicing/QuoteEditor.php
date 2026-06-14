@@ -58,7 +58,7 @@ final class QuoteEditor
     #[LiveProp(writable: true)]
     public string $introText = '';
 
-    /** @var array<int, array{description: string, quantity: string, unitPrice: string, taxRate: string}> */
+    /** @var array<int, array{description: string, quantity: string, unit: string, unitPrice: string, taxRate: string}> */
     #[LiveProp(writable: true)]
     public array $items = [];
 
@@ -82,7 +82,7 @@ final class QuoteEditor
                 $this->customerId     = $quote->getCustomer()->getId();
                 $this->projectId      = $quote->getProject()?->getId() ?? '';
                 $this->issuedAt       = $quote->getIssuedAt()->format('Y-m-d');
-                $this->validUntil     = $quote->getValidUntil()->format('Y-m-d');
+                $this->validUntil     = ($quote->getValidUntil() ?? new \DateTimeImmutable())->format('Y-m-d');
                 $this->currency       = $quote->getCurrency();
                 $this->defaultTaxRate = $quote->getDefaultTaxRate();
                 $this->notes          = $quote->getNotes() ?? '';
@@ -163,10 +163,14 @@ final class QuoteEditor
         } else {
             $command = new CreateQuoteCommand($data);
             new PipelineProcessor($this->createHandlers)->run($command);
+            assert($command->result !== null);
             $quoteId = $command->result->getId();
         }
 
-        $this->requestStack->getSession()->getFlashBag()->add('success', 'Quote saved successfully.');
+        $session = $this->requestStack->getSession();
+        if ($session instanceof \Symfony\Component\HttpFoundation\Session\FlashBagAwareSessionInterface) {
+            $session->getFlashBag()->add('success', 'Quote saved successfully.');
+        }
 
         return new RedirectResponse($this->router->generate('app_quote_show', ['id' => $quoteId]));
     }

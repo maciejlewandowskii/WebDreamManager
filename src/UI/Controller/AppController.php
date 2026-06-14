@@ -8,6 +8,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\Session\FlashBagAwareSessionInterface;
 
 abstract class AppController extends AbstractController
 {
@@ -21,16 +22,20 @@ abstract class AppController extends AbstractController
         /** @noinspection PhpUnhandledExceptionInspection */
         $request = $this->container->get('request_stack')->getCurrentRequest();
         if ($request !== null && $request->hasSession()) {
-            $flashes = $request->getSession()->getFlashBag()->all();
-            if ($flashes !== []) {
-                /** @noinspection JsonEncodingApiUsageInspection */
-                $headers['X-Flash-Messages'] = json_encode($flashes);
+            $session = $request->getSession();
+            if ($session instanceof FlashBagAwareSessionInterface) {
+                $flashes = $session->getFlashBag()->all();
+                if ($flashes !== []) {
+                    /** @noinspection JsonEncodingApiUsageInspection */
+                    $headers['X-Flash-Messages'] = json_encode($flashes);
+                }
             }
         }
 
         return new Response('<turbo-frame id="modal"></turbo-frame>', $status, $headers);
     }
 
+    /** @param array<string, mixed> $params */
     protected function redirectToReferer(Request $request, string $fallbackRoute, array $params = []): RedirectResponse
     {
         $referer = $request->headers->get('referer');

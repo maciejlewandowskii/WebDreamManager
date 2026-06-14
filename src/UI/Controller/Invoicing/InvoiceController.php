@@ -10,7 +10,6 @@ use App\Domain\Invoicing\Application\Pipeline\GenerateInvoicePdf\GenerateInvoice
 use App\Domain\Invoicing\Application\Pipeline\SendInvoiceEmail\SendInvoiceEmailCommand;
 use App\Domain\Invoicing\Entity\Invoice;
 use App\Domain\Invoicing\Infrastructure\DoctrineInvoicePdfRecordRepository;
-use App\Domain\Invoicing\Repository\InvoiceRepositoryInterface;
 use App\Domain\Project\Repository\ProjectRepositoryInterface;
 use App\Domain\TimeTracking\Repository\TimeRecordRepositoryInterface;
 use App\Infrastructure\Pipeline\PipelineProcessor;
@@ -29,7 +28,6 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
 final class InvoiceController extends AppController
 {
     public function __construct(
-        private readonly InvoiceRepositoryInterface $repository,
         private readonly DoctrineInvoicePdfRecordRepository $pdfRecords,
         private readonly AuditReader $auditReader,
         private readonly ProjectRepositoryInterface $projectRepository,
@@ -84,12 +82,14 @@ final class InvoiceController extends AppController
             return $this->redirectToReferer($request, 'app_invoice_from_time_tracking');
         }
 
-        $recordIds = (array) $request->request->all('recordIds');
+        /** @var string[] $recordIds */
+        $recordIds = $request->request->all('recordIds');
         $command   = new CreateInvoiceFromTimeTrackingCommand($selectedProject, $recordIds);
         new PipelineProcessor($this->fromTimeTrackingHandlers)->run($command);
 
         $this->addFlash('success', sprintf('Invoice created from %d time record(s).', count($recordIds)));
 
+        assert($command->result !== null);
         return $this->redirectToRoute('app_invoice_show', ['id' => $command->result->getId()]);
     }
 

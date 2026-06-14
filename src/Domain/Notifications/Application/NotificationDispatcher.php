@@ -11,6 +11,7 @@ final readonly class NotificationDispatcher
 {
     public function __construct(private MessageBusInterface $bus) {}
 
+    /** @param array<string, mixed> $templateContext */
     public function dispatch(
         string $eventName,
         string $emailSubject,

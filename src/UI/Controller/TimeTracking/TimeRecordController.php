@@ -46,7 +46,7 @@ final class TimeRecordController extends AppController
         
         if ($request->query->has('date')) {
             try {
-                $data->date = new \DateTimeImmutable($request->query->get('date'));
+                $data->date = new \DateTimeImmutable($request->query->getString('date'));
             } catch (\Exception $e) {
                 // ignore invalid date
             }

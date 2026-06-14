@@ -40,6 +40,7 @@ final class StripeWebhookController extends AbstractController
         if ($event->type === 'payment_intent.succeeded') {
             /** @var PaymentIntent $intent */
             $intent    = $event->data->object;
+            /** @phpstan-ignore-next-line */
             $invoiceId = $intent->metadata?->invoice_id ?? null;
 
             if ($invoiceId !== null) {

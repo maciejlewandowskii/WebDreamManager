@@ -152,7 +152,7 @@ final class DoctrineTimeRecordRepository extends ServiceEntityRepository impleme
         $direction = strtoupper($sortDirection) === 'ASC' ? 'ASC' : 'DESC';
 
         if (!isset(self::SORT_FIELDS[$sortBy])) {
-            $direction = $defaultSortDirection;
+            $direction = strtoupper($defaultSortDirection) === 'ASC' ? 'ASC' : 'DESC';
         }
 
         return [$field, $direction];
@@ -160,6 +160,7 @@ final class DoctrineTimeRecordRepository extends ServiceEntityRepository impleme
 
     public function sumHoursByDate(DateTimeImmutable $date): array
     {
+        /** @var array{spent: string, estimated: string} $row */
         $row = $this->createQueryBuilder('t')
             ->select('COALESCE(SUM(t.spentHours), 0) AS spent, COALESCE(SUM(t.estimatedHours), 0) AS estimated')
             ->where('t.date = :date')
@@ -175,6 +176,7 @@ final class DoctrineTimeRecordRepository extends ServiceEntityRepository impleme
         $from = new DateTimeImmutable(sprintf('%d-%02d-01', $year, $month));
         $to   = $from->modify('last day of this month');
 
+        /** @var array{spent: string} $row */
         $row = $this->createQueryBuilder('t')
             ->select('COALESCE(SUM(t.spentHours), 0) AS spent')
             ->where('t.date >= :from AND t.date <= :to')
@@ -188,6 +190,7 @@ final class DoctrineTimeRecordRepository extends ServiceEntityRepository impleme
 
     public function sumHoursByDateForUser(DateTimeImmutable $date, User $user): array
     {
+        /** @var array{spent: string, estimated: string} $row */
         $row = $this->createQueryBuilder('t')
             ->select('COALESCE(SUM(t.spentHours), 0) AS spent, COALESCE(SUM(t.estimatedHours), 0) AS estimated')
             ->where('t.date = :date AND t.worker = :user')
@@ -204,6 +207,7 @@ final class DoctrineTimeRecordRepository extends ServiceEntityRepository impleme
         $from = new DateTimeImmutable(sprintf('%d-%02d-01', $year, $month));
         $to   = $from->modify('last day of this month');
 
+        /** @var array{spent: string} $row */
         $row = $this->createQueryBuilder('t')
             ->select('COALESCE(SUM(t.spentHours), 0) AS spent')
             ->where('t.date >= :from AND t.date <= :to AND t.worker = :user')

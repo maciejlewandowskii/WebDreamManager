@@ -67,7 +67,7 @@ final class DoctrineCustomerRepository extends ServiceEntityRepository implement
         $direction = strtoupper($sortDirection) === 'ASC' ? 'ASC' : 'DESC';
 
         if (!isset(self::SORT_FIELDS[$sortBy])) {
-            $direction = $defaultSortDirection;
+            $direction = strtoupper($defaultSortDirection) === 'ASC' ? 'ASC' : 'DESC';
         }
 
         return [$field, $direction];

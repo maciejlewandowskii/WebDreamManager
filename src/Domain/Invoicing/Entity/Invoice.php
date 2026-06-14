@@ -75,6 +75,7 @@ class Invoice
     #[ORM\Column(type: 'datetime_immutable')]
     private DateTimeImmutable $updatedAt;
 
+    /** @var array<int, array<string, mixed>>|null */
     #[ORM\Column(type: 'json', nullable: true)]
     private ?array $itemsSnapshot = [];
 
@@ -103,6 +104,7 @@ class Invoice
         ], $this->items->toArray()));
     }
 
+    /** @return array<int, array<string, mixed>>|null */
     public function getItemsSnapshot(): ?array
     {
         return $this->itemsSnapshot;

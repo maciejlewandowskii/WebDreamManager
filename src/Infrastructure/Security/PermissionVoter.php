@@ -15,6 +15,8 @@ use Symfony\Component\Security\Core\Authorization\Voter\Voter;
 /**
  * Handles all Permission enum values as Symfony attributes.
  * Subject may be a Project entity for project-scoped checks.
+ *
+ * @extends Voter<string, mixed>
  */
 final class PermissionVoter extends Voter
 {

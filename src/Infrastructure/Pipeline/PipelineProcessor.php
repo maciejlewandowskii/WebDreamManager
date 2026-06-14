@@ -6,6 +6,7 @@ namespace App\Infrastructure\Pipeline;
 
 final class PipelineProcessor
 {
+    /** @param iterable<PipelineHandlerInterface> $handlers */
     public function __construct(private readonly iterable $handlers)
     {
     }

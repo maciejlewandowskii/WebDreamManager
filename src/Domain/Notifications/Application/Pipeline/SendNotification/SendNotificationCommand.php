@@ -9,6 +9,9 @@ use App\Domain\Notifications\Entity\NotificationRule;
 
 final readonly class SendNotificationCommand
 {
+    /**
+     * @param array<string, mixed> $templateContext
+     */
     public function __construct(
         public NotificationRule $rule,
         public User $recipient,

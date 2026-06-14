@@ -59,6 +59,7 @@ final class CustomerController extends AppController
             new PipelineProcessor($this->createHandlers)->run($command);
             $this->addFlash('success', 'Customer created successfully.');
 
+            assert($command->result !== null);
             return $this->redirectToRoute('app_customer_show', ['id' => $command->result->getId()]);
         }
 

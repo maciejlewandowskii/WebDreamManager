@@ -60,6 +60,7 @@ final class ProjectController extends AppController
             new PipelineProcessor($this->createHandlers)->run($command);
             $this->addFlash('success', 'Project created successfully.');
 
+            assert($command->result !== null);
             return $this->redirectToRoute('app_project_show', ['id' => $command->result->getId()]);
         }
 
@@ -129,6 +130,7 @@ final class ProjectController extends AppController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            assert($data->user !== null);
             $existing = $this->memberRepository->findByUserAndProject($data->user, $project);
 
             if ($existing !== null) {

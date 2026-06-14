@@ -9,7 +9,6 @@ use App\Domain\Invoicing\Application\Pipeline\GenerateQuotePdf\GenerateQuotePdfC
 use App\Domain\Invoicing\Application\Pipeline\SendQuoteEmail\SendQuoteEmailCommand;
 use App\Domain\Invoicing\Entity\Quote;
 use App\Domain\Invoicing\Infrastructure\DoctrineQuotePdfRecordRepository;
-use App\Domain\Invoicing\Repository\QuoteRepositoryInterface;
 use App\Infrastructure\Pipeline\PipelineProcessor;
 use App\UI\Controller\AppController;
 use SimpleThings\EntityAudit\AuditReader;
@@ -26,7 +25,6 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
 final class QuoteController extends AppController
 {
     public function __construct(
-        private readonly QuoteRepositoryInterface $repository,
         private readonly DoctrineQuotePdfRecordRepository $pdfRecords,
         private readonly AuditReader $auditReader,
         #[AutowireIterator('app.quote.generate_pdf')] private readonly iterable $generatePdfHandlers,

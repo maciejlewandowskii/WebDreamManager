@@ -61,7 +61,7 @@ final class InvoiceEditor
     #[LiveProp(writable: true)]
     public string $bankAccount = '';
 
-    /** @var array<int, array{description: string, quantity: string, unitPrice: string, taxRate: string}> */
+    /** @var array<int, array{description: string, quantity: string, unit: string, unitPrice: string, taxRate: string}> */
     #[LiveProp(writable: true)]
     public array $items = [];
 
@@ -176,10 +176,14 @@ final class InvoiceEditor
         } else {
             $command = new CreateInvoiceCommand($data);
             new PipelineProcessor($this->createHandlers)->run($command);
+            assert($command->result !== null);
             $invoiceId = $command->result->getId();
         }
 
-        $this->requestStack->getSession()->getFlashBag()->add('success', 'Invoice saved successfully.');
+        $session = $this->requestStack->getSession();
+        if ($session instanceof \Symfony\Component\HttpFoundation\Session\FlashBagAwareSessionInterface) {
+            $session->getFlashBag()->add('success', 'Invoice saved successfully.');
+        }
 
         return new RedirectResponse($this->router->generate('app_invoice_show', ['id' => $invoiceId]));
     }
