@@ -29,7 +29,8 @@ enum InvoiceStatus: string
     {
         return match($this) {
             self::Draft     => 'secondary',
-            self::Issued, self::Sent => 'primary',
+            self::Issued => 'info',
+            self::Sent   => 'primary',
             self::Paid      => 'success',
             self::Overdue   => 'destructive',
             self::Cancelled => 'outline',
