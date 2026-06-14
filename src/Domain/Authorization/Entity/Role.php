@@ -7,6 +7,7 @@ namespace App\Domain\Authorization\Entity;
 use App\Domain\Authorization\Infrastructure\DoctrineRoleRepository;
 use DateTimeImmutable;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Uid\Uuid;
 
 #[ORM\Entity(repositoryClass: DoctrineRoleRepository::class)]
 #[ORM\Table(name: 'roles')]
@@ -17,7 +18,7 @@ class Role
     #[ORM\Column(type: 'uuid', unique: true)]
     #[ORM\GeneratedValue(strategy: 'CUSTOM')]
     #[ORM\CustomIdGenerator(class: 'doctrine.uuid_generator')]
-    private string $id;
+    private Uuid $id;
 
     #[ORM\Column(type: 'string', length: 100, unique: true)]
     private string $name;
@@ -52,7 +53,7 @@ class Role
 
     public function getId(): string
     {
-        return $this->id;
+        return (string) $this->id;
     }
 
     public function getName(): string

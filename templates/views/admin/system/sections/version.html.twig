@@ -35,6 +35,15 @@
                     </twig:Button>
                 </form>
 
+                {% if watchtower_enabled %}
+                    <form method="post" action="{{ path('app_admin_system_version_watchtower_trigger') }}">
+                        <twig:Button variant="primary" type="submit">
+                            {{ ux_icon('tabler:bolt', {class: 'w-4 h-4'}) }}
+                            Trigger update now
+                        </twig:Button>
+                    </form>
+                {% endif %}
+
                 {% if update_available and latest_version %}
                     <div class="flex flex-col [gap:0.5rem] flex-1">
                         <p class="text-xs [color:var(--color-on-surface-variant)]">
@@ -79,13 +88,10 @@
                 </label>
 
                 <div class="[background:var(--color-surface-variant)] rounded [padding:0.875rem_1rem] text-xs [color:var(--color-on-surface-variant)] [line-height:1.6]">
-                    <strong class="[color:var(--color-on-surface)]">Watchtower compose snippet:</strong><br>
-                    <code class="block [margin-top:0.5rem] font-mono whitespace-pre">  watchtower:
-    image: containrrr/watchtower
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-    command: --interval 3600 --cleanup
-    restart: unless-stopped</code>
+                    {{ ux_icon('tabler:info-circle', {class: 'w-4 h-4 inline-block [margin-right:0.25rem]'}) }}
+                    To enable one-click updates, configure the
+                    <a href="{{ path('app_admin_system_integration_index') }}" class="[color:var(--color-primary)]">Watchtower integration</a>
+                    with the HTTP API URL and token.
                 </div>
 
                 <div class="flex [justify-content:flex-end]">

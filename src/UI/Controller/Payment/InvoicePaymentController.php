@@ -12,6 +12,7 @@ use App\Domain\Invoicing\Entity\InvoiceStatus;
 use App\Domain\Invoicing\Entity\PaymentStatus;
 use App\Domain\Invoicing\Port\PaymentGatewayInterface;
 use App\Domain\Invoicing\Repository\InvoiceRepositoryInterface;
+use App\Infrastructure\Pipeline\PipelineHandlerInterface;
 use App\Infrastructure\Pipeline\PipelineProcessor;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\DependencyInjection\Attribute\AutowireIterator;
@@ -23,6 +24,10 @@ use Symfony\Component\Routing\Attribute\Route;
 #[Route('/pay', name: 'app_payment_')]
 final class InvoicePaymentController extends AbstractController
 {
+    /**
+     * @param iterable<PipelineHandlerInterface> $preparePaymentHandlers
+     * @param iterable<PipelineHandlerInterface> $markPaidHandlers
+     */
     public function __construct(
         private readonly InvoiceRepositoryInterface $invoices,
         private readonly PaymentGatewayInterface $gateway,

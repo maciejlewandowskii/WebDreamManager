@@ -33,6 +33,7 @@ use lbuchs\WebAuthn\WebAuthnException;
 use Scheb\TwoFactorBundle\Security\TwoFactor\Provider\Totp\TotpAuthenticator;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
+use App\Infrastructure\Pipeline\PipelineHandlerInterface;
 use Symfony\Component\DependencyInjection\Attribute\AutowireIterator;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\RedirectResponse;
@@ -48,6 +49,11 @@ final class SettingsController extends AppController
 {
     private const string WEBAUTHN_RP_NAME = 'WebDream Manager';
 
+    /**
+     * @param iterable<PipelineHandlerInterface> $profileUpdateHandlers
+     * @param iterable<PipelineHandlerInterface> $workSettingsHandlers
+     * @param iterable<PipelineHandlerInterface> $passwordChangeHandlers
+     */
     public function __construct(
         private readonly PasskeyCredentialRepositoryInterface $passkeyRepository,
         private readonly UserRepositoryInterface $userRepository,

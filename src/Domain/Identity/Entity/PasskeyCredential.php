@@ -6,6 +6,7 @@ namespace App\Domain\Identity\Entity;
 
 use DateTimeImmutable;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Uid\Uuid;
 
 #[ORM\Entity]
 #[ORM\Table(name: 'passkey_credentials')]
@@ -15,7 +16,7 @@ class PasskeyCredential
     #[ORM\Column(type: 'uuid', unique: true)]
     #[ORM\GeneratedValue(strategy: 'CUSTOM')]
     #[ORM\CustomIdGenerator(class: 'doctrine.uuid_generator')]
-    private string $id;
+    private Uuid $id;
 
     #[ORM\ManyToOne(targetEntity: User::class)]
     #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
@@ -54,7 +55,7 @@ class PasskeyCredential
         $this->createdAt   = new DateTimeImmutable();
     }
 
-    public function getId(): string { return $this->id; }
+    public function getId(): string { return (string) $this->id; }
     public function getUser(): User { return $this->user; }
     public function getCredentialId(): string { return $this->credentialId; }
     public function getPublicKey(): string { return $this->publicKey; }

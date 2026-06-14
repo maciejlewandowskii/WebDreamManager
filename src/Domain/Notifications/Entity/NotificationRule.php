@@ -7,6 +7,7 @@ namespace App\Domain\Notifications\Entity;
 use App\Domain\Notifications\Infrastructure\DoctrineNotificationRuleRepository;
 use DateTimeImmutable;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Uid\Uuid;
 
 #[ORM\Entity(repositoryClass: DoctrineNotificationRuleRepository::class)]
 #[ORM\Table(name: 'notification_rules')]
@@ -17,7 +18,7 @@ class NotificationRule
     #[ORM\Column(type: 'uuid', unique: true)]
     #[ORM\GeneratedValue(strategy: 'CUSTOM')]
     #[ORM\CustomIdGenerator(class: 'doctrine.uuid_generator')]
-    private string $id;
+    private Uuid $id;
 
     #[ORM\Column(type: 'string', length: 100)]
     private string $eventName;
@@ -47,7 +48,7 @@ class NotificationRule
         $this->createdAt = new DateTimeImmutable();
     }
 
-    public function getId(): string { return $this->id; }
+    public function getId(): string { return (string) $this->id; }
 
     public function getEventName(): string { return $this->eventName; }
 

@@ -7,6 +7,7 @@ namespace App\Domain\Invoicing\Entity;
 use App\Domain\Invoicing\Infrastructure\DoctrineQuotePdfRecordRepository;
 use DateTimeImmutable;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Uid\Uuid;
 
 #[ORM\Entity(repositoryClass: DoctrineQuotePdfRecordRepository::class)]
 #[ORM\Table(name: 'quote_pdf_records')]
@@ -16,7 +17,7 @@ class QuotePdfRecord
     #[ORM\Column(type: 'uuid', unique: true)]
     #[ORM\GeneratedValue(strategy: 'CUSTOM')]
     #[ORM\CustomIdGenerator(class: 'doctrine.uuid_generator')]
-    private string $id;
+    private Uuid $id;
 
     #[ORM\ManyToOne(targetEntity: Quote::class)]
     #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
@@ -43,7 +44,7 @@ class QuotePdfRecord
         $this->generatedAt = new DateTimeImmutable();
     }
 
-    public function getId(): string { return $this->id; }
+    public function getId(): string { return (string) $this->id; }
     public function getQuote(): Quote { return $this->quote; }
     public function getColorMode(): string { return $this->colorMode; }
     public function getFilePath(): string { return $this->filePath; }

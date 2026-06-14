@@ -16,6 +16,7 @@ use App\Infrastructure\External\Google\GoogleCalendarService;
 use App\Infrastructure\Pipeline\PipelineProcessor;
 use App\UI\Controller\AppController;
 use App\UI\Form\CustomerType;
+use App\Infrastructure\Pipeline\PipelineHandlerInterface;
 use Symfony\Component\DependencyInjection\Attribute\AutowireIterator;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -27,6 +28,12 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
 #[Route('/customers', name: 'app_customer_')]
 final class CustomerController extends AppController
 {
+    /**
+     * @param iterable<PipelineHandlerInterface> $createHandlers
+     * @param iterable<PipelineHandlerInterface> $updateHandlers
+     * @param iterable<PipelineHandlerInterface> $deleteHandlers
+     * @param iterable<PipelineHandlerInterface> $meetHandlers
+     */
     public function __construct(
         private readonly CustomerRepositoryInterface $repository,
         private readonly GoogleCalendarService $google,

@@ -13,6 +13,7 @@ use App\Domain\TimeTracking\Entity\TimeRecord;
 use App\Infrastructure\Pipeline\PipelineProcessor;
 use App\UI\Controller\AppController;
 use App\UI\Form\TimeRecordType;
+use App\Infrastructure\Pipeline\PipelineHandlerInterface;
 use Symfony\Component\DependencyInjection\Attribute\AutowireIterator;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -23,6 +24,11 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
 #[Route('/time', name: 'app_time_')]
 final class TimeRecordController extends AppController
 {
+    /**
+     * @param iterable<PipelineHandlerInterface> $createHandlers
+     * @param iterable<PipelineHandlerInterface> $updateHandlers
+     * @param iterable<PipelineHandlerInterface> $deleteHandlers
+     */
     public function __construct(
         #[AutowireIterator('app.time_record.create')] private readonly iterable $createHandlers,
         #[AutowireIterator('app.time_record.update')] private readonly iterable $updateHandlers,

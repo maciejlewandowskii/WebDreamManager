@@ -15,6 +15,7 @@ use App\Domain\TimeTracking\Repository\TimeRecordRepositoryInterface;
 use App\Infrastructure\Pipeline\PipelineProcessor;
 use App\UI\Controller\AppController;
 use SimpleThings\EntityAudit\AuditReader;
+use App\Infrastructure\Pipeline\PipelineHandlerInterface;
 use Symfony\Component\DependencyInjection\Attribute\AutowireIterator;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -27,6 +28,12 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
 #[Route('/invoices', name: 'app_invoice_')]
 final class InvoiceController extends AppController
 {
+    /**
+     * @param iterable<PipelineHandlerInterface> $generatePdfHandlers
+     * @param iterable<PipelineHandlerInterface> $sendEmailHandlers
+     * @param iterable<PipelineHandlerInterface> $fromTimeTrackingHandlers
+     * @param iterable<PipelineHandlerInterface> $deleteHandlers
+     */
     public function __construct(
         private readonly DoctrineInvoicePdfRecordRepository $pdfRecords,
         private readonly AuditReader $auditReader,

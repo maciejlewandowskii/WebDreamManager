@@ -11,6 +11,7 @@ use DateTimeImmutable;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Uid\Uuid;
 
 #[ORM\Entity(repositoryClass: DoctrineInvoiceRepository::class)]
 #[ORM\Table(name: 'invoices')]
@@ -21,7 +22,7 @@ class Invoice
     #[ORM\Column(type: 'uuid', unique: true)]
     #[ORM\GeneratedValue(strategy: 'CUSTOM')]
     #[ORM\CustomIdGenerator(class: 'doctrine.uuid_generator')]
-    private string $id;
+    private Uuid $id;
 
     #[ORM\Column(type: 'string', length: 50, unique: true)]
     private string $number;
@@ -112,7 +113,7 @@ class Invoice
 
     public function getId(): string
     {
-        return $this->id;
+        return (string) $this->id;
     }
 
     public function getNumber(): string

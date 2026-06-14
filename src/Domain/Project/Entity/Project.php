@@ -8,6 +8,7 @@ use App\Domain\Customer\Entity\Customer;
 use App\Domain\Project\Infrastructure\DoctrineProjectRepository;
 use DateTimeImmutable;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Uid\Uuid;
 use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: DoctrineProjectRepository::class)]
@@ -19,7 +20,7 @@ class Project
     #[ORM\Column(type: 'uuid', unique: true)]
     #[ORM\GeneratedValue(strategy: 'CUSTOM')]
     #[ORM\CustomIdGenerator(class: 'doctrine.uuid_generator')]
-    private string $id;
+    private Uuid $id;
 
     #[ORM\Column(type: 'string', length: 200)]
     #[Assert\NotBlank]
@@ -80,7 +81,7 @@ class Project
 
     public function getId(): string
     {
-        return $this->id;
+        return (string) $this->id;
     }
 
     public function getName(): string

@@ -16,6 +16,7 @@ use App\Domain\Project\Repository\ProjectRepositoryInterface;
 use App\Infrastructure\Pipeline\PipelineProcessor;
 use DateInterval;
 use DateTimeImmutable;
+use App\Infrastructure\Pipeline\PipelineHandlerInterface;
 use Symfony\Component\DependencyInjection\Attribute\AutowireIterator;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\RequestStack;
@@ -62,6 +63,10 @@ final class QuoteEditor
     #[LiveProp(writable: true)]
     public array $items = [];
 
+    /**
+     * @param iterable<PipelineHandlerInterface> $createHandlers
+     * @param iterable<PipelineHandlerInterface> $updateHandlers
+     */
     public function __construct(
         private readonly QuoteRepositoryInterface $quoteRepository,
         private readonly CustomerRepositoryInterface $customerRepository,

@@ -8,6 +8,7 @@ use App\Domain\Authorization\Entity\Permission;
 use App\Domain\Integration\Application\Pipeline\SaveIntegrationSettings\SaveIntegrationSettingsCommand;
 use App\Domain\Integration\Port\IntegrationInterface;
 use App\Domain\System\Repository\SystemSettingRepositoryInterface;
+use App\Infrastructure\Pipeline\PipelineHandlerInterface;
 use App\Infrastructure\Pipeline\PipelineProcessor;
 use App\UI\Controller\AppController;
 use Symfony\Component\DependencyInjection\Attribute\AutowireIterator;
@@ -23,6 +24,10 @@ final class IntegrationController extends AppController
     /** @var array<string, IntegrationInterface> */
     private array $integrations;
 
+    /**
+     * @param iterable<IntegrationInterface> $integrations
+     * @param iterable<PipelineHandlerInterface> $saveHandlers
+     */
     public function __construct(
         #[AutowireIterator('app.integration')] iterable $integrations,
         private readonly SystemSettingRepositoryInterface $settings,

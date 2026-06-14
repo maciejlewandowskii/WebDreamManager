@@ -9,6 +9,7 @@ use App\Domain\Project\Entity\Project;
 use App\Domain\TimeTracking\Infrastructure\DoctrineTimeRecordRepository;
 use DateTimeImmutable;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Uid\Uuid;
 use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: DoctrineTimeRecordRepository::class)]
@@ -20,7 +21,7 @@ class TimeRecord
     #[ORM\Column(type: 'uuid', unique: true)]
     #[ORM\GeneratedValue(strategy: 'CUSTOM')]
     #[ORM\CustomIdGenerator(class: 'doctrine.uuid_generator')]
-    private string $id;
+    private Uuid $id;
 
     #[ORM\Column(type: 'string', length: 300)]
     #[Assert\NotBlank]
@@ -77,7 +78,7 @@ class TimeRecord
         $this->updatedAt = new DateTimeImmutable();
     }
 
-    public function getId(): string { return $this->id; }
+    public function getId(): string { return (string) $this->id; }
     public function getTitle(): string { return $this->title; }
     public function setTitle(string $title): void { $this->title = $title; }
     public function getDescription(): ?string { return $this->description; }

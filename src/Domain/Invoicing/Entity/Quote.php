@@ -11,6 +11,7 @@ use DateTimeImmutable;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Uid\Uuid;
 
 #[ORM\Entity(repositoryClass: DoctrineQuoteRepository::class)]
 #[ORM\Table(name: 'quotes')]
@@ -21,7 +22,7 @@ class Quote
     #[ORM\Column(type: 'uuid', unique: true)]
     #[ORM\GeneratedValue(strategy: 'CUSTOM')]
     #[ORM\CustomIdGenerator(class: 'doctrine.uuid_generator')]
-    private string $id;
+    private Uuid $id;
 
     #[ORM\Column(type: 'string', length: 50, unique: true)]
     private string $number;
@@ -101,7 +102,7 @@ class Quote
         return $this->itemsSnapshot;
     }
 
-    public function getId(): string { return $this->id; }
+    public function getId(): string { return (string) $this->id; }
     public function getNumber(): string { return $this->number; }
     public function setNumber(string $number): void { $this->number = $number; }
     public function getCustomer(): Customer { return $this->customer; }

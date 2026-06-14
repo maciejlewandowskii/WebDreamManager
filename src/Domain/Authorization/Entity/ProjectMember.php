@@ -9,6 +9,7 @@ use App\Domain\Identity\Entity\User;
 use App\Domain\Project\Entity\Project;
 use DateTimeImmutable;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Uid\Uuid;
 
 #[ORM\Entity(repositoryClass: DoctrineProjectMemberRepository::class)]
 #[ORM\Table(name: 'project_members')]
@@ -19,7 +20,7 @@ class ProjectMember
     #[ORM\Column(type: 'uuid', unique: true)]
     #[ORM\GeneratedValue(strategy: 'CUSTOM')]
     #[ORM\CustomIdGenerator(class: 'doctrine.uuid_generator')]
-    private string $id;
+    private Uuid $id;
 
     #[ORM\ManyToOne(targetEntity: User::class)]
     #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
@@ -45,7 +46,7 @@ class ProjectMember
 
     public function getId(): string
     {
-        return $this->id;
+        return (string) $this->id;
     }
 
     public function getUser(): User

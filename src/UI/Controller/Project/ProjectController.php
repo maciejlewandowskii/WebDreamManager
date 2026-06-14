@@ -19,6 +19,7 @@ use App\Infrastructure\Pipeline\PipelineProcessor;
 use App\UI\Controller\AppController;
 use App\UI\Form\Admin\ProjectMemberType;
 use App\UI\Form\ProjectType;
+use App\Infrastructure\Pipeline\PipelineHandlerInterface;
 use Symfony\Component\DependencyInjection\Attribute\AutowireIterator;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -29,6 +30,14 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
 #[Route('/projects', name: 'app_project_')]
 final class ProjectController extends AppController
 {
+    /**
+     * @param iterable<PipelineHandlerInterface> $createHandlers
+     * @param iterable<PipelineHandlerInterface> $updateHandlers
+     * @param iterable<PipelineHandlerInterface> $deleteHandlers
+     * @param iterable<PipelineHandlerInterface> $memberAddHandlers
+     * @param iterable<PipelineHandlerInterface> $memberUpdateHandlers
+     * @param iterable<PipelineHandlerInterface> $memberRemoveHandlers
+     */
     public function __construct(
         #[AutowireIterator('app.project.create')] private readonly iterable $createHandlers,
         #[AutowireIterator('app.project.update')] private readonly iterable $updateHandlers,

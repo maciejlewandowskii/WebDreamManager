@@ -12,6 +12,7 @@ use Stripe\PaymentIntent;
 use Stripe\Webhook;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
+use App\Infrastructure\Pipeline\PipelineHandlerInterface;
 use Symfony\Component\DependencyInjection\Attribute\AutowireIterator;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -19,6 +20,7 @@ use Symfony\Component\Routing\Attribute\Route;
 
 final class StripeWebhookController extends AbstractController
 {
+    /** @param iterable<PipelineHandlerInterface> $markPaidHandlers */
     public function __construct(
         private readonly InvoiceRepositoryInterface $invoices,
         #[Autowire(env: 'STRIPE_WEBHOOK_SECRET')] private readonly string $webhookSecret,

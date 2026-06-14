@@ -10,6 +10,7 @@ use App\Domain\Authorization\Application\Pipeline\DeleteUser\DeleteUserCommand;
 use App\Domain\Authorization\Application\Pipeline\UpdateUser\UpdateUserCommand;
 use App\Domain\Authorization\Entity\Permission;
 use App\Domain\Identity\Entity\User;
+use App\Infrastructure\Pipeline\PipelineHandlerInterface;
 use App\Infrastructure\Pipeline\PipelineProcessor;
 use App\UI\Controller\AppController;
 use App\UI\Form\Admin\UserManageType;
@@ -23,6 +24,11 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
 #[Route('/admin/users', name: 'app_admin_user_')]
 final class UserController extends AppController
 {
+    /**
+     * @param iterable<PipelineHandlerInterface> $createHandlers
+     * @param iterable<PipelineHandlerInterface> $updateHandlers
+     * @param iterable<PipelineHandlerInterface> $deleteHandlers
+     */
     public function __construct(
         #[AutowireIterator('app.authorization.user.create')] private readonly iterable $createHandlers,
         #[AutowireIterator('app.authorization.user.update')] private readonly iterable $updateHandlers,

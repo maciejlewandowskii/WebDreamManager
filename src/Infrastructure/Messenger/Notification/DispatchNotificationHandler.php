@@ -7,6 +7,7 @@ namespace App\Infrastructure\Messenger\Notification;
 use App\Domain\Identity\Repository\UserRepositoryInterface;
 use App\Domain\Notifications\Application\Pipeline\SendNotification\SendNotificationCommand;
 use App\Domain\Notifications\Repository\NotificationRuleRepositoryInterface;
+use App\Infrastructure\Pipeline\PipelineHandlerInterface;
 use App\Infrastructure\Pipeline\PipelineProcessor;
 use Symfony\Component\DependencyInjection\Attribute\AutowireIterator;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
@@ -14,6 +15,7 @@ use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 #[AsMessageHandler]
 final class DispatchNotificationHandler
 {
+    /** @param iterable<PipelineHandlerInterface> $notificationHandlers */
     public function __construct(
         private readonly NotificationRuleRepositoryInterface $ruleRepository,
         private readonly UserRepositoryInterface $userRepository,

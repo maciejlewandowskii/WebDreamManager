@@ -7,6 +7,7 @@ namespace App\Domain\Invoicing\Entity;
 use App\Domain\Invoicing\Infrastructure\DoctrineInvoicePdfRecordRepository;
 use DateTimeImmutable;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Uid\Uuid;
 
 #[ORM\Entity(repositoryClass: DoctrineInvoicePdfRecordRepository::class)]
 #[ORM\Table(name: 'invoice_pdf_records')]
@@ -16,7 +17,7 @@ class InvoicePdfRecord
     #[ORM\Column(type: 'uuid', unique: true)]
     #[ORM\GeneratedValue(strategy: 'CUSTOM')]
     #[ORM\CustomIdGenerator(class: 'doctrine.uuid_generator')]
-    private string $id;
+    private Uuid $id;
 
     #[ORM\ManyToOne(targetEntity: Invoice::class)]
     #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
@@ -43,7 +44,7 @@ class InvoicePdfRecord
         $this->generatedAt = new DateTimeImmutable();
     }
 
-    public function getId(): string { return $this->id; }
+    public function getId(): string { return (string) $this->id; }
     public function getInvoice(): Invoice { return $this->invoice; }
     public function getColorMode(): string { return $this->colorMode; }
     public function getFilePath(): string { return $this->filePath; }

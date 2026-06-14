@@ -11,6 +11,7 @@ use App\Domain\Identity\Repository\UserRepositoryInterface;
 use App\Infrastructure\External\Google\GoogleCalendarService;
 use App\Infrastructure\Pipeline\PipelineProcessor;
 use App\UI\Controller\AppController;
+use App\Infrastructure\Pipeline\PipelineHandlerInterface;
 use Symfony\Component\DependencyInjection\Attribute\AutowireIterator;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -20,6 +21,7 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
 #[IsGranted('ROLE_USER')]
 final class GoogleAuthController extends AppController
 {
+    /** @param iterable<PipelineHandlerInterface> $meetHandlers */
     public function __construct(
         private readonly GoogleCalendarService $google,
         private readonly UserRepositoryInterface $userRepository,
