@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Domain\Invoicing\Application\Pipeline\SendInvoiceEmail\Stage;
 
+use App\Domain\Integration\Application\IntegrationStatusService;
 use App\Domain\Invoicing\Application\Pipeline\SendInvoiceEmail\SendInvoiceEmailCommand;
 use App\Domain\Invoicing\Infrastructure\DoctrineInvoicePdfRecordRepository;
 use App\Infrastructure\Pipeline\PipelineHandlerInterface;
@@ -21,7 +22,9 @@ final readonly class SendInvoiceEmailStage implements PipelineHandlerInterface
         private MailerInterface $mailer,
         private Environment $twig,
         private UrlGeneratorInterface $urlGenerator,
-    ) {}
+        private IntegrationStatusService $integrations,
+    ) {
+    }
 
     public function handle(mixed $payload): mixed
     {
@@ -35,7 +38,7 @@ final readonly class SendInvoiceEmailStage implements PipelineHandlerInterface
         }
 
         $paymentUrl = null;
-        if ($invoice->getPaymentToken() !== null) {
+        if ($invoice->getPaymentToken() !== null && $this->integrations->isEnabled('stripe')) {
             $paymentUrl = $this->urlGenerator->generate(
                 'app_payment_show',
                 ['token' => $invoice->getPaymentToken()],

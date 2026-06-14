@@ -5,12 +5,14 @@
 {% block content %}
     {% set breadcrumbs = [{label: 'Customers', url: path('app_customer_index')}, {label: customer.name}] %}
     {% set actions %}
-        <form method="post" action="{{ path('app_customer_meet', {id: customer.id}) }}" class="inline">
-            <twig:Button variant="secondary" size="sm" type="submit">
-                {{ ux_icon('tabler:video', {class: 'w-4 h-4'}) }}
-                Create Meet
-            </twig:Button>
-        </form>
+        {% if is_integration_enabled('google') %}
+            <form method="post" action="{{ path('app_customer_meet', {id: customer.id}) }}" class="inline">
+                <twig:Button variant="secondary" size="sm" type="submit">
+                    {{ ux_icon('tabler:video', {class: 'w-4 h-4'}) }}
+                    Create Meet
+                </twig:Button>
+            </form>
+        {% endif %}
         <twig:Button variant="secondary" size="sm" href="{{ path('app_customer_edit', {id: customer.id}) }}"
                      data-turbo-frame="modal" data-modal-title="Edit Customer">
             {{ ux_icon('tabler:pencil', {class: 'w-4 h-4'}) }}

@@ -1,0 +1,53 @@
+<div class="flex flex-col [gap:1.5rem]">
+    {% for key, item in integrations %}
+        <twig:Card>
+            <form method="post" action="{{ path('app_admin_system_integration_save', {key: key}) }}">
+                <twig:CardHeader>
+                    <div class="flex items-center [gap:0.875rem]">
+                        <div class="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 [background:var(--color-surface-variant)] [border:1px_solid_var(--color-outline-variant)] overflow-hidden">
+                            {{ ux_icon(item.integration.icon, {class: 'w-6 h-6'}) }}
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <div class="flex items-center [gap:0.5rem]">
+                                <span class="text-sm font-semibold [color:var(--color-on-surface)]">{{ item.integration.name }}</span>
+                                {% if item.enabled %}
+                                    <twig:Badge variant="success">Active</twig:Badge>
+                                {% else %}
+                                    <twig:Badge variant="default">Inactive</twig:Badge>
+                                {% endif %}
+                            </div>
+                            <p class="text-xs [color:var(--color-on-surface-variant)] [margin-top:0.125rem]">{{ item.integration.description }}</p>
+                        </div>
+                    </div>
+                </twig:CardHeader>
+                <twig:CardBody>
+                    <div class="flex flex-col [gap:0.875rem]">
+                        {% for settingKey, field in item.fields %}
+                            <div class="flex flex-col [gap:0.375rem]">
+                                <label class="text-xs font-medium [color:var(--color-on-surface-variant)]">
+                                    {{ field.label }}
+                                    <span class="font-mono [opacity:0.5] [margin-left:0.25rem]">{{ settingKey }}</span>
+                                </label>
+                                <input type="text"
+                                       name="settings[{{ settingKey }}]"
+                                       value="{{ field.secret ? '' : field.value }}"
+                                       autocomplete="off"
+                                       placeholder="{{ field.secret ? (field.hasValue ? '••••••••  (set — enter new value to change)' : 'Not configured') : '' }}"
+                                       class="form-input text-sm font-mono">
+                            </div>
+                        {% endfor %}
+
+                        <div class="flex items-center justify-between [padding-top:0.75rem] [border-top:1px_solid_var(--color-outline-variant)]">
+                            <label class="flex items-center [gap:0.625rem] [cursor:pointer]">
+                                <input type="hidden" name="enabled" value="0">
+                                <input type="checkbox" name="enabled" value="1" class="form-checkbox" {{ item.enabled ? 'checked' : '' }}>
+                                <span class="text-sm [color:var(--color-on-surface)]">Enable {{ item.integration.name }}</span>
+                            </label>
+                            <twig:Button variant="primary" type="submit">Save</twig:Button>
+                        </div>
+                    </div>
+                </twig:CardBody>
+            </form>
+        </twig:Card>
+    {% endfor %}
+</div>

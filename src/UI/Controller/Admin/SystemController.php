@@ -20,30 +20,11 @@ final class SystemController extends AppController
     /** @var string[] Key suffixes */
     private const array SECRET_SUFFIXES = ['SECRET', 'KEY', 'DSN', 'TOKEN'];
 
-    /** @var array<string, array<string, string>> Settings exposed in the editable form, grouped by section */
+    /** @var array<string, array<string, string>> General settings exposed in the Configuration tab */
     private const array EDITABLE_SETTINGS = [
         'company' => [
             'COMPANY_NAME'    => 'Company Name',
             'COMPANY_ADDRESS' => 'Company Address',
-        ],
-        'mail' => [
-            'MAILER_DSN'       => 'Mailer DSN',
-            'MAILER_FROM'      => 'From Address',
-            'MAILER_FROM_NAME' => 'From Name',
-        ],
-        'sms' => [
-            'TWILIO_DSN'         => 'Twilio DSN',
-            'TWILIO_FROM_NUMBER' => 'From Number',
-        ],
-        'google' => [
-            'GOOGLE_CLIENT_ID'     => 'Client ID',
-            'GOOGLE_CLIENT_SECRET' => 'Client Secret',
-            'GOOGLE_REDIRECT_URI'  => 'Redirect URI',
-        ],
-        'stripe' => [
-            'STRIPE_SECRET_KEY'      => 'Secret Key',
-            'STRIPE_PUBLISHABLE_KEY' => 'Publishable Key',
-            'STRIPE_WEBHOOK_SECRET'  => 'Webhook Secret',
         ],
     ];
 
@@ -126,10 +107,6 @@ final class SystemController extends AppController
             'groups'       => $current,
             'group_labels' => [
                 'company' => 'Company',
-                'mail'    => 'Email',
-                'sms'     => 'SMS / Twilio',
-                'google'  => 'Google Calendar',
-                'stripe'  => 'Stripe Payments',
             ],
         ]);
     }

@@ -132,14 +132,18 @@
                         <div class="payment-panel-paid__title">Invoice paid</div>
                         <div class="payment-panel-paid__sub">This invoice has already been paid.<br>Thank you!</div>
                     </div>
-                {% else %}
-                    {% if paymentConfig.type == 'stripe' %}
-                        {% include 'ui/external/stripe_payment.html.twig' with {
-                            config: paymentConfig,
-                            sessionUrl: path('app_payment_session', {token: invoice.paymentToken}),
-                            returnUrl: url('app_payment_return', {token: invoice.paymentToken})
-                        } only %}
-                    {% endif %}
+                {% elseif not stripeEnabled %}
+                    <div class="payment-panel-paid">
+                        <div class="payment-panel-paid__icon">ℹ</div>
+                        <div class="payment-panel-paid__title">Payment unavailable</div>
+                        <div class="payment-panel-paid__sub">Online card payment is not enabled.<br>Please contact us for payment instructions.</div>
+                    </div>
+                {% elseif paymentConfig.type == 'stripe' %}
+                    {% include 'ui/external/stripe_payment.html.twig' with {
+                        config: paymentConfig,
+                        sessionUrl: path('app_payment_session', {token: invoice.paymentToken}),
+                        returnUrl: url('app_payment_return', {token: invoice.paymentToken})
+                    } only %}
                 {% endif %}
             </div>
         </div>

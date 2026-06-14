@@ -13,7 +13,7 @@
                 Generate PDF
             </twig:Button>
         </form>
-        {% if invoice.customer.email and pdfs|length > 0 %}
+        {% if is_integration_enabled('mail') and invoice.customer.email and pdfs|length > 0 %}
             <form method="post" action="{{ path('app_invoice_send_email', {id: invoice.id}) }}" class="inline">
                 <input type="hidden" name="_token" value="{{ csrf_token('send_email_invoice_' ~ invoice.id) }}">
                 <input type="hidden" name="pdf_id" value="{{ pdfs[0].id }}">
@@ -71,7 +71,7 @@
                                                 class="[text-transform:uppercase] [font-size:0.7rem]">{{ pdf.colorMode }}</span>
                                         </div>
                                     </div>
-                                    {% if invoice.customer.email %}
+                                    {% if is_integration_enabled('mail') and invoice.customer.email %}
                                         <form method="post"
                                               action="{{ path('app_invoice_send_email', {id: invoice.id}) }}">
                                             <input type="hidden" name="_token"

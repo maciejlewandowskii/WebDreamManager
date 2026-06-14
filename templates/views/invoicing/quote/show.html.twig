@@ -13,7 +13,7 @@
                 Generate PDF
             </twig:Button>
         </form>
-        {% if quote.customer.email and pdfs|length > 0 %}
+        {% if is_integration_enabled('mail') and quote.customer.email and pdfs|length > 0 %}
             <form method="post" action="{{ path('app_quote_send_email', {id: quote.id}) }}" class="inline">
                 <input type="hidden" name="_token" value="{{ csrf_token('send_email_quote_' ~ quote.id) }}">
                 <input type="hidden" name="pdf_id" value="{{ pdfs[0].id }}">
@@ -71,7 +71,7 @@
                                                 class="[text-transform:uppercase] [font-size:0.7rem]">{{ pdf.colorMode }}</span>
                                         </div>
                                     </div>
-                                    {% if quote.customer.email %}
+                                    {% if is_integration_enabled('mail') and quote.customer.email %}
                                         <form method="post" action="{{ path('app_quote_send_email', {id: quote.id}) }}">
                                             <input type="hidden" name="_token"
                                                    value="{{ csrf_token('send_email_quote_' ~ quote.id) }}">

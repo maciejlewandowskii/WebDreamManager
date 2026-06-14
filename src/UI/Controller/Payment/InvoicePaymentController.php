@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\UI\Controller\Payment;
 
+use App\Domain\Integration\Application\IntegrationStatusService;
 use App\Domain\Invoicing\Application\Pipeline\MarkInvoicePaid\MarkInvoicePaidCommand;
 use App\Domain\Invoicing\Application\Pipeline\PrepareInvoicePayment\PrepareInvoicePaymentCommand;
 use App\Domain\Invoicing\Entity\Invoice;
@@ -25,19 +26,24 @@ final class InvoicePaymentController extends AbstractController
     public function __construct(
         private readonly InvoiceRepositoryInterface $invoices,
         private readonly PaymentGatewayInterface $gateway,
+        private readonly IntegrationStatusService $integrations,
         #[AutowireIterator('app.invoice.prepare_payment')] private readonly iterable $preparePaymentHandlers,
         #[AutowireIterator('app.invoice.mark_paid')] private readonly iterable $markPaidHandlers,
-    ) {}
+    ) {
+    }
 
     #[Route('/{token}', name: 'show')]
     public function show(string $token): Response
     {
         $invoice = $this->findByToken($token);
 
+        $stripeEnabled = $this->integrations->isEnabled('stripe');
+
         return $this->render('views/payment/show.html.twig', [
-            'invoice'      => $invoice,
-            'paymentConfig' => $this->gateway->getClientConfig(),
-            'alreadyPaid'  => $invoice->getStatus() === InvoiceStatus::Paid,
+            'invoice'        => $invoice,
+            'paymentConfig'  => $stripeEnabled ? $this->gateway->getClientConfig() : null,
+            'alreadyPaid'    => $invoice->getStatus() === InvoiceStatus::Paid,
+            'stripeEnabled'  => $stripeEnabled,
         ]);
     }
 

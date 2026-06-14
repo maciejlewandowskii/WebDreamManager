@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Domain\Notifications\Application\Pipeline\SendNotification\Stage;
 
+use App\Domain\Integration\Application\IntegrationStatusService;
 use App\Domain\Notifications\Application\Pipeline\SendNotification\SendNotificationCommand;
 use App\Domain\Notifications\Entity\NotificationChannelType;
 use App\Domain\Notifications\Port\NotificationChannelInterface;
@@ -12,9 +13,13 @@ use App\Infrastructure\Pipeline\PipelineHandlerInterface;
 use Symfony\Component\DependencyInjection\Attribute\AutoconfigureTag;
 
 #[AutoconfigureTag('app.notifications.send', attributes: ['priority' => 100])]
-final class SendEmailNotificationStage implements PipelineHandlerInterface, NotificationChannelInterface
+final readonly class SendEmailNotificationStage implements PipelineHandlerInterface, NotificationChannelInterface
 {
-    public function __construct(private readonly EmailSenderInterface $mailer) {}
+    public function __construct(
+        private EmailSenderInterface $mailer,
+        private IntegrationStatusService $integrations,
+    ) {
+    }
 
     public function supports(NotificationChannelType $type): bool
     {
@@ -25,7 +30,8 @@ final class SendEmailNotificationStage implements PipelineHandlerInterface, Noti
     {
         assert($payload instanceof SendNotificationCommand);
 
-        if ($payload->rule->hasChannel(NotificationChannelType::Email)
+        if ($this->integrations->isEnabled('mail')
+            && $payload->rule->hasChannel(NotificationChannelType::Email)
             && $payload->recipient->isNotificationChannelEnabled($payload->rule->getEventName(), NotificationChannelType::Email, $payload->rule->getChannels())
         ) {
             $this->send($payload);

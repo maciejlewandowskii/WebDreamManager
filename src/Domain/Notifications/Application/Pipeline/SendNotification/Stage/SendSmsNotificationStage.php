@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Domain\Notifications\Application\Pipeline\SendNotification\Stage;
 
+use App\Domain\Integration\Application\IntegrationStatusService;
 use App\Domain\Notifications\Application\Pipeline\SendNotification\SendNotificationCommand;
 use App\Domain\Notifications\Entity\NotificationChannelType;
 use App\Domain\Notifications\Port\NotificationChannelInterface;
@@ -19,7 +20,9 @@ final readonly class SendSmsNotificationStage implements PipelineHandlerInterfac
     public function __construct(
         private SmsSenderInterface $smsSender,
         private LoggerInterface $logger,
-    ) {}
+        private IntegrationStatusService $integrations,
+    ) {
+    }
 
     public function supports(NotificationChannelType $type): bool
     {
@@ -30,7 +33,8 @@ final readonly class SendSmsNotificationStage implements PipelineHandlerInterfac
     {
         assert($payload instanceof SendNotificationCommand);
 
-        if ($payload->rule->hasChannel(NotificationChannelType::Sms)
+        if ($this->integrations->isEnabled('sms')
+            && $payload->rule->hasChannel(NotificationChannelType::Sms)
             && $this->smsSender->isConfigured()
             && $payload->recipient->isNotificationChannelEnabled($payload->rule->getEventName(), NotificationChannelType::Sms, $payload->rule->getChannels())
         ) {

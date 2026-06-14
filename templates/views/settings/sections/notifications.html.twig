@@ -33,19 +33,22 @@
                         </div>
 
                         <div class="flex items-center [gap:1.5rem] shrink-0 [margin-top:6px]">
+                            {% set channelIntegration = {'email': 'mail', 'sms': 'sms'} %}
                             {% for channel in channels %}
-                                {% set isSupported = rule.hasChannel(channel) %}
-                                {% set userEnabled = preferences[event] is defined ? channel.value in preferences[event] : isSupported %}
+                                {% if is_integration_enabled(channelIntegration[channel.value] ?? channel.value) %}
+                                    {% set isSupported = rule.hasChannel(channel) %}
+                                    {% set userEnabled = preferences[event] is defined ? channel.value in preferences[event] : isSupported %}
 
-                                <label class="flex items-center [gap:0.5rem] [cursor:pointer] {% if not isSupported %}[opacity:0.4] [cursor:not-allowed]{% endif %}">
-                                    <input type="checkbox"
-                                           name="prefs[{{ event }}][]"
-                                           value="{{ channel.value }}"
-                                           class="form-checkbox"
-                                           {% if userEnabled and isSupported %}checked{% endif %}
-                                           {% if not isSupported %}disabled{% endif %}>
-                                    <span class="text-xs font-medium [color:var(--color-on-surface-variant)]">{{ channel.label() }}</span>
-                                </label>
+                                    <label class="flex items-center [gap:0.5rem] [cursor:pointer] {% if not isSupported %}[opacity:0.4] [cursor:not-allowed]{% endif %}">
+                                        <input type="checkbox"
+                                               name="prefs[{{ event }}][]"
+                                               value="{{ channel.value }}"
+                                               class="form-checkbox"
+                                               {% if userEnabled and isSupported %}checked{% endif %}
+                                               {% if not isSupported %}disabled{% endif %}>
+                                        <span class="text-xs font-medium [color:var(--color-on-surface-variant)]">{{ channel.label() }}</span>
+                                    </label>
+                                {% endif %}
                             {% endfor %}
                         </div>
                     </div>

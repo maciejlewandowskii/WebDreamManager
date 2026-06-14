@@ -19,6 +19,11 @@
                     {{ ux_icon('tabler:adjustments', {class: 'w-4 h-4'}) }}
                     Configuration
                 </a>
+                <a href="{{ path('app_admin_system_integration_index') }}"
+                   class="sidebar-nav-item {{ section == 'integrations' ? 'active' }}">
+                    {{ ux_icon('tabler:plug-connected', {class: 'w-4 h-4'}) }}
+                    Integrations
+                </a>
             </nav>
 
             <div>
@@ -26,6 +31,8 @@
                     {% include 'views/admin/system/sections/version.html.twig' %}
                 {% elseif section == 'settings' %}
                     {% include 'views/admin/system/sections/settings.html.twig' %}
+                {% elseif section == 'integrations' %}
+                    {% include 'views/admin/system/sections/integrations.html.twig' %}
                 {% endif %}
             </div>
         </div>
