@@ -54,7 +54,7 @@ services:
 
   # Optional: uncomment to enable automatic updates when a new image is pushed
   # watchtower:
-  #   image: containrrr/watchtower
+  #   image: containrrr/watchtower:latest
   #   restart: unless-stopped
   #   volumes:
   #     - /var/run/docker.sock:/var/run/docker.sock
