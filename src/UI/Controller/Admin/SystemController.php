@@ -4,10 +4,14 @@ declare(strict_types=1);
 
 namespace App\UI\Controller\Admin;
 
+use App\Domain\System\Application\Pipeline\TriggerWatchtowerUpdate\TriggerWatchtowerUpdateCommand;
 use App\Domain\System\Application\SystemVersionService;
 use App\Domain\System\Repository\SystemSettingRepositoryInterface;
 use App\Domain\Authorization\Entity\Permission;
+use App\Infrastructure\Pipeline\PipelineHandlerInterface;
+use App\Infrastructure\Pipeline\PipelineProcessor;
 use App\UI\Controller\AppController;
+use Symfony\Component\DependencyInjection\Attribute\AutowireIterator;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
@@ -28,9 +32,13 @@ final class SystemController extends AppController
         ],
     ];
 
+    /**
+     * @param iterable<PipelineHandlerInterface> $watchtowerTriggerHandlers
+     */
     public function __construct(
         private readonly SystemVersionService $versionService,
         private readonly SystemSettingRepositoryInterface $settings,
+        #[AutowireIterator('app.system.watchtower_trigger')] private readonly iterable $watchtowerTriggerHandlers,
     ) {
     }
 
@@ -50,6 +58,7 @@ final class SystemController extends AppController
             'update_available'   => $this->versionService->isUpdateAvailable(),
             'auto_update'        => $this->settings->get('SYS_AUTO_UPDATE', '0') === '1',
             'github_repo'        => $this->settings->get('SYS_GITHUB_REPO', ''),
+            'watchtower_enabled' => $this->settings->get('INTEGRATION_WATCHTOWER_ENABLED', '0') === '1',
         ]);
     }
 
@@ -80,6 +89,32 @@ final class SystemController extends AppController
         $this->settings->set('SYS_GITHUB_REPO', $githubRepo !== '' ? $githubRepo : null);
 
         $this->addFlash('success', 'Auto-update settings saved.');
+
+        return $this->redirectToRoute('app_admin_system_version');
+    }
+
+    #[IsGranted(Permission::SystemManage->value)]
+    #[Route('/version/watchtower-trigger', name: 'version_watchtower_trigger', methods: ['POST'])]
+    public function triggerWatchtowerUpdate(): Response
+    {
+        $url   = $this->settings->get('WATCHTOWER_URL', '');
+        $token = $this->settings->get('WATCHTOWER_TOKEN', '');
+
+        if ($url === '') {
+            $this->addFlash('error', 'Watchtower URL is not configured.');
+
+            return $this->redirectToRoute('app_admin_system_version');
+        }
+
+        $command = new TriggerWatchtowerUpdateCommand($url, $token);
+        new PipelineProcessor($this->watchtowerTriggerHandlers)->run($command);
+
+        $this->addFlash(
+            $command->triggered ? 'success' : 'error',
+            $command->triggered
+                ? 'Watchtower update check triggered successfully.'
+                : 'Failed to reach Watchtower. Check the URL and token.',
+        );
 
         return $this->redirectToRoute('app_admin_system_version');
     }

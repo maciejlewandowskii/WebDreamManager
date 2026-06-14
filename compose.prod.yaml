@@ -15,6 +15,8 @@ services:
     depends_on:
       database:
         condition: service_healthy
+    labels:
+      - "com.centurylinklabs.watchtower.enable=true"
     volumes:
       - caddy_data:/data
       - caddy_config:/config
@@ -36,6 +38,8 @@ services:
     depends_on:
       database:
         condition: service_healthy
+    labels:
+      - "com.centurylinklabs.watchtower.enable=true"
     volumes:
       - app_var:/app/var
 
@@ -58,9 +62,10 @@ services:
   #   restart: unless-stopped
   #   environment:
   #     - DOCKER_API_VERSION=1.40
+  #     - WATCHTOWER_HTTP_API_TOKEN=${WATCHTOWER_TOKEN:-changeme}
   #   volumes:
   #     - /var/run/docker.sock:/var/run/docker.sock
-  #   command: --interval 3600 --cleanup
+  #   command: --interval 3600 --cleanup --label-enable --http-api-update
 
 volumes:
   caddy_data:
