@@ -27,7 +27,7 @@ final readonly class TwilioSmsSender implements SmsSenderInterface
             LogLevel::Info,
             'SMS sent to ' . $to,
             'twilio',
-            ['to' => $to, 'length' => strlen($message)],
+            context: ['to' => $to, 'length' => strlen($message)],
         );
 
         return true;

@@ -8,6 +8,7 @@ if [ "$1" = 'frankenphp' ] || [ "$1" = 'php' ] || [ "$1" = 'bin/console' ]; then
 	fi
 
 	php bin/console -V
+	php bin/console cache:clear
 
 	if grep -q ^DATABASE_URL= .env; then
 		echo 'Waiting for database to be ready...'
