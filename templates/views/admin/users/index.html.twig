@@ -14,9 +14,5 @@
     {% endset %}
     <twig:layout:PageHeader title="Users" :actions="actions"/>
 
-    <twig:PageContent>
-        <twig:Card>
-            {{ component('UserList') }}
-        </twig:Card>
-    </twig:PageContent>
+    {{ component('UserList') }}
 {% endblock %}

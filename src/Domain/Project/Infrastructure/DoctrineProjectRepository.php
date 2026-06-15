@@ -71,6 +71,46 @@ final class DoctrineProjectRepository extends ServiceEntityRepository implements
             ->getResult();
     }
 
+    public function findFiltered(?string $search, string $sortBy = 'createdAt', string $sortDirection = 'DESC', int $offset = 0, int $limit = 0): array
+    {
+        [$field, $direction] = $this->resolveSorting($sortBy, $sortDirection, 'createdAt', 'DESC');
+
+        $qb = $this->createQueryBuilder('p')
+            ->leftJoin('p.customer', 'c')
+            ->addSelect('c')
+            ->orderBy($field, $direction)
+            ->addOrderBy('p.createdAt', 'DESC');
+
+        if ($search !== null && $search !== '') {
+            $qb->where('p.name LIKE :q OR c.name LIKE :q')
+               ->setParameter('q', '%' . $search . '%');
+        }
+
+        if ($offset > 0) {
+            $qb->setFirstResult($offset);
+        }
+
+        if ($limit > 0) {
+            $qb->setMaxResults($limit);
+        }
+
+        return $qb->getQuery()->getResult();
+    }
+
+    public function countFiltered(?string $search): int
+    {
+        $qb = $this->createQueryBuilder('p')
+            ->select('COUNT(p.id)')
+            ->leftJoin('p.customer', 'c');
+
+        if ($search !== null && $search !== '') {
+            $qb->where('p.name LIKE :q OR c.name LIKE :q')
+               ->setParameter('q', '%' . $search . '%');
+        }
+
+        return (int) $qb->getQuery()->getSingleScalarResult();
+    }
+
     /** @return array{0: string, 1: 'ASC'|'DESC'} */
     private function resolveSorting(
         string $sortBy,

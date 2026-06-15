@@ -74,6 +74,8 @@ final class DoctrineQuoteRepository extends ServiceEntityRepository implements Q
         ?string $search,
         string $sortBy = 'createdAt',
         string $sortDirection = 'DESC',
+        int $offset = 0,
+        int $limit = 0,
     ): array {
         [$field, $direction] = $this->resolveSorting($sortBy, $sortDirection, 'createdAt', 'DESC');
 
@@ -87,7 +89,29 @@ final class DoctrineQuoteRepository extends ServiceEntityRepository implements Q
                ->setParameter('search', $search);
         }
 
+        if ($offset > 0) {
+            $qb->setFirstResult($offset);
+        }
+
+        if ($limit > 0) {
+            $qb->setMaxResults($limit);
+        }
+
         return $qb->getQuery()->getResult();
+    }
+
+    public function countFiltered(?string $search): int
+    {
+        $qb = $this->createQueryBuilder('q')
+            ->select('COUNT(q.id)')
+            ->leftJoin('q.customer', 'c');
+
+        if ($search !== null) {
+            $qb->andWhere('TRGM_MATCH(:search, q.number) = true OR TRGM_MATCH(:search, c.name) = true')
+               ->setParameter('search', $search);
+        }
+
+        return (int) $qb->getQuery()->getSingleScalarResult();
     }
 
     /** @return array{0: string, 1: 'ASC'|'DESC'} */

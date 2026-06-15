@@ -20,7 +20,11 @@ interface RoleRepositoryInterface
         ?string $search,
         string $sortBy = 'name',
         string $sortDirection = 'ASC',
+        int $offset = 0,
+        int $limit = 0,
     ): array;
+
+    public function countFiltered(?string $search): int;
 
     public function findAdminRole(): ?Role;
 

@@ -82,6 +82,8 @@ final class DoctrineUserRepository extends ServiceEntityRepository implements Us
         ?string $search,
         string $sortBy = 'fullName',
         string $sortDirection = 'ASC',
+        int $offset = 0,
+        int $limit = 0,
     ): array {
         [$field, $direction] = $this->resolveSorting($sortBy, $sortDirection, 'fullName', 'ASC');
 
@@ -95,7 +97,28 @@ final class DoctrineUserRepository extends ServiceEntityRepository implements Us
                ->setParameter('search', $search);
         }
 
+        if ($offset > 0) {
+            $qb->setFirstResult($offset);
+        }
+
+        if ($limit > 0) {
+            $qb->setMaxResults($limit);
+        }
+
         return $qb->getQuery()->getResult();
+    }
+
+    public function countFiltered(?string $search): int
+    {
+        $qb = $this->createQueryBuilder('u')
+            ->select('COUNT(u.id)');
+
+        if ($search !== null) {
+            $qb->andWhere('TRGM_MATCH(:search, u.fullName) = true OR TRGM_MATCH(:search, u.email) = true')
+               ->setParameter('search', $search);
+        }
+
+        return (int) $qb->getQuery()->getSingleScalarResult();
     }
 
     /** @return array{0: string, 1: 'ASC'|'DESC'} */

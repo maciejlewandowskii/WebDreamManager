@@ -3,12 +3,7 @@
 {% block title %}Time Tracking Report — WebDream Manager{% endblock %}
 
 {% block content %}
-    <twig:layout:PageHeader title="Time Tracking Report"/>
+    <twig:layout:PageHeader title="Time Tracking Report — {{ month|date('F Y') }}"/>
 
-    <twig:PageContent>
-        <twig:Card>
-            <twig:CardHeader title="Monthly Summary — {{ month|date('F Y') }}"/>
-            <twig:TimeReportList />
-        </twig:Card>
-    </twig:PageContent>
+    {{ component('TimeReportList') }}
 {% endblock %}

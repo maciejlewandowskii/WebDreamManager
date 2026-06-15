@@ -93,14 +93,6 @@
         </div>
     </div>
 
-    {# Results summary #}
-    <div class="flex items-center justify-between px-8 py-2 text-sm text-[var(--color-on-surface-variant)] border-b border-[var(--color-outline-variant)]">
-        <span>{{ this.total }} {{ this.total == 1 ? 'entry' : 'entries' }}</span>
-        {% if this.totalPages > 1 %}
-            <span>Page {{ this.page }} of {{ this.totalPages }}</span>
-        {% endif %}
-    </div>
-
     {# Table #}
     <table class="data-table">
         <thead>
@@ -165,35 +157,5 @@
         </tbody>
     </table>
 
-    {# Pagination #}
-    {% if this.totalPages > 1 %}
-        <div class="flex items-center justify-center gap-2 px-8 py-4 border-t border-[var(--color-outline-variant)]">
-            {% if this.page > 1 %}
-                <button class="btn btn-ghost btn-sm"
-                        data-action="live#action"
-                        data-live-action-param="goToPage"
-                        data-live-page-param="{{ this.page - 1 }}">
-                    {{ ux_icon('tabler:chevron-left', {class: 'w-4 h-4'}) }}
-                </button>
-            {% endif %}
-
-            {% for p in max(1, this.page - 3)..min(this.totalPages, this.page + 3) %}
-                <button class="btn btn-sm {{ p == this.page ? 'btn-primary' : 'btn-ghost' }}"
-                        data-action="live#action"
-                        data-live-action-param="goToPage"
-                        data-live-page-param="{{ p }}">
-                    {{ p }}
-                </button>
-            {% endfor %}
-
-            {% if this.page < this.totalPages %}
-                <button class="btn btn-ghost btn-sm"
-                        data-action="live#action"
-                        data-live-action-param="goToPage"
-                        data-live-page-param="{{ this.page + 1 }}">
-                    {{ ux_icon('tabler:chevron-right', {class: 'w-4 h-4'}) }}
-                </button>
-            {% endif %}
-        </div>
-    {% endif %}
+    <twig:Pagination :page="this.page" :totalPages="this.totalPages" :total="this.total" label="entries" labelSingular="entry" />
 </div>

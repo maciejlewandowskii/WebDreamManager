@@ -98,15 +98,54 @@ final class DoctrineTimeRecordRepository extends ServiceEntityRepository impleme
         ?User $workerFilter = null,
         array $visibleProjectIds = [],
         ?\DateTimeImmutable $dateFilter = null,
+        int $offset = 0,
+        int $limit = 0,
     ): array {
-        [$field, $direction] = $this->resolveSorting($sortBy, $sortDirection, 'date', 'DESC');
+        $qb = $this->buildFilteredQuery($search, $project, $uninvoicedOnly, $workerFilter, $visibleProjectIds, $dateFilter);
 
+        [$field, $direction] = $this->resolveSorting($sortBy, $sortDirection, 'date', 'DESC');
+        $qb->orderBy($field, $direction)->addOrderBy('t.date', 'DESC');
+
+        if ($offset > 0) {
+            $qb->setFirstResult($offset);
+        }
+
+        if ($limit > 0) {
+            $qb->setMaxResults($limit);
+        }
+
+        return $qb->getQuery()->getResult();
+    }
+
+    public function countFiltered(
+        ?string $search,
+        ?Project $project,
+        bool $uninvoicedOnly = false,
+        ?User $workerFilter = null,
+        array $visibleProjectIds = [],
+        ?\DateTimeImmutable $dateFilter = null,
+    ): int {
+        $qb = $this->buildFilteredQuery($search, $project, $uninvoicedOnly, $workerFilter, $visibleProjectIds, $dateFilter);
+        $qb->select('COUNT(t.id)');
+
+        return (int) $qb->getQuery()->getSingleScalarResult();
+    }
+
+    /**
+     * @param string[] $visibleProjectIds
+     */
+    private function buildFilteredQuery(
+        ?string $search,
+        ?Project $project,
+        bool $uninvoicedOnly,
+        ?User $workerFilter,
+        array $visibleProjectIds,
+        ?\DateTimeImmutable $dateFilter,
+    ): \Doctrine\ORM\QueryBuilder {
         $qb = $this->createQueryBuilder('t')
             ->leftJoin('t.project', 'p')
             ->leftJoin('t.worker', 'w')
-            ->addSelect('p', 'w')
-            ->orderBy($field, $direction)
-            ->addOrderBy('t.date', 'DESC');
+            ->addSelect('p', 'w');
 
         if ($search !== null) {
             $qb->andWhere('TRGM_MATCH(:search, t.title) = true OR TRGM_MATCH(:search, COALESCE(t.description, \'\')) = true')
@@ -138,7 +177,7 @@ final class DoctrineTimeRecordRepository extends ServiceEntityRepository impleme
                ->setParameter('dateFilter', $dateFilter->format('Y-m-d'));
         }
 
-        return $qb->getQuery()->getResult();
+        return $qb;
     }
 
     /** @return array{0: string, 1: 'ASC'|'DESC'} */

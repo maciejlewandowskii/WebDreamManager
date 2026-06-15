@@ -37,6 +37,7 @@ final class LogController extends AppController
     }
 
     #[Route('/purge', name: 'purge', methods: ['POST'])]
+    #[IsGranted('system.manage')]
     public function purge(Request $request): Response
     {
         if ($this->isCsrfTokenValid('purge_logs', (string) $request->request->get('_token'))) {

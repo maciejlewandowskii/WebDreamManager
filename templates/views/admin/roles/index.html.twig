@@ -14,9 +14,5 @@
     {% endset %}
     <twig:layout:PageHeader title="Roles" :actions="actions"/>
 
-    <twig:PageContent>
-        <twig:Card>
-            {{ component('RoleList') }}
-        </twig:Card>
-    </twig:PageContent>
+    {{ component('RoleList') }}
 {% endblock %}

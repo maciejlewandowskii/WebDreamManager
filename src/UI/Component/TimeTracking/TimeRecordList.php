@@ -10,6 +10,7 @@ use App\Domain\Identity\Entity\User;
 use App\Domain\Project\Repository\ProjectRepositoryInterface;
 use App\Domain\TimeTracking\Entity\TimeRecord;
 use App\Domain\TimeTracking\Repository\TimeRecordRepositoryInterface;
+use App\UI\Component\LivePaginationTrait;
 use DateTimeImmutable;
 use Silvesterk\BusinessDays\BusinessDays;
 use Silvesterk\BusinessDays\DateRange;
@@ -24,6 +25,9 @@ use Symfony\UX\LiveComponent\DefaultActionTrait;
 final class TimeRecordList
 {
     use DefaultActionTrait;
+    use LivePaginationTrait;
+
+    private const int PER_PAGE = 50;
 
     #[LiveProp(writable: true)]
     public string $search = '';
@@ -70,18 +74,7 @@ final class TimeRecordList
     /** @return TimeRecord[] */
     public function getRecords(): array
     {
-        $project = $this->projectId !== ''
-            ? $this->projectRepository->findById($this->projectId)
-            : null;
-
-        [$workerFilter, $visibleProjectIds] = $this->resolveVisibility();
-
-        $dateFilter = null;
-        if ($this->viewMode === 'per_day') {
-            $dateFilter = $this->currentDate !== '' 
-                ? new \DateTimeImmutable($this->currentDate) 
-                : new \DateTimeImmutable('today');
-        }
+        [$project, $workerFilter, $visibleProjectIds, $dateFilter] = $this->resolveFilterArgs();
 
         return $this->recordRepository->findFiltered(
             search: $this->search !== '' ? $this->search : null,
@@ -92,7 +85,42 @@ final class TimeRecordList
             workerFilter: $workerFilter,
             visibleProjectIds: $visibleProjectIds,
             dateFilter: $dateFilter,
+            offset: ($this->page - 1) * self::PER_PAGE,
+            limit: self::PER_PAGE,
         );
+    }
+
+    public function getTotal(): int
+    {
+        [$project, $workerFilter, $visibleProjectIds, $dateFilter] = $this->resolveFilterArgs();
+
+        return $this->recordRepository->countFiltered(
+            search: $this->search !== '' ? $this->search : null,
+            project: $project,
+            uninvoicedOnly: $this->uninvoicedOnly,
+            workerFilter: $workerFilter,
+            visibleProjectIds: $visibleProjectIds,
+            dateFilter: $dateFilter,
+        );
+    }
+
+    /** @return array{0: ?\App\Domain\Project\Entity\Project, 1: ?User, 2: string[], 3: ?\DateTimeImmutable} */
+    private function resolveFilterArgs(): array
+    {
+        $project = $this->projectId !== ''
+            ? $this->projectRepository->findById($this->projectId)
+            : null;
+
+        [$workerFilter, $visibleProjectIds] = $this->resolveVisibility();
+
+        $dateFilter = null;
+        if ($this->viewMode === 'per_day') {
+            $dateFilter = $this->currentDate !== ''
+                ? new \DateTimeImmutable($this->currentDate)
+                : new \DateTimeImmutable('today');
+        }
+
+        return [$project, $workerFilter, $visibleProjectIds, $dateFilter];
     }
 
     #[LiveAction]

@@ -1,13 +1,12 @@
 <div {{ attributes }}>
-    <div
-        class="[padding:1rem_2rem] flex [gap:0.75rem] items-center [border-bottom:1px_solid_var(--color-outline-variant)]">
+    <div class="[padding:1rem_2rem] flex [gap:0.75rem] items-center [border-bottom:1px_solid_var(--color-outline-variant)]">
         <div class="search-wrap flex-1 [max-width:320px]">
             {{ ux_icon('tabler:search', {class: 'w-4 h-4'}) }}
             <input type="search"
                    class="form-input [padding-left:2.25rem]"
                    placeholder="Search projects…"
                    value="{{ this.search }}"
-                   data-model="search"
+                   data-model="debounce(400)|search"
             >
         </div>
     </div>
@@ -56,9 +55,9 @@
                 </td>
                 <td class="[color:var(--color-on-surface-variant)]">{{ project.customer.name }}</td>
                 <td>
-                        <span class="badge badge-{{ statusColor[project.status.value] ?? 'default' }}">
-                            {{ project.status.value|replace({'_': ' '}) }}
-                        </span>
+                    <span class="badge badge-{{ statusColor[project.status.value] ?? 'default' }}">
+                        {{ project.status.value|replace({'_': ' '}) }}
+                    </span>
                 </td>
                 <td class="[font-family:var(--font-mono)] text-[0.8125rem] [color:var(--color-on-surface-variant)]">
                     {% if project.budget %}{{ project.budget|number_format(0, '.', ' ') }} {{ project.currency }}{% else %}—{% endif %}
@@ -81,4 +80,6 @@
         {% endfor %}
         </tbody>
     </table>
+
+    <twig:Pagination :page="this.page" :totalPages="this.totalPages" :total="this.total" label="projects" labelSingular="project" />
 </div>

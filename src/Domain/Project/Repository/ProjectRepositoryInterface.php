@@ -20,6 +20,11 @@ interface ProjectRepositoryInterface
     /** @return Project[] */
     public function search(string $query, string $sortBy = 'name', string $sortDirection = 'ASC'): array;
 
+    /** @return Project[] */
+    public function findFiltered(?string $search, string $sortBy = 'createdAt', string $sortDirection = 'DESC', int $offset = 0, int $limit = 0): array;
+
+    public function countFiltered(?string $search): int;
+
     public function save(Project $project, bool $flush = true): void;
 
     public function remove(Project $project, bool $flush = true): void;

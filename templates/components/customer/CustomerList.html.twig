@@ -6,7 +6,7 @@
                    class="form-input pl-9"
                    placeholder="Search customers…"
                    value="{{ this.search }}"
-                   data-model="search">
+                   data-model="debounce(400)|search">
         </div>
     </div>
 
@@ -45,10 +45,9 @@
                 <td class="text-[var(--color-on-surface-variant)]">{{ customer.company ?? '—' }}</td>
                 <td class="font-mono text-[0.8125rem] text-[var(--color-on-surface-variant)]">{{ customer.email ?? '—' }}</td>
                 <td>
-                        <span
-                            class="badge badge-{{ customer.status.value == 'active' ? 'success' : (customer.status.value == 'lead' ? 'warning' : 'default') }}">
-                            {{ customer.status.value }}
-                        </span>
+                    <span class="badge badge-{{ customer.status.color() }}">
+                        {{ customer.status.label() }}
+                    </span>
                 </td>
                 <td class="text-[var(--color-on-surface-variant)]">{{ customer.projects|length }}</td>
                 <td class="text-right">
@@ -66,4 +65,6 @@
         {% endfor %}
         </tbody>
     </table>
+
+    <twig:Pagination :page="this.page" :totalPages="this.totalPages" :total="this.total" label="customers" labelSingular="customer" />
 </div>

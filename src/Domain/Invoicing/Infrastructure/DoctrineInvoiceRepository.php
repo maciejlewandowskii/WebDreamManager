@@ -80,6 +80,8 @@ final class DoctrineInvoiceRepository extends ServiceEntityRepository implements
         ?string $search,
         string $sortBy = 'issuedAt',
         string $sortDirection = 'DESC',
+        int $offset = 0,
+        int $limit = 0,
     ): array {
         [$field, $direction] = $this->resolveSorting($sortBy, $sortDirection, 'issuedAt', 'DESC');
 
@@ -93,7 +95,29 @@ final class DoctrineInvoiceRepository extends ServiceEntityRepository implements
                ->setParameter('search', $search);
         }
 
+        if ($offset > 0) {
+            $qb->setFirstResult($offset);
+        }
+
+        if ($limit > 0) {
+            $qb->setMaxResults($limit);
+        }
+
         return $qb->getQuery()->getResult();
+    }
+
+    public function countFiltered(?string $search): int
+    {
+        $qb = $this->createQueryBuilder('i')
+            ->select('COUNT(i.id)')
+            ->leftJoin('i.customer', 'c');
+
+        if ($search !== null) {
+            $qb->andWhere('TRGM_MATCH(:search, i.number) = true OR TRGM_MATCH(:search, c.name) = true')
+               ->setParameter('search', $search);
+        }
+
+        return (int) $qb->getQuery()->getSingleScalarResult();
     }
 
     /** @return array{0: string, 1: 'ASC'|'DESC'} */

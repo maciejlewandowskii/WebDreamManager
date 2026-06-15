@@ -60,15 +60,12 @@
     </div>
 
     {# Filters #}
-    {# Filters #}
-    <div
-        class="[padding:1rem_2rem] flex [gap:0.75rem] items-center justify-between [border-bottom:1px_solid_var(--color-outline-variant)] [flex-wrap:wrap]">
-        
+    <div class="flex items-center justify-between gap-3 border-b border-[var(--color-outline-variant)] px-8 py-4 flex-wrap">
         <div class="flex items-center gap-4">
-            <div class="search-wrap [max-width:280px]">
+            <div class="search-wrap max-w-80">
                 {{ ux_icon('tabler:search', {class: 'w-4 h-4'}) }}
                 <input type="search"
-                       class="form-input [padding-left:2.25rem]"
+                       class="form-input pl-9"
                        placeholder="Search records…"
                        value="{{ this.search }}"
                        data-model="debounce(400)|search"
@@ -203,11 +200,13 @@
         {% else %}
             <tr>
                 <td colspan="{{ canViewAll ? 8 : 7 }}"
-                    class="text-center [padding:3rem] [color:var(--color-on-surface-variant)]">
+                    class="p-12 text-center text-[var(--color-on-surface-variant)]">
                     No time records found.
                 </td>
             </tr>
         {% endfor %}
         </tbody>
     </table>
+
+    <twig:Pagination :page="this.page" :totalPages="this.totalPages" :total="this.total" label="records" labelSingular="record" />
 </div>

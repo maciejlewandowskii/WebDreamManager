@@ -40,6 +40,9 @@ services:
     App\Domain\System\Repository\SystemSettingRepositoryInterface:
         alias: App\Domain\System\Infrastructure\DoctrineSystemSettingRepository
 
+    App\Domain\Logging\Repository\LogRepositoryInterface:
+        alias: App\Domain\Logging\Infrastructure\DoctrineLogRepository
+
     App\Infrastructure\External\Sms\TwilioSmsSender:
         arguments:
             $fromNumber: '%env(TWILIO_FROM_NUMBER)%'

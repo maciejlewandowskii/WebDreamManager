@@ -41,7 +41,21 @@ interface TimeRecordRepositoryInterface
         ?User $workerFilter = null,
         array $visibleProjectIds = [],
         ?\DateTimeImmutable $dateFilter = null,
+        int $offset = 0,
+        int $limit = 0,
     ): array;
+
+    /**
+     * @param string[] $visibleProjectIds
+     */
+    public function countFiltered(
+        ?string $search,
+        ?Project $project,
+        bool $uninvoicedOnly = false,
+        ?User $workerFilter = null,
+        array $visibleProjectIds = [],
+        ?\DateTimeImmutable $dateFilter = null,
+    ): int;
 
     /** @return array{spent: float, estimated: float} */
     public function sumHoursByDate(DateTimeImmutable $date): array;

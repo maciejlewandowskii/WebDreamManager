@@ -47,6 +47,8 @@ final class DoctrineRoleRepository extends ServiceEntityRepository implements Ro
         ?string $search,
         string $sortBy = 'name',
         string $sortDirection = 'ASC',
+        int $offset = 0,
+        int $limit = 0,
     ): array {
         [$field, $direction] = $this->resolveSorting($sortBy, $sortDirection, 'name', 'ASC');
 
@@ -58,7 +60,28 @@ final class DoctrineRoleRepository extends ServiceEntityRepository implements Ro
                ->setParameter('search', $search);
         }
 
+        if ($offset > 0) {
+            $qb->setFirstResult($offset);
+        }
+
+        if ($limit > 0) {
+            $qb->setMaxResults($limit);
+        }
+
         return $qb->getQuery()->getResult();
+    }
+
+    public function countFiltered(?string $search): int
+    {
+        $qb = $this->createQueryBuilder('r')
+            ->select('COUNT(r.id)');
+
+        if ($search !== null) {
+            $qb->andWhere('TRGM_MATCH(:search, r.name) = true')
+               ->setParameter('search', $search);
+        }
+
+        return (int) $qb->getQuery()->getSingleScalarResult();
     }
 
     /** @return array{0: string, 1: 'ASC'|'DESC'} */

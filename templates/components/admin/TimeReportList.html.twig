@@ -1,9 +1,9 @@
 <div {{ attributes }}>
-    <div class="[padding:1rem_2rem] flex [gap:0.75rem] items-center [border-bottom:1px_solid_var(--color-outline-variant)]">
-        <div class="search-wrap [max-width:280px]">
+    <div class="flex items-center gap-3 border-b border-[var(--color-outline-variant)] px-8 py-4">
+        <div class="search-wrap max-w-80 flex-1">
             {{ ux_icon('tabler:search', {class: 'w-4 h-4'}) }}
             <input type="search"
-                   class="form-input [padding-left:2.25rem]"
+                   class="form-input pl-9"
                    placeholder="Search users..."
                    value="{{ this.search }}"
                    data-model="search"
@@ -83,7 +83,7 @@
             </tr>
         {% else %}
             <tr>
-                <td colspan="4" class="text-center [padding:3rem] [color:var(--color-on-surface-variant)]">
+                <td colspan="4" class="p-12 text-center text-[var(--color-on-surface-variant)]">
                     No users found.
                 </td>
             </tr>

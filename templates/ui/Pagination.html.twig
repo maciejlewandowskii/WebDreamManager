@@ -1,0 +1,48 @@
+<div class="flex items-center justify-between px-8 py-3 border-t border-[var(--color-outline-variant)] text-sm text-[var(--color-on-surface-variant)]">
+    <span>{{ total }} {{ total == 1 ? labelSingular : label }}</span>
+
+    {% if totalPages > 1 %}
+        {% set windowSize = 7 %}
+        {% set windowStart = max(1, min(page - 3, totalPages - windowSize + 1)) %}
+        {% set windowEnd = min(totalPages, windowStart + windowSize - 1) %}
+        <div class="flex items-center gap-1">
+            {% if page > 1 %}
+                <button class="btn btn-ghost btn-sm w-8 h-8 p-0 flex items-center justify-center"
+                        data-action="live#action"
+                        data-live-action-param="goToPage"
+                        data-live-page-param="{{ page - 1 }}">
+                    {{ ux_icon('tabler:chevron-left', {class: 'w-4 h-4'}) }}
+                </button>
+            {% else %}
+                <span class="w-8 h-8 shrink-0"></span>
+            {% endif %}
+
+            <div class="flex items-center gap-1">
+                {% for p in windowStart..windowEnd %}
+                    <button class="btn btn-sm w-8 h-8 p-0 flex items-center justify-center {{ p == page ? 'btn-primary' : 'btn-ghost' }}"
+                            data-action="live#action"
+                            data-live-action-param="goToPage"
+                            data-live-page-param="{{ p }}">
+                        {{ p }}
+                    </button>
+                {% endfor %}
+                {% if totalPages < windowSize %}
+                    {% for i in 1..(windowSize - totalPages) %}
+                        <span class="w-8 h-8 shrink-0"></span>
+                    {% endfor %}
+                {% endif %}
+            </div>
+
+            {% if page < totalPages %}
+                <button class="btn btn-ghost btn-sm w-8 h-8 p-0 flex items-center justify-center"
+                        data-action="live#action"
+                        data-live-action-param="goToPage"
+                        data-live-page-param="{{ page + 1 }}">
+                    {{ ux_icon('tabler:chevron-right', {class: 'w-4 h-4'}) }}
+                </button>
+            {% else %}
+                <span class="w-8 h-8 shrink-0"></span>
+            {% endif %}
+        </div>
+    {% endif %}
+</div>

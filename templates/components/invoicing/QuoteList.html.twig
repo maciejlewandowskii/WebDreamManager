@@ -67,4 +67,6 @@
         {% endfor %}
         </tbody>
     </table>
+
+    <twig:Pagination :page="this.page" :totalPages="this.totalPages" :total="this.total" label="quotes" labelSingular="quote" />
 </div>
