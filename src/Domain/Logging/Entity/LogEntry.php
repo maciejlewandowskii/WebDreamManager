@@ -37,6 +37,7 @@ class LogEntry
     #[ORM\Column(type: 'text')]
     private string $message;
 
+    /** @var array<string, mixed>|null */
     #[ORM\Column(type: 'json', nullable: true)]
     private ?array $context;
 
@@ -58,6 +59,7 @@ class LogEntry
     #[ORM\Column(name: 'created_at', type: 'datetime_immutable')]
     private DateTimeImmutable $createdAt;
 
+    /** @param array<string, mixed>|null $context */
     public function __construct(
         LogType $type,
         LogLevel $level,
@@ -108,6 +110,7 @@ class LogEntry
         return $this->message;
     }
 
+    /** @return array<string, mixed>|null */
     public function getContext(): ?array
     {
         return $this->context;

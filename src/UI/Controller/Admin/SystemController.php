@@ -100,8 +100,8 @@ final class SystemController extends AppController
     #[Route('/version/watchtower-trigger', name: 'version_watchtower_trigger', methods: ['POST'])]
     public function triggerWatchtowerUpdate(): Response
     {
-        $url   = $this->settings->get('WATCHTOWER_URL', '');
-        $token = $this->settings->get('WATCHTOWER_TOKEN', '');
+        $url   = $this->settings->get('WATCHTOWER_URL') ?? '';
+        $token = $this->settings->get('WATCHTOWER_TOKEN') ?? '';
 
         if ($url === '') {
             $this->addFlash('error', 'Watchtower URL is not configured.');

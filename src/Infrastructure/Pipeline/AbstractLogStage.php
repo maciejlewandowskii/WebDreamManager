@@ -28,6 +28,7 @@ abstract readonly class AbstractLogStage implements PipelineHandlerInterface
         return $user instanceof User ? $user->getFullName() : null;
     }
 
+    /** @param array<string, mixed> $context */
     protected function logUserAction(string $message, string $category = 'app', array $context = []): void
     {
         $this->logger->userAction(
@@ -40,6 +41,7 @@ abstract readonly class AbstractLogStage implements PipelineHandlerInterface
         );
     }
 
+    /** @param array<string, mixed> $context */
     protected function logSystem(string $message, string $category = 'system', array $context = []): void
     {
         $this->logger->system(LogLevel::Info, $message, $category, $context);

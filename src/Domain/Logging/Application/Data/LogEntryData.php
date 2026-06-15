@@ -13,6 +13,7 @@ final class LogEntryData
     public LogLevel $level;
     public string $category = 'app';
     public string $message = '';
+    /** @var array<string, mixed>|null */
     public ?array $context = null;
     public ?string $userId = null;
     public ?string $userName = null;

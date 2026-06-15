@@ -22,6 +22,7 @@ final readonly class LoggerService
     ) {
     }
 
+    /** @param array<string, mixed> $context */
     public function system(LogLevel $level, string $message, string $category = 'system', array $context = []): void
     {
         $data           = new LogEntryData();
@@ -35,6 +36,7 @@ final readonly class LoggerService
         $this->dispatch($data);
     }
 
+    /** @param array<string, mixed> $context */
     public function userAction(
         LogLevel $level,
         string $message,
@@ -56,6 +58,7 @@ final readonly class LoggerService
         $this->dispatch($data);
     }
 
+    /** @param array<string, mixed> $context */
     public function externalService(
         LogLevel $level,
         string $message,
