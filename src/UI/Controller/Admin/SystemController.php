@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\UI\Controller\Admin;
 
+use App\Domain\Logging\Application\Data\LogFilter;
+use App\Domain\Logging\Repository\LogRepositoryInterface;
 use App\Domain\System\Application\Pipeline\TriggerWatchtowerUpdate\TriggerWatchtowerUpdateCommand;
 use App\Domain\System\Application\SystemVersionService;
 use App\Domain\System\Repository\SystemSettingRepositoryInterface;
@@ -38,6 +40,7 @@ final class SystemController extends AppController
     public function __construct(
         private readonly SystemVersionService $versionService,
         private readonly SystemSettingRepositoryInterface $settings,
+        private readonly LogRepositoryInterface $logRepository,
         #[AutowireIterator('app.system.watchtower_trigger')] private readonly iterable $watchtowerTriggerHandlers,
     ) {
     }
@@ -168,6 +171,15 @@ final class SystemController extends AppController
         $this->addFlash('success', 'Settings saved. Some changes may require a service restart to take effect.');
 
         return $this->redirectToRoute('app_admin_system_settings');
+    }
+
+    #[Route('/maintenance', name: 'maintenance')]
+    public function maintenance(): Response
+    {
+        return $this->render('views/admin/system/index.html.twig', [
+            'section'   => 'maintenance',
+            'log_count' => $this->logRepository->countByFilter(new LogFilter()),
+        ]);
     }
 
     private function isSecretKey(string $key): bool

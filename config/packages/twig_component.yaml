@@ -10,3 +10,4 @@ twig_component:
         App\UI\Component\Invoicing\: 'components/invoicing/'
         App\UI\Component\TimeTracking\: 'components/time_tracking/'
         App\UI\Component\Admin\: 'components/admin/'
+        App\UI\Component\Logging\: 'components/logging/'

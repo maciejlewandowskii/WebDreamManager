@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Infrastructure\External\Google;
 
+use App\Domain\Logging\Application\LoggerService;
+use App\Domain\Logging\Entity\LogLevel;
 use DateTimeImmutable;
 use DateTimeInterface;
 use RuntimeException;
@@ -16,6 +18,7 @@ final readonly class GoogleCalendarService
         private string $clientId,
         private string $clientSecret,
         private string $redirectUri,
+        private LoggerService $logger,
     ) {}
 
     public function getAuthUrl(string $state): string
@@ -47,8 +50,15 @@ final readonly class GoogleCalendarService
         $data = $response->toArray(false);
 
         if (isset($data['error'])) {
+            $this->logger->externalService(
+                LogLevel::Error,
+                'Google OAuth code exchange failed: ' . ($data['error_description'] ?? $data['error']),
+                'google',
+            );
             throw new RuntimeException('Google OAuth error: ' . ($data['error_description'] ?? $data['error']));
         }
+
+        $this->logger->externalService(LogLevel::Info, 'Google OAuth code exchanged successfully', 'google');
 
         return $data;
     }
@@ -109,8 +119,23 @@ final readonly class GoogleCalendarService
         $data = $response->toArray(false);
 
         if (isset($data['error'])) {
+            $this->logger->externalService(
+                LogLevel::Error,
+                'Google Calendar event creation failed: ' . ($data['error']['message'] ?? 'unknown'),
+                'google',
+                'integration',
+                ['customer' => $customerName],
+            );
             throw new RuntimeException('Google Calendar error: ' . ($data['error']['message'] ?? 'unknown'));
         }
+
+        $this->logger->externalService(
+            LogLevel::Info,
+            'Google Meet created with ' . $customerName,
+            'google',
+            'integration',
+            ['customer' => $customerName, 'meet_url' => self::extractMeetUrl($data)],
+        );
 
         return $data;
     }

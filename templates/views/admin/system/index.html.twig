@@ -24,6 +24,11 @@
                     {{ ux_icon('tabler:plug-connected', {class: 'w-4 h-4'}) }}
                     Integrations
                 </a>
+                <a href="{{ path('app_admin_system_maintenance') }}"
+                   class="sidebar-nav-item {{ section == 'maintenance' ? 'active' }}">
+                    {{ ux_icon('tabler:tool', {class: 'w-4 h-4'}) }}
+                    Maintenance
+                </a>
             </nav>
 
             <div>
@@ -33,6 +38,8 @@
                     {% include 'views/admin/system/sections/settings.html.twig' %}
                 {% elseif section == 'integrations' %}
                     {% include 'views/admin/system/sections/integrations.html.twig' %}
+                {% elseif section == 'maintenance' %}
+                    {% include 'views/admin/system/sections/maintenance.html.twig' %}
                 {% endif %}
             </div>
         </div>

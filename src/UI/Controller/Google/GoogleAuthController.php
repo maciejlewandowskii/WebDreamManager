@@ -8,6 +8,8 @@ use App\Domain\Customer\Application\Pipeline\CreateMeeting\CreateMeetingCommand;
 use App\Domain\Customer\Repository\CustomerRepositoryInterface;
 use App\Domain\Identity\Entity\User;
 use App\Domain\Identity\Repository\UserRepositoryInterface;
+use App\Domain\Logging\Application\LoggerService;
+use App\Domain\Logging\Entity\LogLevel;
 use App\Infrastructure\External\Google\GoogleCalendarService;
 use App\Infrastructure\Pipeline\PipelineProcessor;
 use App\UI\Controller\AppController;
@@ -26,6 +28,7 @@ final class GoogleAuthController extends AppController
         private readonly GoogleCalendarService $google,
         private readonly UserRepositoryInterface $userRepository,
         private readonly CustomerRepositoryInterface $customerRepository,
+        private readonly LoggerService $logger,
         #[AutowireIterator('app.customer.meet')] private readonly iterable $meetHandlers,
     ) {}
 
@@ -47,6 +50,7 @@ final class GoogleAuthController extends AppController
         if (isset($tokens['refresh_token']) && is_string($tokens['refresh_token'])) {
             $user->setGoogleRefreshToken($tokens['refresh_token']);
             $this->userRepository->save($user);
+            $this->logger->userAction(LogLevel::Info, 'Google Calendar connected', $user->getId(), $user->getFullName(), 'integration');
         }
 
         $customerId = $state ?: null;

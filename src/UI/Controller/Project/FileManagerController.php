@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace App\UI\Controller\Project;
 
+use App\Domain\Identity\Entity\User;
+use App\Domain\Logging\Application\LoggerService;
+use App\Domain\Logging\Entity\LogLevel;
 use App\Domain\Project\Entity\Project;
 use DateTimeImmutable;
 use DirectoryIterator;
@@ -28,6 +31,7 @@ final class FileManagerController extends AbstractController
 {
     public function __construct(
         #[Autowire('%kernel.project_dir%/var/project_files')] private readonly string $filesBaseDir,
+        private readonly LoggerService $logger,
     ) {}
 
     #[Route('', name: 'base', methods: ['OPTIONS'])]
@@ -81,6 +85,9 @@ final class FileManagerController extends AbstractController
         $file->move($parentPath, $name);
         $id = $this->pathToId($basePath, $parentPath . '/' . $name);
 
+        $actor = $this->getUser();
+        $this->logger->userAction(LogLevel::Info, 'File uploaded: ' . $name . ' in project ' . $project->getName(), $actor instanceof User ? $actor->getId() : null, $actor instanceof User ? $actor->getFullName() : null, 'projects', ['project_id' => $project->getId(), 'file' => $name]);
+
         return $this->json(['result' => ['id' => $id, 'name' => $name]]);
     }
 
@@ -110,6 +117,9 @@ final class FileManagerController extends AbstractController
         }
 
         $id = $this->pathToId($basePath, $targetPath);
+
+        $actor = $this->getUser();
+        $this->logger->userAction(LogLevel::Info, ($type === 'folder' ? 'Folder' : 'File') . ' created: ' . $name . ' in project ' . $project->getName(), $actor instanceof User ? $actor->getId() : null, $actor instanceof User ? $actor->getFullName() : null, 'projects', ['project_id' => $project->getId(), 'name' => $name, 'type' => $type]);
 
         return $this->json(['result' => ['id' => $id, 'name' => $name]]);
     }
@@ -144,12 +154,14 @@ final class FileManagerController extends AbstractController
         /** @var array{ids?: string[]} $body */
         $basePath = $this->ensureProjectPath($project->getId());
 
+        $actor = $this->getUser();
         foreach ($body['ids'] ?? [] as $id) {
             if ($this->isProtectedInvoicePath($id)) {
                 return $this->json(['error' => 'Invoice PDFs cannot be deleted via the file manager.'], 403);
             }
             $fsPath = $this->resolveSafePath($basePath, $id);
             $this->removeRecursive($fsPath);
+            $this->logger->userAction(LogLevel::Info, 'File/folder deleted: ' . $id . ' in project ' . $project->getName(), $actor instanceof User ? $actor->getId() : null, $actor instanceof User ? $actor->getFullName() : null, 'projects', ['project_id' => $project->getId(), 'path' => $id]);
         }
 
         return $this->json(['result' => true]);

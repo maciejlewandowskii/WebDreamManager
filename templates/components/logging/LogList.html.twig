@@ -1,0 +1,199 @@
+<div {{ attributes }}>
+    {# Filter toolbar #}
+    <div class="border-b border-[var(--color-outline-variant)] px-8 py-3">
+        <div class="flex flex-wrap items-center gap-2">
+
+            {# Search #}
+            <div class="search-wrap w-56 shrink-0">
+                {{ ux_icon('tabler:search', {class: 'w-4 h-4'}) }}
+                <input type="search"
+                       class="form-input pl-9"
+                       placeholder="Search message…"
+                       value="{{ this.search }}"
+                       data-model="search">
+            </div>
+
+            <div class="h-5 w-px bg-[var(--color-outline-variant)] shrink-0"></div>
+
+            {# Type #}
+            <div class="w-40 shrink-0">
+                <select class="form-select" data-model="type">
+                    <option value="">All types</option>
+                    {% for logType in this.logTypes %}
+                        <option value="{{ logType.value }}" {{ this.type == logType.value ? 'selected' }}>
+                            {{ logType.label() }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            {# Level #}
+            <div class="w-36 shrink-0">
+                <select class="form-select" data-model="level">
+                    <option value="">All levels</option>
+                    {% for logLevel in this.logLevels %}
+                        <option value="{{ logLevel.value }}" {{ this.level == logLevel.value ? 'selected' }}>
+                            {{ logLevel.label() }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            {# Category #}
+            <div class="w-40 shrink-0">
+                <select class="form-select" data-model="category">
+                    <option value="">All categories</option>
+                    {% for cat in this.availableCategories %}
+                        <option value="{{ cat }}" {{ this.category == cat ? 'selected' }}>{{ cat }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            {# Service #}
+            {% if this.availableServices is not empty %}
+                <div class="w-36 shrink-0">
+                    <select class="form-select" data-model="service">
+                        <option value="">All services</option>
+                        {% for svc in this.availableServices %}
+                            <option value="{{ svc }}" {{ this.service == svc ? 'selected' }}>{{ svc }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            {% endif %}
+
+            <div class="h-5 w-px bg-[var(--color-outline-variant)] shrink-0"></div>
+
+            {# Date range #}
+            <div class="flex items-center gap-1.5 shrink-0">
+                <div class="w-36">
+                    <input type="date"
+                           class="form-input"
+                           value="{{ this.dateFrom }}"
+                           data-model="dateFrom">
+                </div>
+                <span class="text-xs text-[var(--color-on-surface-variant)]">—</span>
+                <div class="w-36">
+                    <input type="date"
+                           class="form-input"
+                           value="{{ this.dateTo }}"
+                           data-model="dateTo">
+                </div>
+            </div>
+
+            {# Clear button #}
+            {% if this.search != '' or this.type != '' or this.level != '' or this.category != '' or this.service != '' or this.dateFrom != '' or this.dateTo != '' %}
+                <button class="btn btn-ghost btn-sm shrink-0"
+                        data-action="live#action"
+                        data-live-action-param="resetFilters">
+                    {{ ux_icon('tabler:x', {class: 'w-3.5 h-3.5'}) }}
+                    Clear
+                </button>
+            {% endif %}
+
+        </div>
+    </div>
+
+    {# Results summary #}
+    <div class="flex items-center justify-between px-8 py-2 text-sm text-[var(--color-on-surface-variant)] border-b border-[var(--color-outline-variant)]">
+        <span>{{ this.total }} {{ this.total == 1 ? 'entry' : 'entries' }}</span>
+        {% if this.totalPages > 1 %}
+            <span>Page {{ this.page }} of {{ this.totalPages }}</span>
+        {% endif %}
+    </div>
+
+    {# Table #}
+    <table class="data-table">
+        <thead>
+        <tr>
+            <th>
+                <twig:SortableHeader label="Time" field="createdAt" :currentBy="this.sortBy" :currentDirection="this.sortDirection"/>
+            </th>
+            <th>
+                <twig:SortableHeader label="Type" field="type" :currentBy="this.sortBy" :currentDirection="this.sortDirection"/>
+            </th>
+            <th>
+                <twig:SortableHeader label="Level" field="level" :currentBy="this.sortBy" :currentDirection="this.sortDirection"/>
+            </th>
+            <th>
+                <twig:SortableHeader label="Category" field="category" :currentBy="this.sortBy" :currentDirection="this.sortDirection"/>
+            </th>
+            <th>Message</th>
+            <th>User / Service</th>
+            <th></th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for entry in this.entries %}
+            <tr>
+                <td class="font-mono text-[0.8125rem] text-[var(--color-on-surface-variant)] whitespace-nowrap">
+                    {{ entry.createdAt|date('Y-m-d H:i:s') }}
+                </td>
+                <td>
+                    <span class="badge badge-{{ entry.type.color() }}">{{ entry.type.label() }}</span>
+                </td>
+                <td>
+                    <span class="badge badge-{{ entry.level.color() }}">{{ entry.level.label() }}</span>
+                </td>
+                <td class="font-mono text-[0.8125rem] text-[var(--color-on-surface-variant)]">
+                    {{ entry.category }}
+                </td>
+                <td class="max-w-xs truncate text-[var(--color-on-surface)]">
+                    {{ entry.message }}
+                </td>
+                <td class="text-[0.8125rem] text-[var(--color-on-surface-variant)]">
+                    {% if entry.userName %}
+                        {{ ux_icon('tabler:user', {class: 'w-3 h-3 inline'}) }} {{ entry.userName }}
+                    {% elseif entry.service %}
+                        {{ ux_icon('tabler:plug', {class: 'w-3 h-3 inline'}) }} {{ entry.service }}
+                    {% else %}
+                        —
+                    {% endif %}
+                </td>
+                <td class="text-right">
+                    <a href="{{ path('app_admin_log_show', {id: entry.id}) }}" class="btn btn-ghost btn-sm">
+                        {{ ux_icon('tabler:chevron-right', {class: 'w-4 h-4'}) }}
+                    </a>
+                </td>
+            </tr>
+        {% else %}
+            <tr>
+                <td colspan="7" class="p-12 text-center text-[var(--color-on-surface-variant)]">
+                    No log entries found.
+                </td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+    {# Pagination #}
+    {% if this.totalPages > 1 %}
+        <div class="flex items-center justify-center gap-2 px-8 py-4 border-t border-[var(--color-outline-variant)]">
+            {% if this.page > 1 %}
+                <button class="btn btn-ghost btn-sm"
+                        data-action="live#action"
+                        data-live-action-param="goToPage"
+                        data-live-page-param="{{ this.page - 1 }}">
+                    {{ ux_icon('tabler:chevron-left', {class: 'w-4 h-4'}) }}
+                </button>
+            {% endif %}
+
+            {% for p in max(1, this.page - 3)..min(this.totalPages, this.page + 3) %}
+                <button class="btn btn-sm {{ p == this.page ? 'btn-primary' : 'btn-ghost' }}"
+                        data-action="live#action"
+                        data-live-action-param="goToPage"
+                        data-live-page-param="{{ p }}">
+                    {{ p }}
+                </button>
+            {% endfor %}
+
+            {% if this.page < this.totalPages %}
+                <button class="btn btn-ghost btn-sm"
+                        data-action="live#action"
+                        data-live-action-param="goToPage"
+                        data-live-page-param="{{ this.page + 1 }}">
+                    {{ ux_icon('tabler:chevron-right', {class: 'w-4 h-4'}) }}
+                </button>
+            {% endif %}
+        </div>
+    {% endif %}
+</div>

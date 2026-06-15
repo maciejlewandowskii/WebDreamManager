@@ -7,6 +7,8 @@ namespace App\Infrastructure\External\Stripe;
 use App\Domain\Invoicing\Entity\Invoice;
 use App\Domain\Invoicing\Entity\PaymentStatus;
 use App\Domain\Invoicing\Port\PaymentGatewayInterface;
+use App\Domain\Logging\Application\LoggerService;
+use App\Domain\Logging\Entity\LogLevel;
 use Stripe\Exception\ApiErrorException;
 use Stripe\StripeClient;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
@@ -16,6 +18,7 @@ final readonly class StripeGateway implements PaymentGatewayInterface
     public function __construct(
         private StripeClient $stripe,
         #[Autowire(env: 'STRIPE_PUBLISHABLE_KEY')] private string $publishableKey,
+        private LoggerService $logger,
     ) {}
 
     public function getClientConfig(): array
@@ -37,6 +40,14 @@ final readonly class StripeGateway implements PaymentGatewayInterface
         ]);
 
         $invoice->setStripeSessionId($intent->id);
+
+        $this->logger->externalService(
+            LogLevel::Info,
+            'Stripe payment intent created for invoice #' . $invoice->getNumber(),
+            'stripe',
+            'integration',
+            ['invoice_id' => $invoice->getId(), 'amount' => $invoice->getGrossTotal(), 'currency' => $invoice->getCurrency()],
+        );
 
         return (string) $intent->client_secret;
     }
@@ -61,8 +72,25 @@ final readonly class StripeGateway implements PaymentGatewayInterface
     {
         try {
             $this->stripe->paymentIntents->cancel($sessionId);
+
+            $this->logger->externalService(
+                LogLevel::Info,
+                'Stripe payment intent cancelled',
+                'stripe',
+                'integration',
+                ['session_id' => $sessionId],
+            );
+
             return true;
-        } catch (ApiErrorException) {
+        } catch (ApiErrorException $e) {
+            $this->logger->externalService(
+                LogLevel::Warning,
+                'Stripe payment cancel failed: ' . $e->getMessage(),
+                'stripe',
+                'integration',
+                ['session_id' => $sessionId],
+            );
+
             return false;
         }
     }

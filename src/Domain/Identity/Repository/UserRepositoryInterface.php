@@ -26,7 +26,11 @@ interface UserRepositoryInterface
         ?string $search,
         string $sortBy = 'fullName',
         string $sortDirection = 'ASC',
+        int $offset = 0,
+        int $limit = 0,
     ): array;
+
+    public function countFiltered(?string $search): int;
 
     public function findBySetupToken(string $token): ?User;
 

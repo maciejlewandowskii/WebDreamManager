@@ -1,0 +1,83 @@
+{% extends 'layout.html.twig' %}
+
+{% block title %}Log Entry — WebDream Manager{% endblock %}
+
+{% block content %}
+    {% set actions %}
+        <twig:Button variant="ghost" href="{{ path('app_admin_log_index') }}">
+            {{ ux_icon('tabler:arrow-left', {class: 'w-4 h-4'}) }}
+            Back to Logs
+        </twig:Button>
+    {% endset %}
+    <twig:layout:PageHeader title="Log Entry" :actions="actions"/>
+
+    <div class="px-8 py-6 mt-4">
+        <twig:Card>
+            <div class="grid grid-cols-2 gap-6 p-6 md:grid-cols-3">
+                <div>
+                    <div class="text-[0.75rem] font-medium uppercase tracking-wide text-[var(--color-on-surface-variant)]">Type</div>
+                    <div class="mt-1">
+                        <span class="badge badge-{{ entry.type.color() }}">{{ entry.type.label() }}</span>
+                    </div>
+                </div>
+
+                <div>
+                    <div class="text-[0.75rem] font-medium uppercase tracking-wide text-[var(--color-on-surface-variant)]">Level</div>
+                    <div class="mt-1">
+                        <span class="badge badge-{{ entry.level.color() }}">{{ entry.level.label() }}</span>
+                    </div>
+                </div>
+
+                <div>
+                    <div class="text-[0.75rem] font-medium uppercase tracking-wide text-[var(--color-on-surface-variant)]">Category</div>
+                    <div class="mt-1 font-mono text-sm">{{ entry.category }}</div>
+                </div>
+
+                <div>
+                    <div class="text-[0.75rem] font-medium uppercase tracking-wide text-[var(--color-on-surface-variant)]">Timestamp</div>
+                    <div class="mt-1 font-mono text-sm">{{ entry.createdAt|date('Y-m-d H:i:s') }}</div>
+                </div>
+
+                {% if entry.ipAddress %}
+                    <div>
+                        <div class="text-[0.75rem] font-medium uppercase tracking-wide text-[var(--color-on-surface-variant)]">IP Address</div>
+                        <div class="mt-1 font-mono text-sm">{{ entry.ipAddress }}</div>
+                    </div>
+                {% endif %}
+
+                {% if entry.requestId %}
+                    <div>
+                        <div class="text-[0.75rem] font-medium uppercase tracking-wide text-[var(--color-on-surface-variant)]">Request ID</div>
+                        <div class="mt-1 font-mono text-sm">{{ entry.requestId }}</div>
+                    </div>
+                {% endif %}
+
+                {% if entry.userName %}
+                    <div>
+                        <div class="text-[0.75rem] font-medium uppercase tracking-wide text-[var(--color-on-surface-variant)]">User</div>
+                        <div class="mt-1 text-sm">{{ entry.userName }}{% if entry.userId %} <span class="font-mono text-[var(--color-on-surface-variant)]">({{ entry.userId }})</span>{% endif %}</div>
+                    </div>
+                {% endif %}
+
+                {% if entry.service %}
+                    <div>
+                        <div class="text-[0.75rem] font-medium uppercase tracking-wide text-[var(--color-on-surface-variant)]">Service</div>
+                        <div class="mt-1 text-sm font-medium">{{ entry.service }}</div>
+                    </div>
+                {% endif %}
+            </div>
+
+            <div class="border-t border-[var(--color-outline-variant)] px-6 py-4">
+                <div class="text-[0.75rem] font-medium uppercase tracking-wide text-[var(--color-on-surface-variant)] mb-2">Message</div>
+                <p class="text-sm text-[var(--color-on-surface)]">{{ entry.message }}</p>
+            </div>
+
+            {% if entry.context %}
+                <div class="border-t border-[var(--color-outline-variant)] px-6 py-4">
+                    <div class="text-[0.75rem] font-medium uppercase tracking-wide text-[var(--color-on-surface-variant)] mb-2">Context</div>
+                    <pre class="rounded bg-[var(--color-surface-variant)] p-4 text-[0.8125rem] font-mono overflow-x-auto text-[var(--color-on-surface-variant)]">{{ entry.context|json_encode(constant('JSON_PRETTY_PRINT') b-or constant('JSON_UNESCAPED_UNICODE')) }}</pre>
+                </div>
+            {% endif %}
+        </twig:Card>
+    </div>
+{% endblock %}

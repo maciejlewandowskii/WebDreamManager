@@ -15,6 +15,8 @@ use App\Domain\Identity\Entity\User;
 use App\Domain\Identity\Repository\PasskeyCredentialRepositoryInterface;
 use App\Domain\Identity\Repository\UserRepositoryInterface;
 use App\Domain\Notifications\Entity\NotificationChannelType;
+use App\Domain\Logging\Application\LoggerService;
+use App\Domain\Logging\Entity\LogLevel;
 use App\Domain\Notifications\Repository\NotificationRuleRepositoryInterface;
 use App\Infrastructure\Pipeline\PipelineProcessor;
 use App\UI\Controller\AppController;
@@ -65,6 +67,7 @@ final class SettingsController extends AppController
         #[AutowireIterator('app.profile.update')] private readonly iterable $profileUpdateHandlers,
         #[AutowireIterator('app.work_settings.update')] private readonly iterable $workSettingsHandlers,
         #[AutowireIterator('app.password.change')] private readonly iterable $passwordChangeHandlers,
+        private readonly LoggerService $logger,
     ) {
     }
 
@@ -225,6 +228,8 @@ final class SettingsController extends AppController
         $state = $user->isEmailAuthEnabled() ? 'enabled' : 'disabled';
         $this->addFlash('success', "Email two-factor authentication $state.");
 
+        $this->logger->userAction(LogLevel::Info, 'Email 2FA ' . $state, $user->getId(), $user->getFullName(), 'security');
+
         return $this->redirectToRoute('app_settings_2fa');
     }
 
@@ -263,6 +268,7 @@ final class SettingsController extends AppController
         $this->userRepository->save($user);
         $request->getSession()->remove('totp_pending_secret');
         $this->addFlash('success', 'Authenticator app set up successfully.');
+        $this->logger->userAction(LogLevel::Info, 'TOTP 2FA enabled', $user->getId(), $user->getFullName(), 'security');
 
         return $this->redirectToRoute('app_settings_2fa');
     }
@@ -276,6 +282,7 @@ final class SettingsController extends AppController
         $user->setTotpAuthEnabled(false);
         $this->userRepository->save($user);
         $this->addFlash('success', 'Authenticator app removed.');
+        $this->logger->userAction(LogLevel::Info, 'TOTP 2FA disabled', $user->getId(), $user->getFullName(), 'security');
 
         return $this->redirectToRoute('app_settings_2fa');
     }
@@ -303,6 +310,7 @@ final class SettingsController extends AppController
 
         $state = $user->isSmsAuthEnabled() ? 'enabled' : 'disabled';
         $this->addFlash('success', "SMS two-factor authentication $state.");
+        $this->logger->userAction(LogLevel::Info, 'SMS 2FA ' . $state, $user->getId(), $user->getFullName(), 'security');
 
         return $this->redirectToRoute('app_settings_2fa');
     }
@@ -394,6 +402,7 @@ final class SettingsController extends AppController
             $credential = new PasskeyCredential($user, $credentialId, $publicKey, $signCount, $name);
             $this->passkeyRepository->save($credential);
             $request->getSession()->remove('passkey_challenge');
+            $this->logger->userAction(LogLevel::Info, 'Passkey registered: ' . $name, $user->getId(), $user->getFullName(), 'security');
 
             return $this->json(['ok' => true]);
         } catch (WebAuthnException $e) {
@@ -411,6 +420,7 @@ final class SettingsController extends AppController
         if ($credential !== null && $credential->getUser() === $user) {
             $this->passkeyRepository->remove($credential);
             $this->addFlash('success', 'Passkey removed.');
+            $this->logger->userAction(LogLevel::Info, 'Passkey deleted: ' . $credential->getName(), $user->getId(), $user->getFullName(), 'security');
         }
 
         return $this->redirectToRoute('app_settings_passkeys');

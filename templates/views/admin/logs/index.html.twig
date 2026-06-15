@@ -1,0 +1,9 @@
+{% extends 'layout.html.twig' %}
+
+{% block title %}Logs — WebDream Manager{% endblock %}
+
+{% block content %}
+    <twig:layout:PageHeader title="Logs"/>
+
+    {{ component('LogList') }}
+{% endblock %}

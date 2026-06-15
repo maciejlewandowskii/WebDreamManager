@@ -28,7 +28,11 @@ interface QuoteRepositoryInterface
         ?string $search,
         string $sortBy = 'createdAt',
         string $sortDirection = 'DESC',
+        int $offset = 0,
+        int $limit = 0,
     ): array;
+
+    public function countFiltered(?string $search): int;
 
     public function getNextNumber(): string;
 

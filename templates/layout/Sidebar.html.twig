@@ -73,6 +73,11 @@
                     {{ ux_icon('tabler:server-cog', {class: 'w-4 h-4'}) }}
                     System
                 </a>
+                <a href="{{ path('app_admin_log_index') }}"
+                   class="sidebar-nav-item {{ currentRoute starts with 'app_admin_log' ? 'active' }}">
+                    {{ ux_icon('tabler:logs', {class: 'w-4 h-4'}) }}
+                    Logs
+                </a>
             {% endif %}
         {% endif %}
     </nav>

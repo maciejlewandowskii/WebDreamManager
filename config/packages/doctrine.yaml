@@ -59,6 +59,12 @@ doctrine:
                 dir: '%kernel.project_dir%/src/Domain/System/Entity'
                 prefix: 'App\Domain\System\Entity'
                 alias: System
+            Logging:
+                type: attribute
+                is_bundle: false
+                dir: '%kernel.project_dir%/src/Domain/Logging/Entity'
+                prefix: 'App\Domain\Logging\Entity'
+                alias: Logging
 
 when@test:
     doctrine:

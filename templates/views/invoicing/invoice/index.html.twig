@@ -17,6 +17,6 @@
     <twig:layout:PageHeader title="Invoices" :actions="actions"/>
 
     <div class="surface">
-        <twig:InvoiceList />
+        {{ component('InvoiceList') }}
     </div>
 {% endblock %}
