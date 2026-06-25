@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Domain\TimeTracking\Entity;
 
 use App\Domain\Identity\Entity\User;
+use App\Domain\IssueTracker\Entity\ExternalIssue;
 use App\Domain\Project\Entity\Project;
 use App\Domain\TimeTracking\Infrastructure\DoctrineTimeRecordRepository;
 use DateTimeImmutable;
@@ -50,8 +51,9 @@ class TimeRecord
     #[ORM\Column(type: 'date_immutable')]
     private DateTimeImmutable $date;
 
-    #[ORM\Column(type: 'integer', nullable: true)]
-    private ?int $githubIssueId = null;
+    #[ORM\ManyToOne(targetEntity: ExternalIssue::class)]
+    #[ORM\JoinColumn(nullable: true, onDelete: 'SET NULL')]
+    private ?ExternalIssue $externalIssue = null;
 
     #[ORM\Column(type: 'boolean', options: ['default' => false])]
     private bool $invoiced = false;
@@ -93,8 +95,8 @@ class TimeRecord
     public function setSpentHours(string $hours): void { $this->spentHours = $hours; }
     public function getDate(): DateTimeImmutable { return $this->date; }
     public function setDate(DateTimeImmutable $date): void { $this->date = $date; }
-    public function getGithubIssueId(): ?int { return $this->githubIssueId; }
-    public function setGithubIssueId(?int $issueId): void { $this->githubIssueId = $issueId; }
+    public function getExternalIssue(): ?ExternalIssue { return $this->externalIssue; }
+    public function setExternalIssue(?ExternalIssue $issue): void { $this->externalIssue = $issue; }
     public function isInvoiced(): bool { return $this->invoiced; }
     public function setInvoiced(bool $invoiced): void { $this->invoiced = $invoiced; }
     public function getCreatedAt(): DateTimeImmutable { return $this->createdAt; }
