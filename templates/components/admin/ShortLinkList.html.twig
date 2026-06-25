@@ -1,0 +1,90 @@
+<div {{ attributes.defaults({'data-action': 'short_link:mutated@document->live#$render'}) }}>
+    <div class="border-b border-[var(--color-outline-variant)] px-8 py-3">
+        <div class="search-wrap max-w-80">
+            {{ ux_icon('tabler:search', {class: 'w-4 h-4'}) }}
+            <input type="search"
+                   class="form-input pl-9"
+                   placeholder="Search code, URL or source…"
+                   value="{{ this.search }}"
+                   data-model="debounce(400)|search">
+        </div>
+    </div>
+
+    <table class="data-table">
+        <thead>
+        <tr>
+            <th>
+                <twig:SortableHeader label="Short link" field="code" :currentBy="this.sortBy" :currentDirection="this.sortDirection"/>
+            </th>
+            <th>Target URL</th>
+            <th>Source</th>
+            <th>
+                <twig:SortableHeader label="Clicks" field="clickCount" :currentBy="this.sortBy" :currentDirection="this.sortDirection"/>
+            </th>
+            <th>
+                <twig:SortableHeader label="Last clicked" field="lastClickedAt" :currentBy="this.sortBy" :currentDirection="this.sortDirection"/>
+            </th>
+            <th>
+                <twig:SortableHeader label="Created" field="createdAt" :currentBy="this.sortBy" :currentDirection="this.sortDirection"/>
+            </th>
+            <th></th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for link in this.links %}
+            <tr>
+                <td class="whitespace-nowrap">
+                    <a href="{{ url('app_short_link_redirect', {code: link.code}) }}"
+                       target="_blank" rel="noopener"
+                       class="font-mono text-[0.8125rem] text-[var(--color-primary)]">
+                        /s/{{ link.code }}
+                    </a>
+                </td>
+                <td class="max-w-xs truncate text-[var(--color-on-surface)]" title="{{ link.targetUrl }}">
+                    {{ link.targetUrl }}
+                </td>
+                <td class="text-[0.8125rem] text-[var(--color-on-surface-variant)] whitespace-nowrap">
+                    {% if link.sourceType == 'invoice' %}
+                        {{ ux_icon('tabler:file-invoice', {class: 'w-3.5 h-3.5 inline'}) }} Invoice #{{ link.sourceLabel }}
+                    {% elseif link.sourceType == 'quote' %}
+                        {{ ux_icon('tabler:file-text', {class: 'w-3.5 h-3.5 inline'}) }} Quote #{{ link.sourceLabel }}
+                    {% else %}
+                        —
+                    {% endif %}
+                </td>
+                <td class="font-mono text-[0.8125rem] text-[var(--color-on-surface-variant)]">
+                    {{ link.clickCount }}
+                </td>
+                <td class="text-[0.8125rem] text-[var(--color-on-surface-variant)] whitespace-nowrap">
+                    {{ link.lastClickedAt ? link.lastClickedAt|date('Y-m-d H:i:s') : '—' }}
+                </td>
+                <td class="text-[0.8125rem] text-[var(--color-on-surface-variant)] whitespace-nowrap">
+                    {{ link.createdAt|date('Y-m-d H:i:s') }}
+                </td>
+                <td class="text-right">
+                    {% if is_granted('link_shortener.manage') %}
+                        <form method="post" action="{{ path('app_admin_link_shortener_delete', {id: link.id}) }}"
+                              data-controller="delete-confirm"
+                              data-delete-confirm-message-value="Delete short link /s/{{ link.code }}?"
+                              data-delete-confirm-event-value="short_link:mutated"
+                              data-action="submit->delete-confirm#submit">
+                            <input type="hidden" name="_token" value="{{ csrf_token('delete_short_link_' ~ link.id) }}">
+                            <button type="submit" class="btn btn-ghost btn-sm [color:var(--color-error)]">
+                                {{ ux_icon('tabler:trash', {class: 'w-4 h-4'}) }}
+                            </button>
+                        </form>
+                    {% endif %}
+                </td>
+            </tr>
+        {% else %}
+            <tr>
+                <td colspan="7" class="p-12 text-center text-[var(--color-on-surface-variant)]">
+                    No short links found.
+                </td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+    <twig:Pagination :page="this.page" :totalPages="this.totalPages" :total="this.total" label="links" labelSingular="link" />
+</div>

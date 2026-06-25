@@ -26,11 +26,14 @@ final class SystemController extends AppController
     /** @var string[] Key suffixes */
     private const array SECRET_SUFFIXES = ['SECRET', 'KEY', 'DSN', 'TOKEN'];
 
-    /** @var array<string, array<string, string>> General settings exposed in the Configuration tab */
+    /** @var array<string, array<string, array{label: string, type: string}>> General settings exposed in the Configuration tab */
     private const array EDITABLE_SETTINGS = [
         'company' => [
-            'COMPANY_NAME'    => 'Company Name',
-            'COMPANY_ADDRESS' => 'Company Address',
+            'COMPANY_NAME'    => ['label' => 'Company Name', 'type' => 'text'],
+            'COMPANY_ADDRESS' => ['label' => 'Company Address', 'type' => 'text'],
+        ],
+        'pdf' => [
+            'PDF_SHOW_COMPANY_ADDRESS' => ['label' => 'Show company address on PDFs', 'type' => 'boolean'],
         ],
     ];
 
@@ -127,15 +130,15 @@ final class SystemController extends AppController
     {
         $current = [];
         foreach (self::EDITABLE_SETTINGS as $group => $keys) {
-            foreach ($keys as $key => $label) {
+            foreach ($keys as $key => $meta) {
                 $isSecret = $this->isSecretKey($key);
                 $stored   = $this->settings->get($key) ?? $_ENV[$key] ?? '';
                 $current[$group][$key] = [
-                    'label'     => $label,
-                    'secret'    => $isSecret,
-                    'hasValue'  => $stored !== '',
-                    // never send the actual secret value to the browser
-                    'value'     => $isSecret ? '' : $stored,
+                    'label'    => $meta['label'],
+                    'type'     => $meta['type'],
+                    'secret'   => $isSecret,
+                    'hasValue' => $stored !== '',
+                    'value'    => $isSecret ? '' : $stored,
                 ];
             }
         }
@@ -145,6 +148,7 @@ final class SystemController extends AppController
             'groups'       => $current,
             'group_labels' => [
                 'company' => 'Company',
+                'pdf'     => 'PDF',
             ],
         ]);
     }
@@ -156,7 +160,11 @@ final class SystemController extends AppController
         $posted = $request->request->all('settings');
 
         foreach (self::EDITABLE_SETTINGS as $keys) {
-            foreach (array_keys($keys) as $key) {
+            foreach ($keys as $key => $meta) {
+                if ($meta['type'] === 'boolean') {
+                    $this->settings->set($key, array_key_exists($key, $posted) ? '1' : '0');
+                    continue;
+                }
                 if (!array_key_exists($key, $posted)) {
                     continue;
                 }

@@ -143,7 +143,7 @@
         table.items th.r { text-align: right; }
 
         table.items td {
-            padding: 16px 8px;
+            padding: 10px 8px;
             font-size: 10.5pt;
             color: var(--text);
             border-bottom: 1px solid var(--border);
@@ -154,6 +154,7 @@
             color: var(--text-muted);
             font-family: DejaVu Sans Mono, monospace;
             font-size: 10pt;
+            white-space: nowrap;
         }
 
         table.items td.desc { font-weight: 500; }
@@ -197,6 +198,7 @@
             text-align: right;
             font-family: DejaVu Sans Mono, monospace;
             color: var(--text);
+            white-space: nowrap;
         }
 
         table.totals tr.gross {
@@ -220,12 +222,21 @@
             line-height: 1.6;
         }
 
+        @page {
+            margin-top: 40px;
+            margin-bottom: 65px;
+        }
+
+        @page :first {
+            margin-top: 0;
+        }
+
         .footer-static {
-            position: absolute;
-            bottom: 30px;
+            position: fixed;
+            bottom: 0;
             left: 44px;
             right: 44px;
-            text-align: center;
+            text-align: left;
             font-size: 8pt;
             color: var(--text-outline);
             border-top: 1px solid var(--border);
@@ -239,9 +250,9 @@
     <div class="header-left">
         <div class="lbl-upper">From</div>
         <div class="company-name">{{ company_name }}</div>
-        {% if company_address or company_email %}
+        {% if (show_company_address and company_address) or company_email %}
             <div class="company-sub">
-                {% if company_address %}{{ company_address }}{% if company_email %} &bull; {% endif %}{% endif %}
+                {% if show_company_address and company_address %}{{ company_address }}{% if company_email %} &bull; {% endif %}{% endif %}
                 {% if company_email %}{{ company_email }}{% endif %}
             </div>
         {% endif %}
@@ -346,6 +357,13 @@
 <div class="footer-static">
     {{ company_name }} &bull; Generated {{ "now"|date('d.m.Y') }}
 </div>
+
+<script type="text/php">
+    if (isset($pdf)) {
+        $font = $fontMetrics->get_font("DejaVu Sans", "normal");
+        $pdf->page_text(510, $pdf->get_height() - 10, "Page {PAGE_NUM} / {PAGE_COUNT}", $font, 7.5, [0.63, 0.63, 0.67]);
+    }
+</script>
 
 </body>
 </html>
