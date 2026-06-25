@@ -241,9 +241,9 @@
     <div class="header-left">
         <div class="lbl-upper">From</div>
         <div class="company-name">{{ company_name }}</div>
-        {% if company_address or company_email %}
+        {% if (show_company_address and company_address) or company_email %}
             <div class="company-sub">
-                {% if company_address %}{{ company_address }}{% if company_email %} &bull; {% endif %}{% endif %}
+                {% if show_company_address and company_address %}{{ company_address }}{% if company_email %} &bull; {% endif %}{% endif %}
                 {% if company_email %}{{ company_email }}{% endif %}
             </div>
         {% endif %}
