@@ -48,6 +48,7 @@ security:
         - { path: ^/passkey, roles: PUBLIC_ACCESS }
         - { path: ^/account/setup, roles: PUBLIC_ACCESS }
         - { path: ^/pay, roles: PUBLIC_ACCESS }
+        - { path: ^/s/, roles: PUBLIC_ACCESS }
         - { path: ^/stripe/webhook, roles: PUBLIC_ACCESS }
         - { path: ^/logout, roles: PUBLIC_ACCESS }
         - { path: ^/2fa, roles: IS_AUTHENTICATED_2FA_IN_PROGRESS }
