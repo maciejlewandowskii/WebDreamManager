@@ -222,12 +222,21 @@
             line-height: 1.6;
         }
 
+        @page {
+            margin-top: 40px;
+            margin-bottom: 65px;
+        }
+
+        @page :first {
+            margin-top: 0;
+        }
+
         .footer-static {
-            position: absolute;
-            bottom: 30px;
+            position: fixed;
+            bottom: 0;
             left: 44px;
             right: 44px;
-            text-align: center;
+            text-align: left;
             font-size: 8pt;
             color: var(--text-outline);
             border-top: 1px solid var(--border);
@@ -349,6 +358,13 @@
 <div class="footer-static">
     {{ company_name }} &bull; Generated {{ "now"|date('d.m.Y') }}
 </div>
+
+<script type="text/php">
+    if (isset($pdf)) {
+        $font = $fontMetrics->get_font("DejaVu Sans", "normal");
+        $pdf->page_text(510, $pdf->get_height() - 10, "Page {PAGE_NUM} / {PAGE_COUNT}", $font, 7.5, [0.63, 0.63, 0.67]);
+    }
+</script>
 
 </body>
 </html>

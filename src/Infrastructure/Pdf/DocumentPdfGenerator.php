@@ -61,6 +61,7 @@ final class DocumentPdfGenerator
         $options = new Options();
         $options->set('defaultFont', 'DejaVu Sans');
         $options->set('isRemoteEnabled', false);
+        $options->set('isPhpEnabled', true);
 
         $dompdf = new Dompdf($options);
         $dompdf->loadHtml($html, 'UTF-8');
