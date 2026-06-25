@@ -1,0 +1,9 @@
+{% extends 'layout.html.twig' %}
+
+{% block title %}Link Shortener — WebDream Manager{% endblock %}
+
+{% block content %}
+    <twig:layout:PageHeader title="Link Shortener"/>
+
+    {{ component('ShortLinkList') }}
+{% endblock %}

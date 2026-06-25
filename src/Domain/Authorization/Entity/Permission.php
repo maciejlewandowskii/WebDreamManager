@@ -63,6 +63,10 @@ enum Permission: string
     case SystemView   = 'system.view';
     case SystemManage = 'system.manage';
 
+    // Link Shortener
+    case LinkShortenerView   = 'link_shortener.view';
+    case LinkShortenerManage = 'link_shortener.manage';
+
     public function actionLabel(): string
     {
         return match ($this) {
@@ -116,6 +120,9 @@ enum Permission: string
             ],
             'System' => [
                 self::SystemView, self::SystemManage,
+            ],
+            'Link Shortener' => [
+                self::LinkShortenerView, self::LinkShortenerManage,
             ],
         ];
     }

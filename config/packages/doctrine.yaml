@@ -65,6 +65,12 @@ doctrine:
                 dir: '%kernel.project_dir%/src/Domain/Logging/Entity'
                 prefix: 'App\Domain\Logging\Entity'
                 alias: Logging
+            LinkShortener:
+                type: attribute
+                is_bundle: false
+                dir: '%kernel.project_dir%/src/Domain/LinkShortener/Entity'
+                prefix: 'App\Domain\LinkShortener\Entity'
+                alias: LinkShortener
 
 when@test:
     doctrine:

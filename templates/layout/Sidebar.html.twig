@@ -44,7 +44,7 @@
             Time Tracking
         </a>
 
-        {% if is_granted('user.list') or is_granted('role.list') or is_granted('time_record.view_summary') %}
+        {% if is_granted('user.list') or is_granted('role.list') or is_granted('time_record.view_summary') or is_granted('link_shortener.view') %}
             <div class="sidebar-nav-section">Admin</div>
             {% if is_granted('user.list') %}
                 <a href="{{ path('app_admin_user_index') }}"
@@ -77,6 +77,13 @@
                    class="sidebar-nav-item {{ currentRoute starts with 'app_admin_log' ? 'active' }}">
                     {{ ux_icon('tabler:logs', {class: 'w-4 h-4'}) }}
                     Logs
+                </a>
+            {% endif %}
+            {% if is_granted('link_shortener.view') %}
+                <a href="{{ path('app_admin_link_shortener_index') }}"
+                   class="sidebar-nav-item {{ currentRoute starts with 'app_admin_link_shortener' ? 'active' }}">
+                    {{ ux_icon('tabler:link', {class: 'w-4 h-4'}) }}
+                    Link Shortener
                 </a>
             {% endif %}
         {% endif %}
