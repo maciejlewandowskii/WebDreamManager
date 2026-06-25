@@ -139,6 +139,16 @@ class Quote
         $this->items->removeElement($item);
     }
 
+    public function getTotalHours(): float
+    {
+        return array_sum(
+            $this->items
+                ->filter(fn (QuoteItem $i) => $i->getUnit() === 'h')
+                ->map(fn (QuoteItem $i) => (float) $i->getQuantity())
+                ->toArray()
+        );
+    }
+
     public function getNetTotal(): float
     {
         return array_sum($this->items->map(fn (QuoteItem $i) => $i->getNetTotal())->toArray());
