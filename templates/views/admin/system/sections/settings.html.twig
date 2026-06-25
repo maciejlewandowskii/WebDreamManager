@@ -14,7 +14,16 @@
                                 <span class="font-mono [opacity:0.5] [margin-left:0.25rem]">{{ key }}</span>
                             </label>
 
-                            {% if field.secret %}
+                            {% if field.type == 'boolean' %}
+                                <label class="flex items-center [gap:0.5rem] cursor-pointer">
+                                    <input type="checkbox"
+                                           name="settings[{{ key }}]"
+                                           value="1"
+                                           {{ field.value == '1' ? 'checked' : '' }}
+                                           class="form-checkbox">
+                                    <span class="text-sm [color:var(--color-on-surface-variant)]">Enabled</span>
+                                </label>
+                            {% elseif field.secret %}
                                 <input type="text"
                                        name="settings[{{ key }}]"
                                        value=""
