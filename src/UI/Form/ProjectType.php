@@ -5,8 +5,9 @@ declare(strict_types=1);
 namespace App\UI\Form;
 
 use App\Domain\Customer\Entity\Customer;
-use App\Domain\Project\Entity\ProjectStatus;
+use App\Domain\IssueTracker\Enum\TrackerType;
 use App\Domain\Project\Application\Data\ProjectData;
+use App\Domain\Project\Entity\ProjectStatus;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\EnumType;
@@ -53,10 +54,15 @@ final class ProjectType extends AbstractType
                 'default_protocol' => 'https',
                 'attr'          => ['placeholder' => 'https://client.example.com'],
             ])
-            ->add('githubRepository', TextType::class, [
-                'label'    => 'GitHub Repository',
+            ->add('trackerType', EnumType::class, [
+                'class'        => TrackerType::class,
+                'label'        => 'Issue Tracker',
+                'choice_label' => fn(TrackerType $t) => $t->label(),
+            ])
+            ->add('trackerResource', TextType::class, [
+                'label'    => 'Tracker Resource',
                 'required' => false,
-                'attr'     => ['placeholder' => 'owner/repo'],
+                'attr'     => ['placeholder' => 'e.g. owner/repo or PROJECT-KEY'],
             ])
             ->add('budget', NumberType::class, [
                 'label'    => 'Monthly Budget (hours)',

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Domain\Project\Entity;
 
 use App\Domain\Customer\Entity\Customer;
+use App\Domain\IssueTracker\Enum\TrackerType;
 use App\Domain\Project\Infrastructure\DoctrineProjectRepository;
 use DateTimeImmutable;
 use Doctrine\ORM\Mapping as ORM;
@@ -41,8 +42,11 @@ class Project
     #[Assert\Url]
     private ?string $websiteUrl = null;
 
+    #[ORM\Column(type: 'string', length: 20, enumType: TrackerType::class, options: ['default' => 'none'])]
+    private TrackerType $trackerType = TrackerType::None;
+
     #[ORM\Column(type: 'string', length: 500, nullable: true)]
-    private ?string $githubRepository = null;
+    private ?string $trackerResource = null;
 
     #[ORM\Column(type: 'string', length: 1000, nullable: true)]
     private ?string $filesPath = null;
@@ -134,14 +138,29 @@ class Project
         $this->websiteUrl = $websiteUrl;
     }
 
-    public function getGithubRepository(): ?string
+    public function getTrackerType(): TrackerType
     {
-        return $this->githubRepository;
+        return $this->trackerType;
     }
 
-    public function setGithubRepository(?string $githubRepository): void
+    public function setTrackerType(TrackerType $trackerType): void
     {
-        $this->githubRepository = $githubRepository;
+        $this->trackerType = $trackerType;
+    }
+
+    public function getTrackerResource(): ?string
+    {
+        return $this->trackerResource;
+    }
+
+    public function setTrackerResource(?string $trackerResource): void
+    {
+        $this->trackerResource = $trackerResource;
+    }
+
+    public function hasTracker(): bool
+    {
+        return $this->trackerType !== TrackerType::None && $this->trackerResource !== null && $this->trackerResource !== '';
     }
 
     public function getFilesPath(): ?string

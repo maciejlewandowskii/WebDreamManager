@@ -9,6 +9,7 @@ use App\Domain\Invoicing\Application\Pipeline\GenerateQuotePdf\GenerateQuotePdfC
 use App\Domain\Invoicing\Application\Pipeline\SendQuoteEmail\SendQuoteEmailCommand;
 use App\Domain\Invoicing\Entity\Quote;
 use App\Domain\Invoicing\Infrastructure\DoctrineQuotePdfRecordRepository;
+use App\Domain\IssueTracker\Application\IssueTrackerService;
 use App\Infrastructure\Pipeline\PipelineProcessor;
 use App\UI\Controller\AppController;
 use SimpleThings\EntityAudit\AuditReader;
@@ -196,6 +197,28 @@ final class QuoteController extends AppController
         $this->addFlash('success', 'Quote sent to ' . $customerEmail . '.');
 
         return $this->redirectToRoute('app_quote_show', ['id' => $quote->getId()]);
+    }
+
+    #[Route('/{id}/export-issues', name: 'export_issues', methods: ['POST'], requirements: ['id' => '[0-9a-f-]{36}'])]
+    public function exportIssues(Quote $quote, Request $request, IssueTrackerService $service): Response
+    {
+        $project = $quote->getProject();
+        if ($project === null || !$project->hasTracker()) {
+            $this->addFlash('error', 'This quote has no linked project with a configured tracker.');
+
+            return $this->redirectToRoute('app_quote_show', ['id' => $quote->getId()]);
+        }
+
+        if (!$this->isCsrfTokenValid('export_issues_' . $quote->getId(), (string) $request->request->get('_token'))) {
+            $this->addFlash('error', 'Invalid CSRF token.');
+
+            return $this->redirectToRoute('app_quote_show', ['id' => $quote->getId()]);
+        }
+
+        $count = $service->createIssuesFromQuote($quote, $project);
+        $this->addFlash('success', "Created {$count} issues in {$project->getTrackerType()->label()}.");
+
+        return $this->redirectToRoute('app_project_issues', ['id' => $project->getId()]);
     }
 
     #[Route('/{id}/delete', name: 'delete', methods: ['POST'], requirements: ['id' => '[0-9a-f-]{36}'])]

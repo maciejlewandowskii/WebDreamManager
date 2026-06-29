@@ -23,6 +23,15 @@
                 </twig:Button>
             </form>
         {% endif %}
+        {% if quote.project and quote.project.hasTracker() %}
+            <form method="post" action="{{ path('app_quote_export_issues', {id: quote.id}) }}" class="inline">
+                <input type="hidden" name="_token" value="{{ csrf_token('export_issues_' ~ quote.id) }}">
+                <twig:Button variant="ghost" size="sm" type="submit">
+                    {{ ux_icon('tabler:brand-github', {class: 'w-4 h-4'}) }}
+                    Export to Tracker
+                </twig:Button>
+            </form>
+        {% endif %}
     {% endset %}
 
     {% set badge %}
