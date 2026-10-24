@@ -41,9 +41,12 @@
                                    class="[color:var(--color-primary)] [text-decoration:none] hover:underline [word-break:break-all]">{{ project.websiteUrl }}</a>
                             </twig:PropertyItem>
                         {% endif %}
-                        {% if project.githubRepository %}
-                            <twig:PropertyItem label="GitHub" is_mono="true">
-                                {{ project.githubRepository }}
+                        {% if project.trackerType.value != 'none' and project.trackerResource %}
+                            <twig:PropertyItem label="Issue Tracker">
+                                <span class="font-medium">{{ project.trackerType.label() }}</span>
+                                {% if project.trackerResource %}
+                                    <span class="[color:var(--color-on-surface-variant)] font-mono text-xs ml-1">{{ project.trackerResource }}</span>
+                                {% endif %}
                             </twig:PropertyItem>
                         {% endif %}
                         {% if project.budget %}
@@ -143,7 +146,17 @@
                     {{ component('TimeRecordList', {monthlyBudget: project.budget}) }}
                 </twig:Card>
 
-
+                {% if project.hasTracker() %}
+                <twig:Card>
+                    <twig:CardHeader title="Issues" class="flex items-center justify-between">
+                        <twig:Button variant="ghost" size="sm"
+                                     href="{{ path('app_project_issues', {id: project.id}) }}">
+                            View all {{ ux_icon('tabler:arrow-right', {class: 'w-4 h-4'}) }}
+                        </twig:Button>
+                    </twig:CardHeader>
+                    {{ component('IssueList', {projectId: project.id, limit: 8}) }}
+                </twig:Card>
+                {% endif %}
             </div>
         </div>
     </twig:PageContent>

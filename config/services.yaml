@@ -43,6 +43,15 @@ services:
     App\Domain\Logging\Repository\LogRepositoryInterface:
         alias: App\Domain\Logging\Infrastructure\DoctrineLogRepository
 
+    App\Domain\IssueTracker\Infrastructure\DoctrineExternalIssueRepository: ~
+
+    App\Domain\IssueTracker\Port\ExternalIssueRepositoryInterface:
+        alias: App\Domain\IssueTracker\Infrastructure\DoctrineExternalIssueRepository
+
+    App\Infrastructure\External\IssueTracker\IssueTrackerRegistry: ~
+
+    App\Domain\IssueTracker\Application\IssueTrackerService: ~
+
     App\Infrastructure\External\Sms\TwilioSmsSender:
         arguments:
             $fromNumber: '%env(TWILIO_FROM_NUMBER)%'

@@ -1,0 +1,92 @@
+{% set issues = this.issues %}
+{% set show_filters = limit == 0 %}
+
+{% if show_filters %}
+<div class="flex items-center [gap:0.5rem] [padding:1rem_1.25rem_0]">
+    <div class="flex [gap:0.25rem]">
+        {% for value, label in {'open': 'Open', 'closed': 'Closed', 'all': 'All'} %}
+            <button type="button"
+                    data-action="live#update"
+                    data-live-prop-name="filterStatus"
+                    data-live-prop-value="{{ value }}"
+                    class="btn btn-xs {{ filterStatus == value ? 'btn-primary' : 'btn-ghost' }}">
+                {{ label }}
+            </button>
+        {% endfor %}
+    </div>
+    <div class="ml-auto">
+        <input type="text"
+               data-model="search"
+               placeholder="Search issues…"
+               class="input input-sm [width:16rem]">
+    </div>
+    <button type="button"
+            data-action="live#action"
+            data-live-action-name="sync"
+            class="btn btn-ghost btn-sm">
+        {{ ux_icon('tabler:refresh', {class: 'w-4 h-4'}) }}
+        Sync
+    </button>
+</div>
+{% endif %}
+
+{% if synced %}
+<div class="[padding:0.5rem_1.25rem] text-sm [color:var(--color-success)]">
+    Synced {{ syncCount }} issue{{ syncCount != 1 ? 's' }}.
+</div>
+{% endif %}
+
+{% if issues is empty %}
+    <div class="[padding:1.5rem] text-center text-sm [color:var(--color-on-surface-variant)]">
+        {% if search != '' or filterStatus != 'all' %}
+            No issues match your filters.
+        {% else %}
+            No issues found. Configure a tracker and sync to fetch issues.
+        {% endif %}
+    </div>
+{% else %}
+    <table class="data-table">
+        <thead>
+        <tr>
+            <th>#</th>
+            <th>Title</th>
+            <th>Status</th>
+            <th>Assignee</th>
+            <th></th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for issue in issues %}
+            <tr>
+                <td class="font-mono text-xs [color:var(--color-on-surface-variant)]">
+                    {% if issue.externalNumber %}#{{ issue.externalNumber }}{% else %}—{% endif %}
+                </td>
+                <td>
+                    <span class="text-sm font-medium">{{ issue.title }}</span>
+                    {% if issue.labels %}
+                        <div class="flex flex-wrap [gap:0.25rem] mt-1">
+                            {% for label in issue.labels %}
+                                <span class="badge badge-xs badge-outline">{{ label }}</span>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </td>
+                <td>
+                    <twig:Badge variant="{{ issue.status.color() }}">{{ issue.status.label() }}</twig:Badge>
+                </td>
+                <td class="text-sm [color:var(--color-on-surface-variant)]">
+                    {{ issue.assignee ?? '—' }}
+                </td>
+                <td class="text-right">
+                    {% if issue.url %}
+                        <a href="{{ issue.url }}" target="_blank" rel="noopener"
+                           class="btn btn-ghost btn-xs" title="Open in tracker">
+                            {{ ux_icon('tabler:external-link', {class: 'w-3.5 h-3.5'}) }}
+                        </a>
+                    {% endif %}
+                </td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+{% endif %}

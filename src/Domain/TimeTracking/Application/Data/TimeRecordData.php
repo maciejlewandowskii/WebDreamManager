@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Domain\TimeTracking\Application\Data;
 
+use App\Domain\IssueTracker\Entity\ExternalIssue;
 use App\Domain\Project\Entity\Project;
 use App\Domain\TimeTracking\Entity\TimeRecord;
 use DateTimeImmutable;
@@ -16,7 +17,7 @@ final class TimeRecordData
     public float $spentHours = 0.0;
     public ?float $estimatedHours = null;
     public DateTimeImmutable $date;
-    public ?int $githubIssueId = null;
+    public ?ExternalIssue $externalIssue = null;
 
     public function __construct()
     {
@@ -26,13 +27,13 @@ final class TimeRecordData
     public static function fromEntity(TimeRecord $record): self
     {
         $data = new self();
-        $data->title          = $record->getTitle();
-        $data->project        = $record->getProject();
-        $data->description    = $record->getDescription();
-        $data->spentHours     = (float) $record->getSpentHours();
+        $data->title         = $record->getTitle();
+        $data->project       = $record->getProject();
+        $data->description   = $record->getDescription();
+        $data->spentHours    = (float) $record->getSpentHours();
         $data->estimatedHours = $record->getEstimatedHours() !== null ? (float) $record->getEstimatedHours() : null;
-        $data->date           = $record->getDate();
-        $data->githubIssueId  = $record->getGithubIssueId();
+        $data->date          = $record->getDate();
+        $data->externalIssue = $record->getExternalIssue();
 
         return $data;
     }
@@ -47,6 +48,6 @@ final class TimeRecordData
         $record->setSpentHours((string) $this->spentHours);
         $record->setEstimatedHours($this->estimatedHours !== null ? (string) $this->estimatedHours : null);
         $record->setDate($this->date);
-        $record->setGithubIssueId($this->githubIssueId);
+        $record->setExternalIssue($this->externalIssue);
     }
 }

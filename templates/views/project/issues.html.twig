@@ -1,0 +1,33 @@
+{% extends 'layout.html.twig' %}
+
+{% block title %}{{ project.name }} Issues — WebDream Manager{% endblock %}
+
+{% block content %}
+    {% set breadcrumbs = [
+        {label: 'Projects', url: path('app_project_index')},
+        {label: project.customer.name, url: path('app_customer_show', {id: project.customer.id})},
+        {label: project.name, url: path('app_project_show', {id: project.id})},
+        {label: 'Issues'}
+    ] %}
+    {% set actions %}
+        <form method="post" action="{{ path('app_project_issues_sync', {id: project.id}) }}">
+            <input type="hidden" name="_token" value="{{ csrf_token('sync_issues_' ~ project.id) }}">
+            <twig:Button variant="secondary" size="sm" type="submit">
+                {{ ux_icon('tabler:refresh', {class: 'w-4 h-4'}) }}
+                Sync Issues
+            </twig:Button>
+        </form>
+        <twig:Button variant="ghost" size="sm" href="{{ path('app_project_show', {id: project.id}) }}">
+            {{ ux_icon('tabler:arrow-left', {class: 'w-4 h-4'}) }}
+            Back to Project
+        </twig:Button>
+    {% endset %}
+    <twig:layout:PageHeader title="{{ project.name }} Issues" :breadcrumbs="breadcrumbs" :actions="actions"/>
+
+    <twig:PageContent>
+        <twig:Card>
+            <twig:CardHeader title="{{ project.trackerType.label() }}: {{ project.trackerResource }}"/>
+            {{ component('IssueList', {projectId: project.id}) }}
+        </twig:Card>
+    </twig:PageContent>
+{% endblock %}
