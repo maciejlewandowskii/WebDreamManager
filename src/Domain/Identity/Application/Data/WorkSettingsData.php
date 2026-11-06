@@ -5,10 +5,13 @@ declare(strict_types=1);
 namespace App\Domain\Identity\Application\Data;
 
 use App\Domain\Identity\Entity\User;
+use Symfony\Component\Validator\Constraints as Assert;
 
 final class WorkSettingsData
 {
-    public int $workingHoursPerDay = 8;
+    #[Assert\NotBlank]
+    #[Assert\Range(min: 1, max: 24)]
+    public ?int $workingHoursPerDay = 8;
 
     public static function fromUser(User $user): self
     {
@@ -20,6 +23,6 @@ final class WorkSettingsData
 
     public function applyTo(User $user): void
     {
-        $user->setWorkingHoursPerDay($this->workingHoursPerDay);
+        $user->setWorkingHoursPerDay($this->workingHoursPerDay ?? 8);
     }
 }

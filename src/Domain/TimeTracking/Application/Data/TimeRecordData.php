@@ -7,15 +7,31 @@ namespace App\Domain\TimeTracking\Application\Data;
 use App\Domain\Project\Entity\Project;
 use App\Domain\TimeTracking\Entity\TimeRecord;
 use DateTimeImmutable;
+use Symfony\Component\Validator\Constraints as Assert;
 
 final class TimeRecordData
 {
+    #[Assert\Sequentially([new Assert\NotBlank(), new Assert\Length(min: 2, max: 300)])]
     public string $title = '';
+
+    #[Assert\NotNull(message: 'Please select a project.')]
     public ?Project $project = null;
+
     public ?string $description = null;
-    public float $spentHours = 0.0;
+
+    #[Assert\NotNull]
+    #[Assert\PositiveOrZero]
+    #[Assert\LessThan(10000)]
+    public ?float $spentHours = 0.0;
+
+    #[Assert\PositiveOrZero]
+    #[Assert\LessThan(10000)]
     public ?float $estimatedHours = null;
-    public DateTimeImmutable $date;
+
+    #[Assert\NotNull]
+    public ?DateTimeImmutable $date;
+
+    #[Assert\Positive]
     public ?int $githubIssueId = null;
 
     public function __construct()
@@ -44,9 +60,11 @@ final class TimeRecordData
             $record->setProject($this->project);
         }
         $record->setDescription($this->description !== '' ? $this->description : null);
-        $record->setSpentHours((string) $this->spentHours);
+        $record->setSpentHours((string) ($this->spentHours ?? 0.0));
         $record->setEstimatedHours($this->estimatedHours !== null ? (string) $this->estimatedHours : null);
-        $record->setDate($this->date);
+        if ($this->date !== null) {
+            $record->setDate($this->date);
+        }
         $record->setGithubIssueId($this->githubIssueId);
     }
 }

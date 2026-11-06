@@ -15,9 +15,6 @@ use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
-use Symfony\Component\Validator\Constraints\Email;
-use Symfony\Component\Validator\Constraints\Length;
-use Symfony\Component\Validator\Constraints\NotBlank;
 
 /** @extends AbstractType<mixed> */
 final class UserManageType extends AbstractType
@@ -33,11 +30,11 @@ final class UserManageType extends AbstractType
 
         $builder
             ->add('email', EmailType::class, [
-                'constraints' => [new NotBlank(), new Email()],
+                'empty_data' => '',
             ])
             ->add('fullName', TextType::class, [
-                'label'       => 'Full Name',
-                'constraints' => [new NotBlank(), new Length(min: 2, max: 100)],
+                'label'      => 'Full Name',
+                'empty_data' => '',
             ])
             ->add('role', EntityType::class, [
                 'class'        => Role::class,
@@ -54,9 +51,7 @@ final class UserManageType extends AbstractType
         if (!$isNew) {
             $builder->add('plainPassword', PasswordType::class, [
                 'label'       => 'New Password (leave blank to keep current)',
-                'mapped'      => false,
                 'required'    => false,
-                'constraints' => [new Length(min: 8)],
                 'attr'        => ['autocomplete' => 'new-password'],
             ]);
         }

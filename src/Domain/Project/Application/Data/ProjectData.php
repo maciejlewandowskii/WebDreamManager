@@ -7,15 +7,29 @@ namespace App\Domain\Project\Application\Data;
 use App\Domain\Customer\Entity\Customer;
 use App\Domain\Project\Entity\Project;
 use App\Domain\Project\Entity\ProjectStatus;
+use Symfony\Component\Validator\Constraints as Assert;
 
 final class ProjectData
 {
+    #[Assert\Sequentially([new Assert\NotBlank(), new Assert\Length(min: 2, max: 200)])]
     public string $name = '';
+
+    #[Assert\NotNull(message: 'Please select a customer.')]
     public ?Customer $customer = null;
+
     public ProjectStatus $status = ProjectStatus::Planning;
+
     public ?string $description = null;
+
+    #[Assert\Url(requireTld: true)]
+    #[Assert\Length(max: 500)]
     public ?string $websiteUrl = null;
+
+    #[Assert\Length(max: 500)]
     public ?string $githubRepository = null;
+
+    #[Assert\PositiveOrZero]
+    #[Assert\LessThan(100000000)]
     public ?float $budget = null;
 
     public static function fromEntity(Project $project): self

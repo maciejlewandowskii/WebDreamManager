@@ -10,7 +10,6 @@ use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
-use Symfony\Component\Validator\Constraints as Assert;
 
 /** @extends AbstractType<mixed> */
 final class WorkSettingsType extends AbstractType
@@ -19,9 +18,8 @@ final class WorkSettingsType extends AbstractType
     {
         $builder
             ->add('workingHoursPerDay', IntegerType::class, [
-                'label'       => 'Working Hours per Day',
-                'attr'        => ['min' => 1, 'max' => 24, 'placeholder' => '8'],
-                'constraints' => [new Assert\NotBlank(), new Assert\Range(min: 1, max: 24)],
+                'label' => 'Working Hours per Day',
+                'attr'  => ['min' => 1, 'max' => 24, 'placeholder' => '8'],
             ])
             ->add('save', SubmitType::class, ['label' => 'Save Preferences'])
         ;

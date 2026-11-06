@@ -14,6 +14,7 @@ use App\Domain\Invoicing\Repository\QuoteRepositoryInterface;
 use App\Domain\Project\Entity\Project;
 use App\Domain\Project\Repository\ProjectRepositoryInterface;
 use App\Infrastructure\Pipeline\PipelineProcessor;
+use App\UI\Component\DtoValidationTrait;
 use DateInterval;
 use DateTimeImmutable;
 use App\Infrastructure\Pipeline\PipelineHandlerInterface;
@@ -21,6 +22,7 @@ use Symfony\Component\DependencyInjection\Attribute\AutowireIterator;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
+use Symfony\Component\Validator\Validator\ValidatorInterface;
 use Symfony\UX\LiveComponent\Attribute\AsLiveComponent;
 use Symfony\UX\LiveComponent\Attribute\LiveAction;
 use Symfony\UX\LiveComponent\Attribute\LiveArg;
@@ -31,6 +33,7 @@ use Symfony\UX\LiveComponent\DefaultActionTrait;
 final class QuoteEditor
 {
     use DefaultActionTrait;
+    use DtoValidationTrait;
 
     #[LiveProp]
     public ?string $quoteId = null;
@@ -73,6 +76,7 @@ final class QuoteEditor
         private readonly ProjectRepositoryInterface $projectRepository,
         private readonly RequestStack $requestStack,
         private readonly UrlGeneratorInterface $router,
+        private readonly ValidatorInterface $validator,
         #[AutowireIterator('app.quote.create')] private readonly iterable $createHandlers,
         #[AutowireIterator('app.quote.update')] private readonly iterable $updateHandlers,
     ) {
@@ -145,7 +149,7 @@ final class QuoteEditor
     }
 
     #[LiveAction]
-    public function save(): RedirectResponse
+    public function save(): ?RedirectResponse
     {
         $data                 = new QuoteFormData();
         $data->customerId     = $this->customerId;
@@ -157,6 +161,10 @@ final class QuoteEditor
         $data->notes          = $this->notes;
         $data->introText      = $this->introText;
         $data->items          = $this->items;
+
+        if (!$this->validateDto($this->validator, $data)) {
+            return null;
+        }
 
         if ($this->quoteId !== null) {
             $quote = $this->quoteRepository->findById($this->quoteId);

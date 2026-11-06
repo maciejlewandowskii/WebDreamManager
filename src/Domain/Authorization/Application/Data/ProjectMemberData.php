@@ -7,9 +7,11 @@ namespace App\Domain\Authorization\Application\Data;
 use App\Domain\Authorization\Entity\Permission;
 use App\Domain\Authorization\Entity\ProjectMember;
 use App\Domain\Identity\Entity\User;
+use Symfony\Component\Validator\Constraints as Assert;
 
 final class ProjectMemberData
 {
+    #[Assert\NotNull(message: 'Please select a user.')]
     public ?User $user = null;
 
     /** @var string[] Permission enum values */

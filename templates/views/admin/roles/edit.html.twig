@@ -11,6 +11,7 @@
     </div>
 
     <div class="form-label [margin-bottom:0.5rem]">Permissions</div>
+    {{ form_errors(form.permissions) }}
 
     {% set standardCols = ['List', 'View', 'Create', 'Update', 'Delete'] %}
 

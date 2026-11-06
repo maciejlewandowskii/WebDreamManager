@@ -11,7 +11,6 @@ use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
-use Symfony\Component\Validator\Constraints\NotBlank;
 
 /** @extends AbstractType<mixed> */
 final class RoleType extends AbstractType
@@ -25,8 +24,8 @@ final class RoleType extends AbstractType
 
         $builder
             ->add('name', TextType::class, [
-                'constraints' => [new NotBlank()],
-                'attr'        => ['placeholder' => 'Role name'],
+                'attr'       => ['placeholder' => 'Role name'],
+                'empty_data' => '',
             ])
             ->add('permissions', ChoiceType::class, [
                 'choices'  => $permissionChoices,

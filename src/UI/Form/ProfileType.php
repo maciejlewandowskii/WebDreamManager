@@ -12,7 +12,6 @@ use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
-use Symfony\Component\Validator\Constraints as Assert;
 
 /** @extends AbstractType<mixed> */
 final class ProfileType extends AbstractType
@@ -21,26 +20,21 @@ final class ProfileType extends AbstractType
     {
         $builder
             ->add('fullName', TextType::class, [
-                'label'       => 'Full Name',
-                'constraints' => [new Assert\NotBlank(), new Assert\Length(min: 2, max: 100)],
+                'label'      => 'Full Name',
+                'empty_data' => '',
             ])
             ->add('email', EmailType::class, [
-                'label'       => 'Email',
-                'constraints' => [new Assert\NotBlank(), new Assert\Email()],
+                'label'      => 'Email',
+                'empty_data' => '',
             ])
             ->add('phone', TextType::class, [
-                'label'       => 'Phone Number',
-                'required'    => false,
-                'constraints' => [new Assert\Length(max: 50)],
+                'label'    => 'Phone Number',
+                'required' => false,
             ])
             ->add('avatarFile', FileType::class, [
                 'label'    => 'Profile Photo',
                 'required' => false,
-                'mapped'   => false,
                 'attr'     => ['accept' => 'image/jpeg,image/png,image/webp'],
-                'constraints' => [
-                    new Assert\Image(maxSize: '2M', mimeTypes: ['image/jpeg', 'image/png', 'image/webp']),
-                ],
             ])
             ->add('save', SubmitType::class, ['label' => 'Save Profile'])
         ;
