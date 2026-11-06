@@ -24,6 +24,9 @@ final class CustomerList
     #[LiveProp(writable: true)]
     public string $search = '';
 
+    #[LiveProp(writable: true, url: true, onUpdated: 'resetPage')]
+    public bool $showArchived = false;
+
     #[LiveProp(writable: true)]
     public string $sortBy = 'name';
 
@@ -44,6 +47,7 @@ final class CustomerList
             sortDirection: $this->sortDirection,
             offset: ($this->page - 1) * self::PER_PAGE,
             limit: self::PER_PAGE,
+            includeArchived: $this->showArchived,
         );
     }
 
@@ -51,7 +55,13 @@ final class CustomerList
     {
         return $this->repository->countFiltered(
             search: $this->search !== '' ? $this->search : null,
+            includeArchived: $this->showArchived,
         );
+    }
+
+    public function resetPage(): void
+    {
+        $this->page = 1;
     }
 
     #[LiveAction]

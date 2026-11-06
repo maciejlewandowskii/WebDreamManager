@@ -17,9 +17,12 @@ interface CustomerRepositoryInterface
     public function search(string $query, string $sortBy = 'name', string $sortDirection = 'ASC'): array;
 
     /** @return Customer[] */
-    public function findFiltered(?string $search, string $sortBy = 'name', string $sortDirection = 'ASC', int $offset = 0, int $limit = 0): array;
+    public function findSelectable(?string $includeCustomerId = null): array;
 
-    public function countFiltered(?string $search): int;
+    /** @return Customer[] */
+    public function findFiltered(?string $search, string $sortBy = 'name', string $sortDirection = 'ASC', int $offset = 0, int $limit = 0, bool $includeArchived = false): array;
+
+    public function countFiltered(?string $search, bool $includeArchived = false): int;
 
     public function save(Customer $customer, bool $flush = true): void;
 

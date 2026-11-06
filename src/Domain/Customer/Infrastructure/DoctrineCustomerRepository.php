@@ -5,8 +5,10 @@ declare(strict_types=1);
 namespace App\Domain\Customer\Infrastructure;
 
 use App\Domain\Customer\Entity\Customer;
+use App\Domain\Customer\Entity\CustomerStatus;
 use App\Domain\Customer\Repository\CustomerRepositoryInterface;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\ORM\QueryBuilder;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
@@ -56,7 +58,22 @@ final class DoctrineCustomerRepository extends ServiceEntityRepository implement
             ->getResult();
     }
 
-    public function findFiltered(?string $search, string $sortBy = 'name', string $sortDirection = 'ASC', int $offset = 0, int $limit = 0): array
+    public function findSelectable(?string $includeCustomerId = null): array
+    {
+        $qb = $this->createQueryBuilder('c')
+            ->where('c.status != :archived')
+            ->setParameter('archived', CustomerStatus::Archived)
+            ->orderBy('c.name', 'ASC');
+
+        if ($includeCustomerId !== null && $includeCustomerId !== '') {
+            $qb->orWhere('c.id = :includeId')
+               ->setParameter('includeId', $includeCustomerId);
+        }
+
+        return $qb->getQuery()->getResult();
+    }
+
+    public function findFiltered(?string $search, string $sortBy = 'name', string $sortDirection = 'ASC', int $offset = 0, int $limit = 0, bool $includeArchived = false): array
     {
         [$field, $direction] = $this->resolveSorting($sortBy, $sortDirection, 'name', 'ASC');
 
@@ -64,10 +81,7 @@ final class DoctrineCustomerRepository extends ServiceEntityRepository implement
             ->orderBy($field, $direction)
             ->addOrderBy('c.name', 'ASC');
 
-        if ($search !== null && $search !== '') {
-            $qb->where('c.name LIKE :q OR c.email LIKE :q OR c.company LIKE :q')
-               ->setParameter('q', '%' . $search . '%');
-        }
+        $this->applyFilters($qb, $search, $includeArchived);
 
         if ($offset > 0) {
             $qb->setFirstResult($offset);
@@ -80,17 +94,27 @@ final class DoctrineCustomerRepository extends ServiceEntityRepository implement
         return $qb->getQuery()->getResult();
     }
 
-    public function countFiltered(?string $search): int
+    public function countFiltered(?string $search, bool $includeArchived = false): int
     {
         $qb = $this->createQueryBuilder('c')
             ->select('COUNT(c.id)');
 
+        $this->applyFilters($qb, $search, $includeArchived);
+
+        return (int) $qb->getQuery()->getSingleScalarResult();
+    }
+
+    private function applyFilters(QueryBuilder $qb, ?string $search, bool $includeArchived): void
+    {
         if ($search !== null && $search !== '') {
-            $qb->where('c.name LIKE :q OR c.email LIKE :q OR c.company LIKE :q')
+            $qb->andWhere('c.name LIKE :q OR c.email LIKE :q OR c.company LIKE :q')
                ->setParameter('q', '%' . $search . '%');
         }
 
-        return (int) $qb->getQuery()->getSingleScalarResult();
+        if (!$includeArchived) {
+            $qb->andWhere('c.status != :archived')
+               ->setParameter('archived', CustomerStatus::Archived);
+        }
     }
 
     /** @return array{0: string, 1: 'ASC'|'DESC'} */

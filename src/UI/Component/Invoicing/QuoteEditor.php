@@ -204,7 +204,7 @@ final class QuoteEditor
     /** @return Customer[] */
     public function getAvailableCustomers(): array
     {
-        return $this->customerRepository->findAll();
+        return $this->customerRepository->findSelectable($this->customerId);
     }
 
     /** @return Project[] */
