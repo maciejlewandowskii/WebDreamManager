@@ -37,11 +37,10 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use App\Infrastructure\Pipeline\PipelineHandlerInterface;
 use Symfony\Component\DependencyInjection\Attribute\AutowireIterator;
-use Symfony\Component\HttpFoundation\File\UploadedFile;
+use Symfony\Component\Form\FormInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\String\Slugger\SluggerInterface;
 use Throwable;
@@ -59,7 +58,6 @@ final class SettingsController extends AppController
     public function __construct(
         private readonly PasskeyCredentialRepositoryInterface $passkeyRepository,
         private readonly UserRepositoryInterface $userRepository,
-        private readonly UserPasswordHasherInterface $passwordHasher,
         private readonly SluggerInterface $slugger,
         private readonly TotpAuthenticator $totpAuthenticator,
         #[Autowire(param: 'uploads_dir')] private readonly string $uploadsDir,
@@ -83,42 +81,31 @@ final class SettingsController extends AppController
         /** @var User $user */
         $user = $this->getUser();
 
-        $form = $this->createForm(ProfileType::class, ProfileData::fromUser($user), [
-            'action' => $this->generateUrl('app_settings_profile_save'),
-        ]);
-
-        return $this->render('views/settings/index.html.twig', [
-            'section'      => 'profile',
-            'profile_form' => $form,
-        ]);
+        return $this->renderProfile($this->createProfileForm(ProfileData::fromUser($user)));
     }
 
     #[Route('/profile', name: '_profile_save', methods: ['POST'])]
-    public function profileSave(Request $request): RedirectResponse
+    public function profileSave(Request $request): Response
     {
         /** @var User $user */
         $user = $this->getUser();
         $data = ProfileData::fromUser($user);
-        $form = $this->createForm(ProfileType::class, $data);
+        $form = $this->createProfileForm($data);
         $form->handleRequest($request);
 
-        if ($form->isSubmitted() && $form->isValid()) {
-            /** @var UploadedFile|null $avatarFile */
-            $avatarFile = $form->get('avatarFile')->getData();
-            if ($avatarFile !== null) {
-                $ext      = $avatarFile->guessExtension() ?? 'bin';
-                $filename = $this->slugger->slug($user->getId()) . '-' . uniqid('', true) . '.' . $ext;
-                $avatarFile->move($this->uploadsDir . '/avatars', $filename);
-                $user->setAvatarUrl('/uploads/avatars/' . $filename);
-            }
-
-            new PipelineProcessor($this->profileUpdateHandlers)->run(new UpdateProfileCommand($user, $data));
-            $this->addFlash('success', 'Profile updated.');
-        } else {
-            foreach ($form->getErrors(true) as $error) {
-                $this->addFlash('error', $error->getMessage());
-            }
+        if (!$form->isSubmitted() || !$form->isValid()) {
+            return $this->renderProfile($form, Response::HTTP_UNPROCESSABLE_ENTITY);
         }
+
+        if ($data->avatarFile !== null) {
+            $ext      = $data->avatarFile->guessExtension() ?? 'bin';
+            $filename = $this->slugger->slug($user->getId()) . '-' . uniqid('', true) . '.' . $ext;
+            $data->avatarFile->move($this->uploadsDir . '/avatars', $filename);
+            $user->setAvatarUrl('/uploads/avatars/' . $filename);
+        }
+
+        new PipelineProcessor($this->profileUpdateHandlers)->run(new UpdateProfileCommand($user, $data));
+        $this->addFlash('success', 'Profile updated.');
 
         return $this->redirectToRoute('app_settings_profile');
     }
@@ -129,33 +116,24 @@ final class SettingsController extends AppController
         /** @var User $user */
         $user = $this->getUser();
 
-        $form = $this->createForm(WorkSettingsType::class, WorkSettingsData::fromUser($user), [
-            'action' => $this->generateUrl('app_settings_work_save'),
-        ]);
-
-        return $this->render('views/settings/index.html.twig', [
-            'section'   => 'work',
-            'work_form' => $form,
-        ]);
+        return $this->renderWork($this->createWorkForm(WorkSettingsData::fromUser($user)));
     }
 
     #[Route('/work', name: '_work_save', methods: ['POST'])]
-    public function workSave(Request $request): RedirectResponse
+    public function workSave(Request $request): Response
     {
         /** @var User $user */
         $user = $this->getUser();
         $data = WorkSettingsData::fromUser($user);
-        $form = $this->createForm(WorkSettingsType::class, $data);
+        $form = $this->createWorkForm($data);
         $form->handleRequest($request);
 
-        if ($form->isSubmitted() && $form->isValid()) {
-            new PipelineProcessor($this->workSettingsHandlers)->run(new UpdateWorkSettingsCommand($user, $data));
-            $this->addFlash('success', 'Work preferences saved.');
-        } else {
-            foreach ($form->getErrors(true) as $error) {
-                $this->addFlash('error', $error->getMessage());
-            }
+        if (!$form->isSubmitted() || !$form->isValid()) {
+            return $this->renderWork($form, Response::HTTP_UNPROCESSABLE_ENTITY);
         }
+
+        new PipelineProcessor($this->workSettingsHandlers)->run(new UpdateWorkSettingsCommand($user, $data));
+        $this->addFlash('success', 'Work preferences saved.');
 
         return $this->redirectToRoute('app_settings_work');
     }
@@ -163,37 +141,25 @@ final class SettingsController extends AppController
     #[Route('/security', name: '_security', methods: ['GET'])]
     public function security(): Response
     {
-        $form = $this->createForm(ChangePasswordType::class, new ChangePasswordData(), [
-            'action' => $this->generateUrl('app_settings_security_save'),
-        ]);
-
-        return $this->render('views/settings/index.html.twig', [
-            'section'       => 'security',
-            'password_form' => $form,
-        ]);
+        return $this->renderSecurity($this->createPasswordForm(new ChangePasswordData()));
     }
 
     #[Route('/security', name: '_security_save', methods: ['POST'])]
-    public function securitySave(Request $request): RedirectResponse
+    public function securitySave(Request $request): Response
     {
         /** @var User $user */
         $user = $this->getUser();
         $data = new ChangePasswordData();
-        $form = $this->createForm(ChangePasswordType::class, $data);
+        $form = $this->createPasswordForm($data);
         $form->handleRequest($request);
 
-        if ($form->isSubmitted() && $form->isValid()) {
-            if (!$this->passwordHasher->isPasswordValid($user, $data->currentPassword)) {
-                $this->addFlash('error', 'Current password is incorrect.');
-            } else {
-                new PipelineProcessor($this->passwordChangeHandlers)->run(new ChangePasswordCommand($user, $data->newPassword));
-                $this->addFlash('success', 'Password changed successfully.');
-            }
-        } else {
-            foreach ($form->getErrors(true) as $error) {
-                $this->addFlash('error', $error->getMessage());
-            }
+        if (!$form->isSubmitted() || !$form->isValid()) {
+            return $this->renderSecurity($form, Response::HTTP_UNPROCESSABLE_ENTITY);
         }
+
+        assert($data->newPassword !== null);
+        new PipelineProcessor($this->passwordChangeHandlers)->run(new ChangePasswordCommand($user, $data->newPassword));
+        $this->addFlash('success', 'Password changed successfully.');
 
         return $this->redirectToRoute('app_settings_security');
     }
@@ -478,6 +444,57 @@ final class SettingsController extends AppController
         $this->addFlash('success', 'Notification preferences updated.');
 
         return $this->noContentResponse();
+    }
+
+    /** @return FormInterface<mixed> */
+    private function createProfileForm(ProfileData $data): FormInterface
+    {
+        return $this->createForm(ProfileType::class, $data, [
+            'action' => $this->generateUrl('app_settings_profile_save'),
+        ]);
+    }
+
+    /** @param FormInterface<mixed> $form */
+    private function renderProfile(FormInterface $form, int $status = Response::HTTP_OK): Response
+    {
+        return $this->render('views/settings/index.html.twig', [
+            'section'      => 'profile',
+            'profile_form' => $form,
+        ], new Response(null, $status));
+    }
+
+    /** @return FormInterface<mixed> */
+    private function createWorkForm(WorkSettingsData $data): FormInterface
+    {
+        return $this->createForm(WorkSettingsType::class, $data, [
+            'action' => $this->generateUrl('app_settings_work_save'),
+        ]);
+    }
+
+    /** @param FormInterface<mixed> $form */
+    private function renderWork(FormInterface $form, int $status = Response::HTTP_OK): Response
+    {
+        return $this->render('views/settings/index.html.twig', [
+            'section'   => 'work',
+            'work_form' => $form,
+        ], new Response(null, $status));
+    }
+
+    /** @return FormInterface<mixed> */
+    private function createPasswordForm(ChangePasswordData $data): FormInterface
+    {
+        return $this->createForm(ChangePasswordType::class, $data, [
+            'action' => $this->generateUrl('app_settings_security_save'),
+        ]);
+    }
+
+    /** @param FormInterface<mixed> $form */
+    private function renderSecurity(FormInterface $form, int $status = Response::HTTP_OK): Response
+    {
+        return $this->render('views/settings/index.html.twig', [
+            'section'       => 'security',
+            'password_form' => $form,
+        ], new Response(null, $status));
     }
 
     private function createWebAuthn(): WebAuthn

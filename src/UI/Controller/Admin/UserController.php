@@ -78,9 +78,8 @@ final class UserController extends AppController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $plain = $form->get('plainPassword')->getData();
             new PipelineProcessor($this->updateHandlers)->run(
-                new UpdateUserCommand($user, $data, is_string($plain) && $plain !== '' ? $plain : null),
+                new UpdateUserCommand($user, $data, $data->plainPassword !== '' ? $data->plainPassword : null),
             );
 
             $this->addFlash('success', 'User updated.');

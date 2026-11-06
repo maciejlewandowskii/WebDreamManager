@@ -15,7 +15,6 @@ use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
-use Symfony\Component\Validator\Constraints as Assert;
 
 /** @extends AbstractType<mixed> */
 final class CustomerType extends AbstractType
@@ -24,18 +23,14 @@ final class CustomerType extends AbstractType
     {
         $builder
             ->add('name', TextType::class, [
-                'label' => 'Full Name',
-                'attr'  => ['placeholder' => 'e.g. Jan Kowalski'],
-                'constraints' => [
-                    new Assert\NotBlank(),
-                    new Assert\Length(min: 2, max: 200),
-                ],
+                'label'      => 'Full Name',
+                'attr'       => ['placeholder' => 'e.g. Jan Kowalski'],
+                'empty_data' => '',
             ])
             ->add('email', EmailType::class, [
                 'label'    => 'Email',
                 'required' => false,
                 'attr'     => ['placeholder' => 'contact@example.com'],
-                'constraints' => [new Assert\Email()],
             ])
             ->add('phone', TextType::class, [
                 'label'    => 'Phone',

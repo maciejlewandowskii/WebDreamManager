@@ -11,7 +11,6 @@ use Symfony\Component\Form\Extension\Core\Type\RepeatedType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
-use Symfony\Component\Validator\Constraints as Assert;
 
 /** @extends AbstractType<mixed> */
 final class ChangePasswordType extends AbstractType
@@ -20,18 +19,13 @@ final class ChangePasswordType extends AbstractType
     {
         $builder
             ->add('currentPassword', PasswordType::class, [
-                'label'       => 'Current Password',
-                'constraints' => [new Assert\NotBlank()],
+                'label' => 'Current Password',
             ])
             ->add('newPassword', RepeatedType::class, [
                 'type'           => PasswordType::class,
                 'first_options'  => ['label' => 'New Password'],
                 'second_options' => ['label' => 'Confirm New Password'],
                 'invalid_message' => 'Passwords do not match.',
-                'constraints'    => [
-                    new Assert\NotBlank(),
-                    new Assert\Length(min: 8, minMessage: 'Password must be at least 8 characters.'),
-                ],
             ])
             ->add('save', SubmitType::class, ['label' => 'Change Password'])
         ;

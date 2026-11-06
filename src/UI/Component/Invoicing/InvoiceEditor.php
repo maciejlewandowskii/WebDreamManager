@@ -14,6 +14,7 @@ use App\Domain\Invoicing\Repository\InvoiceRepositoryInterface;
 use App\Domain\Project\Entity\Project;
 use App\Domain\Project\Repository\ProjectRepositoryInterface;
 use App\Infrastructure\Pipeline\PipelineProcessor;
+use App\UI\Component\DtoValidationTrait;
 use DateInterval;
 use DateTimeImmutable;
 use App\Infrastructure\Pipeline\PipelineHandlerInterface;
@@ -21,6 +22,7 @@ use Symfony\Component\DependencyInjection\Attribute\AutowireIterator;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
+use Symfony\Component\Validator\Validator\ValidatorInterface;
 use Symfony\UX\LiveComponent\Attribute\AsLiveComponent;
 use Symfony\UX\LiveComponent\Attribute\LiveAction;
 use Symfony\UX\LiveComponent\Attribute\LiveArg;
@@ -31,6 +33,7 @@ use Symfony\UX\LiveComponent\DefaultActionTrait;
 final class InvoiceEditor
 {
     use DefaultActionTrait;
+    use DtoValidationTrait;
 
     #[LiveProp]
     public ?string $invoiceId = null;
@@ -76,6 +79,7 @@ final class InvoiceEditor
         private readonly ProjectRepositoryInterface $projectRepository,
         private readonly RequestStack $requestStack,
         private readonly UrlGeneratorInterface $router,
+        private readonly ValidatorInterface $validator,
         #[AutowireIterator('app.invoice.create')] private readonly iterable $createHandlers,
         #[AutowireIterator('app.invoice.update')] private readonly iterable $updateHandlers,
     ) {
@@ -153,7 +157,7 @@ final class InvoiceEditor
     }
 
     #[LiveAction]
-    public function save(): RedirectResponse
+    public function save(): ?RedirectResponse
     {
         if ($this->isReadonly) {
             return new RedirectResponse($this->router->generate('app_invoice_show', ['id' => $this->invoiceId]));
@@ -170,6 +174,10 @@ final class InvoiceEditor
         $data->paymentTerms   = $this->paymentTerms;
         $data->bankAccount    = $this->bankAccount;
         $data->items          = $this->items;
+
+        if (!$this->validateDto($this->validator, $data)) {
+            return null;
+        }
 
         if ($this->invoiceId !== null) {
             $invoice = $this->invoiceRepository->findById($this->invoiceId);

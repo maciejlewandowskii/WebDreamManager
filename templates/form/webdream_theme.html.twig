@@ -25,6 +25,13 @@
     {{- parent() -}}
 {%- endblock textarea_widget %}
 
+{% block form_start -%}
+    {{- parent() -}}
+    {%- if errors|length > 0 -%}
+        <div class="mb-4">{{- form_errors(form) -}}</div>
+    {%- endif -%}
+{%- endblock form_start %}
+
 {% block form_errors -%}
     {%- for error in errors -%}
         <p class="form-error">{{ error.message }}</p>
@@ -53,4 +60,6 @@
         <div class="flex-1">{{ form_widget(form.amount) }}</div>
         <div class="w-24">{{ form_widget(form.currency) }}</div>
     </div>
+    {{- form_errors(form.amount) -}}
+    {{- form_errors(form.currency) -}}
 {% endblock %}

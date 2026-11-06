@@ -6,6 +6,7 @@
     </div>
 
     <div class="form-label [margin-bottom:0.5rem]">Permissions</div>
+    {{ form_errors(form.permissions) }}
 
     {% set permissionsById = {} %}
     {% for child in form.permissions %}

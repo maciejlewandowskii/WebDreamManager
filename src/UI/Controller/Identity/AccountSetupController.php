@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\UI\Controller\Identity;
 
+use App\Domain\Identity\Application\Data\ProfileData;
+use App\Domain\Identity\Application\Data\SetPasswordData;
 use App\Domain\Identity\Repository\UserRepositoryInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
@@ -11,6 +13,8 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Validator\ConstraintViolationListInterface;
+use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 #[Route('/account/setup/{token}', name: 'app_account_setup')]
 final class AccountSetupController extends AbstractController
@@ -20,6 +24,7 @@ final class AccountSetupController extends AbstractController
     public function __construct(
         private readonly UserRepositoryInterface $userRepository,
         private readonly UserPasswordHasherInterface $hasher,
+        private readonly ValidatorInterface $validator,
     ) {
     }
 
@@ -49,7 +54,10 @@ final class AccountSetupController extends AbstractController
         if ($step === 1) {
             /** @var UploadedFile|null $file */
             $file = $request->files->get('avatar');
-            if ($file !== null && $file->isValid()) {
+            $profile = ProfileData::fromUser($user);
+            $profile->avatarFile = $file;
+            $errors = $this->collectErrors($this->validator->validateProperty($profile, 'avatarFile'), ['avatarFile' => 'avatar']);
+            if ($errors === [] && $file !== null && $file->isValid()) {
                 $uploadDir = $this->getParameter('kernel.project_dir') . '/public/uploads/avatars';
                 if (!is_dir($uploadDir) && !mkdir($uploadDir, 0755, true) && !is_dir($uploadDir)) {
                     $errors['avatar'] = 'Upload directory could not be created.';
@@ -63,33 +71,28 @@ final class AccountSetupController extends AbstractController
                 }
             }
         } elseif ($step === 2) {
-            $fullName = trim((string) $request->request->get('fullName', ''));
+            $profile = ProfileData::fromUser($user);
+            $profile->fullName = trim((string) $request->request->get('fullName', ''));
             $phone = trim((string) $request->request->get('phone', ''));
-            if ($phone === '') {
-                $phone = null;
-            }
+            $profile->phone = $phone !== '' ? $phone : null;
 
-            if (mb_strlen($fullName) < 2) {
-                $errors['fullName'] = 'Full name must be at least 2 characters.';
-            }
-            if ($phone !== null && mb_strlen($phone) > 50) {
-                $errors['phone'] = 'Phone number cannot exceed 50 characters.';
-            }
+            $errors = [
+                ...$this->collectErrors($this->validator->validateProperty($profile, 'fullName')),
+                ...$this->collectErrors($this->validator->validateProperty($profile, 'phone')),
+            ];
 
-            if (empty($errors)) {
-                $user->setFullName($fullName);
-                $user->setPhone($phone);
+            if ($errors === []) {
+                $profile->applyTo($user);
                 $this->userRepository->save($user);
             }
         } elseif ($step === 3) {
-            $password = (string) $request->request->get('password', '');
-            $confirm = (string) $request->request->get('confirmPassword', '');
-            if (mb_strlen($password) < 8) {
-                $errors['password'] = 'Password must be at least 8 characters.';
-            } elseif ($password !== $confirm) {
-                $errors['confirmPassword'] = 'Passwords do not match.';
-            } else {
-                $user->setPassword($this->hasher->hashPassword($user, $password));
+            $passwordData = new SetPasswordData();
+            $passwordData->password = (string) $request->request->get('password', '');
+            $passwordData->confirmPassword = (string) $request->request->get('confirmPassword', '');
+
+            $errors = $this->collectErrors($this->validator->validate($passwordData));
+            if ($errors === []) {
+                $user->setPassword($this->hasher->hashPassword($user, $passwordData->password));
                 $user->clearSetupToken();
                 $this->userRepository->save($user);
                 $session->remove(self::SESSION_KEY . '_' . substr($token, 0, 8));
@@ -99,7 +102,7 @@ final class AccountSetupController extends AbstractController
             }
         }
 
-        if (!empty($errors)) {
+        if ($errors !== []) {
             return $this->render('views/identity/account_setup.html.twig', [
                 'step'   => $step,
                 'user'   => $user,
@@ -112,5 +115,22 @@ final class AccountSetupController extends AbstractController
         $session->set(self::SESSION_KEY . '_' . substr($token, 0, 8), $nextStep);
 
         return $this->redirectToRoute('app_account_setup', ['token' => $token]);
+    }
+
+    /**
+     * @param array<string, string> $fieldMap
+     *
+     * @return array<string, string>
+     */
+    private function collectErrors(ConstraintViolationListInterface $violations, array $fieldMap = []): array
+    {
+        $errors = [];
+        foreach ($violations as $violation) {
+            $path = $violation->getPropertyPath();
+            $field = $fieldMap[$path] ?? $path;
+            $errors[$field] ??= (string) $violation->getMessage();
+        }
+
+        return $errors;
     }
 }

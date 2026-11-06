@@ -13,6 +13,7 @@
                     </option>
                 {% endfor %}
             </select>
+            <twig:FieldErrors :messages="this.getErrors('customerId')"/>
         </div>
         <div>
             <label class="form-label">Project</label>
@@ -32,19 +33,23 @@
                     <option value="{{ c }}" {{ currency == c ? 'selected' }}>{{ c }}</option>
                 {% endfor %}
             </select>
+            <twig:FieldErrors :messages="this.getErrors('currency')"/>
         </div>
         <div>
             <label class="form-label">Issue Date</label>
             <input type="date" class="form-input editor-field" value="{{ issuedAt }}" data-model="issuedAt">
+            <twig:FieldErrors :messages="this.getErrors('issuedAt')"/>
         </div>
         <div>
             <label class="form-label">Due Date</label>
             <input type="date" class="form-input editor-field" value="{{ dueAt }}" data-model="dueAt">
+            <twig:FieldErrors :messages="this.getErrors('dueAt')"/>
         </div>
         <div>
             <label class="form-label">Default Tax Rate %</label>
             <input type="number" class="form-input editor-field" value="{{ defaultTaxRate }}"
                    data-model="defaultTaxRate" min="0" max="100" step="1">
+            <twig:FieldErrors :messages="this.getErrors('defaultTaxRate')"/>
         </div>
     </div>
 
@@ -70,6 +75,7 @@
                            value="{{ item.description }}"
                            data-model="items[{{ i }}][description]"
                            placeholder="Service or product description">
+                    <twig:FieldErrors :messages="this.getErrors('items[' ~ i ~ '][description]')"/>
                 </td>
                 <td>
                     <input type="number"
@@ -77,6 +83,7 @@
                            value="{{ item.quantity }}"
                            data-model="items[{{ i }}][quantity]"
                            min="0" step="0.01">
+                    <twig:FieldErrors :messages="this.getErrors('items[' ~ i ~ '][quantity]')"/>
                 </td>
                 <td>
                     <select class="editor-field"
@@ -86,6 +93,7 @@
                         <option value="pcs" {{ (item.unit ?? 'unit') == 'pcs' ? 'selected' }}>pcs</option>
                         <option value="day" {{ (item.unit ?? 'unit') == 'day' ? 'selected' }}>day</option>
                     </select>
+                    <twig:FieldErrors :messages="this.getErrors('items[' ~ i ~ '][unit]')"/>
                 </td>
                 <td>
                     <input type="number"
@@ -93,6 +101,7 @@
                            value="{{ item.unitPrice }}"
                            data-model="items[{{ i }}][unitPrice]"
                            min="0" step="0.01">
+                    <twig:FieldErrors :messages="this.getErrors('items[' ~ i ~ '][unitPrice]')"/>
                 </td>
                 <td>
                     <input type="number"
@@ -100,6 +109,7 @@
                            value="{{ item.taxRate }}"
                            data-model="items[{{ i }}][taxRate]"
                            min="0" max="100" step="1">
+                    <twig:FieldErrors :messages="this.getErrors('items[' ~ i ~ '][taxRate]')"/>
                 </td>
                 <td class="text-right [padding:0.5rem_0.75rem] [font-family:var(--font-mono)] text-[0.8125rem] [color:var(--color-on-surface-variant)] whitespace-nowrap">
                     {{ (item.quantity * item.unitPrice)|number_format(2, '.', ' ') }}
@@ -120,6 +130,7 @@
         {% endfor %}
         </tbody>
     </table>
+    <twig:FieldErrors :messages="this.getErrors('items')"/>
 
     {% if not isReadonly %}
     <button type="button"
@@ -158,6 +169,7 @@
             <label class="form-label">Bank Account</label>
             <input type="text" class="form-input editor-field" value="{{ bankAccount }}" data-model="bankAccount"
                    placeholder="PL00 0000 0000 …">
+            <twig:FieldErrors :messages="this.getErrors('bankAccount')"/>
         </div>
         <div>
             <label class="form-label">Payment Terms</label>
@@ -172,6 +184,9 @@
     </div>
 
     {% if not isReadonly %}
+    {% if this.hasErrors %}
+        <p class="form-error [margin-top:1.5rem] text-right">Please correct the highlighted fields before saving.</p>
+    {% endif %}
     <div class="[margin-top:1.5rem] flex [gap:0.5rem] [justify-content:flex-end]">
         <button type="button" data-action="live#action" data-live-action-param="save" class="btn btn-primary">
             {{ ux_icon('tabler:device-floppy', {class: 'w-4 h-4'}) }}

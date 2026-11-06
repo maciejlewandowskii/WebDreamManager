@@ -15,7 +15,6 @@ use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
-use Symfony\Component\Validator\Constraints as Assert;
 
 /** @extends AbstractType<mixed> */
 final class TimeRecordType extends AbstractType
@@ -24,31 +23,25 @@ final class TimeRecordType extends AbstractType
     {
         $builder
             ->add('title', TextType::class, [
-                'label' => 'Title',
-                'attr'  => ['placeholder' => 'What did you work on?'],
-                'constraints' => [
-                    new Assert\NotBlank(),
-                    new Assert\Length(min: 2, max: 300),
-                ],
+                'label'      => 'Title',
+                'attr'       => ['placeholder' => 'What did you work on?'],
+                'empty_data' => '',
             ])
             ->add('project', EntityType::class, [
                 'class'        => Project::class,
                 'label'        => 'Project',
                 'choice_label' => 'name',
                 'placeholder'  => '— Select project —',
-                'constraints'  => [new Assert\NotNull()],
             ])
             ->add('date', DateType::class, [
                 'label'  => 'Date',
                 'widget' => 'single_text',
                 'input'  => 'datetime_immutable',
-                'constraints' => [new Assert\NotNull()],
             ])
             ->add('spentHours', NumberType::class, [
                 'label'   => 'Spent Hours',
                 'scale'   => 2,
                 'attr'    => ['min' => 0, 'step' => 0.25, 'placeholder' => '0'],
-                'constraints' => [new Assert\PositiveOrZero()],
             ])
             ->add('estimatedHours', NumberType::class, [
                 'label'    => 'Estimated Hours',

@@ -18,7 +18,6 @@ use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\Extension\Core\Type\UrlType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
-use Symfony\Component\Validator\Constraints as Assert;
 
 /** @extends AbstractType<mixed> */
 final class ProjectType extends AbstractType
@@ -35,12 +34,9 @@ final class ProjectType extends AbstractType
 
         $builder
             ->add('name', TextType::class, [
-                'label' => 'Project Name',
-                'attr'  => ['placeholder' => 'Project name'],
-                'constraints' => [
-                    new Assert\NotBlank(),
-                    new Assert\Length(min: 2, max: 200),
-                ],
+                'label'      => 'Project Name',
+                'attr'       => ['placeholder' => 'Project name'],
+                'empty_data' => '',
             ])
             ->add('customer', EntityType::class, [
                 'class'        => Customer::class,
@@ -50,7 +46,6 @@ final class ProjectType extends AbstractType
                     ? $c->getName() . ' (' . $c->getCompany() . ')'
                     : $c->getName(),
                 'placeholder'  => '— Select customer —',
-                'constraints'  => [new Assert\NotNull()],
             ])
             ->add('status', EnumType::class, [
                 'class'        => ProjectStatus::class,
