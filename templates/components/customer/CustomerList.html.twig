@@ -8,6 +8,14 @@
                    value="{{ this.search }}"
                    data-model="debounce(400)|search">
         </div>
+        <label class="toggle-label">
+            <input type="checkbox"
+                   class="toggle-input"
+                {{ this.showArchived ? 'checked' }}
+                   data-model="showArchived">
+            <span class="toggle-track"></span>
+            <span class="text-sm [color:var(--color-on-surface-variant)]">Show archived</span>
+        </label>
     </div>
 
     <table class="data-table">

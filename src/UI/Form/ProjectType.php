@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\UI\Form;
 
 use App\Domain\Customer\Entity\Customer;
+use App\Domain\Customer\Repository\CustomerRepositoryInterface;
 use App\Domain\Project\Entity\ProjectStatus;
 use App\Domain\Project\Application\Data\ProjectData;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
@@ -22,8 +23,16 @@ use Symfony\Component\Validator\Constraints as Assert;
 /** @extends AbstractType<mixed> */
 final class ProjectType extends AbstractType
 {
+    public function __construct(
+        private readonly CustomerRepositoryInterface $customerRepository,
+    ) {
+    }
+
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
+        $data = $options['data'] ?? null;
+        $currentCustomerId = $data instanceof ProjectData ? $data->customer?->getId() : null;
+
         $builder
             ->add('name', TextType::class, [
                 'label' => 'Project Name',
@@ -35,6 +44,7 @@ final class ProjectType extends AbstractType
             ])
             ->add('customer', EntityType::class, [
                 'class'        => Customer::class,
+                'choices'      => $this->customerRepository->findSelectable($currentCustomerId),
                 'label'        => 'Customer',
                 'choice_label' => fn(Customer $c) => $c->getCompany()
                     ? $c->getName() . ' (' . $c->getCompany() . ')'
